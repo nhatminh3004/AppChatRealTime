@@ -16,22 +16,25 @@ function Chat() {
     const socket = useRef();
     const navigate = useNavigate();
     const [contacts, setContacts] = useState([]);
-    const [conversations, setConversations] = useState([]);
     const [currentUser, setCurrentUser] = useState(undefined);
     const [currentChat, setCurrentChat] = useState(undefined);
     const [isLoaded, setIsLoaded] = useState(false);
     const [openMessageContainer, setOpenMessageContainer] = useState(true);
+    const [conversations, setConversations] = useState([]);
+    const [haveNewMessage, setHaveNewMessage] = useState({});
 
     useEffect(() => {
         checkLogin();
     }, []);
     useEffect(() => {
         if (currentUser) {
-
-            socket.current = io(host);
-            socket.current.emit("add-user", currentUser._id);
+            addUserToSocket();
         }
     })
+    const addUserToSocket = async () => {
+        socket.current = io(host);
+        await socket.current.emit("add-user", currentUser._id);
+    }
     const checkLogin = async () => {
         if (!localStorage.getItem("chat-app-user")) {
             navigate('/login')
@@ -48,6 +51,23 @@ function Chat() {
         if (currentUser) {
             if (currentUser.isAvatarImageSet) {
                 const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
+                setContacts(data.data); 
+            } else {
+                navigate("/setAvatar");
+            }
+        }
+    }
+    useEffect(() => {
+        getConversationsFromDB();
+    }, [currentUser]);
+
+    useEffect(() => {
+        getConversationsFromDB();
+    }, [haveNewMessage]);
+    const getConversationsFromDB = async () => {
+        if (currentUser) {
+            if (currentUser.isAvatarImageSet) {
+                const data = await axios.get(`${myConversationsRoute}/${currentUser._id}`);
                 setConversations(data.data); 
             } else {
                 navigate("/setAvatar");
@@ -55,36 +75,18 @@ function Chat() {
         }
     }
 
-    const getConversationsFromDB = async () => {
-        if (currentUser) {
-            if (currentUser.isAvatarImageSet) {
-                const data = await axios.get(`${myConversationsRoute}/${currentUser._id}`);
-                setContacts(data.data); 
-            } else {
-                navigate("/setAvatar");
-            }
+    
+    useEffect(() => {
+        if (socket.current) {
+            socket.current.on("msg-receive", (dataSent) => {
+                setHaveNewMessage(new Date());
+            })
         }
-    }
-
-    // const MessageContainer = (contacts, currentUser, handleChatChange, isLoaded, currentChat) => {
-    //     return (
-    //         <>
-    //             <Contacts contacts={contacts} currentUser={currentUser} changeChat={handleChatChange}/>
-    //             {
-    //                 isLoaded && currentChat === undefined ? 
-    //                     (<Welcome currentUser={currentUser} />) :
-    //                     (<ChatContainer currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
-                         
-    //             }
-    //         </>
-    //     )
-    // }
+    });
 
     const handleChatChange = (chat) => {
         setCurrentChat(chat)
     }
-
-
 
     const onHandleSelectNav = (isMessageContainer) => {
         setOpenMessageContainer(isMessageContainer);
@@ -96,7 +98,30 @@ function Chat() {
             {
                 openMessageContainer ? (
                     <>
-                        <ConversationList conversations={conversations} currentUser={currentUser} changeChat={handleChatChange}/>
+                        <ConversationList conversations={conversations} currentUser={currentUser} changeChat={handleChatChange} socket={socket}/>
+                        {
+                            isLoaded && currentChat === undefined ? 
+                                (<Welcome currentUser={currentUser} />) :
+                                (<ChatContainer updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
+                                
+                        }
+                    </>
+                ) : (
+                    <>
+                        <FriendsContainer contacts={contacts} currentUser={currentUser} changeChat={handleChatChange}/>
+                        {
+                            isLoaded && currentChat === undefined ? 
+                                (<Welcome currentUser={currentUser} />) :
+                                (<ChatContainer updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
+                                
+                        }
+                    </>
+                )
+            }
+            {/* {
+                openMessageContainer ? (
+                    <>
+                        <Contacts contacts={conversations} currentUser={currentUser} changeChat={handleChatChange}/>
                         {
                             isLoaded && currentChat === undefined ? 
                                 (<Welcome currentUser={currentUser} />) :
@@ -105,7 +130,7 @@ function Chat() {
                         }
                     </>
                 ) : (<FriendsContainer/>)
-            }
+            } */}
         </div>
     </Container> ;
 }

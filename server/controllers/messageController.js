@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const messageModel = require("../model/messageModel");
 
 module.exports.addMessage = async (req, res, next) => {
@@ -36,43 +37,124 @@ module.exports.getAllMessage = async (req, res, next) => {
   }
 };
 
-// module.exports.getMyConversations = async (req, res, next) => {
-//   try {
-//     const { from, tos } = req.body;
-//     const conversations = [];
-//     tos.map(async (to) => {
-//       // const convertation = await messageModel
-//       // .find({
-//       //   sender: {
-//       //     $all: [from, to],
-//       //   },
-//       // })
-//       // .sort({ updatedAt: 1 })
-//       // .limit(1);
+module.exports.getMyConversations = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    // const convertations = await messageModel.aggregate([
+    //   {
+    //     $match: {
+    //       sender: new mongoose.Types.ObjectId(id),
+    //     },
+    //   },
+    //   {
+    //     $sort: {
+    //       updatedAt: -1,
+    //     },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$users",
+    //       message: { $first: "$$ROOT" },
+    //     },
+    //   },
+    //   {
+    //     $project: {
+    //       _id: 0,
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "users",
+    //       localField: "message.users.1",
+    //       foreignField: "_id",
+    //       as: "user_info",
+    //     },
+    //   },
+    //   {
+    //     $unwind: {
+    //       path: "$user_info",
+    //     },
+    //   },
+    //   {
+    //     $sort: {
+    //       "message.updatedAt": -1,
+    //     },
+    //   },
+    // ]);
+    const conversations = await messageModel.aggregate([
+      {
+        $match: {
+          users: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $sort: {
+          updatedAt: -1,
+        },
+      },
+      {
+        $group: {
+          _id: "$users",
+          message: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "message.users",
+          foreignField: "_id",
+          as: "user_info",
+        },
+      },
+      {
+        $sort: {
+          "message.updatedAt": -1,
+        },
+      },
+    ]);
+    var result = [];
+    conversations.map((conversation, index) => {
+      if (result.length === 0) {
+        result = [...result, conversation];
+      } else {
+        for (var i = 0; i < result.length; i++) {
+          if (conversation === result[i]) {
+            continue;
+          } else {
+            if (
+              (result[i].message.users[0].toString() ===
+                conversation.message.users[0].toString() ||
+                result[i].message.users[1].toString() ===
+                  conversation.message.users[0].toString()) &&
+              (result[i].message.users[0].toString() ===
+                conversation.message.users[1].toString() ||
+                result[i].message.users[1].toString() ===
+                  conversation.message.users[1].toString())
+            ) {
+              break;
+            }
 
-//       const convertation = await messageModel
-//       .aggregate([
-//         {
-//           $lookup:
-//           {
-//             from: 'messages',
-//             localField: 'users',
-//             foreignField: '_id',
-//             as: 'users_info'
-//           }
-//         },
-//         {
-//           $project: {
-//             users_info.username: 1,
-
-//           }
-//         }
-//       ]);
-
-//       conversations = [...conversations, convertation];
-//     })
-//     res.json(conversations);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+            if (i === result.length - 1) {
+              result = [...result, conversation];
+            }
+          }
+        }
+      }
+    });
+    result.map((item) => {
+      if (item.user_info[0]._id.toString() === id) {
+        item.user_info = item.user_info[1];
+      } else {
+        item.user_info = item.user_info[0];
+      }
+    });
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};

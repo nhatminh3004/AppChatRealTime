@@ -27,5 +27,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  listFriends: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 });
 module.exports = mongoose.model("Users", userSchema);

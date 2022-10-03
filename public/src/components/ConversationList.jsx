@@ -1,11 +1,15 @@
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Logo from "../assets/logo.svg"
+import Logout from './Logout';
 
-function ConversationList({conversations, currentUser, changeChat}) {
+function ConversationList({conversations, currentUser, changeChat, socket}) {
     const [currentUserName, setCurrentUserName] = useState(undefined);
     const [currentUserImage, setCurrentUserImage] = useState(undefined);
     const [currentSelected, setCurrentSelected] = useState(undefined);
+    
+    
     useEffect(() => {
         if(currentUser) {
             setCurrentUserImage(currentUser.avatarImage);
@@ -13,7 +17,7 @@ function ConversationList({conversations, currentUser, changeChat}) {
         }
     }, [currentUser]);
     const changeCurrentChat = (index, contact) => {
-        setCurrentSelected(index);
+        setCurrentSelected(contact._id);
         changeChat(contact);
     }
     return <>
@@ -26,18 +30,23 @@ function ConversationList({conversations, currentUser, changeChat}) {
                     </div>
                     <div className="contacts">
                         {
-                            (conversations.map((contact, index) => {
-                                return (
+                            (conversations.map((conversation, index) => {
+                                return  (
                                     <div 
-                                    className={`contact ${index === currentSelected ? "selected" : ""}`} 
+                                    className={`contact ${conversation.user_info._id === currentSelected ? "selected" : ""}`} 
                                     key={index}
-                                    onClick={() => changeCurrentChat(index, contact)}
+                                    onClick={() => changeCurrentChat(index, conversation.user_info)}
                                     >
                                         <div className="avatar">
-                                            <img src={`data:image/svg+xml;base64,${contact.avatarImage}`} alt="avatar"/>
+                                            <img src={`data:image/svg+xml;base64,${conversation.user_info.avatarImage}`} alt="avatar"/>
                                         </div>
-                                        <div className="username">
-                                            <h3>{contact.username}</h3>
+                                        <div className='message'>
+                                            <div className="username">
+                                                <h3>{conversation.user_info.username}</h3>
+                                            </div>
+                                            <div className="latestMessage">
+                                                <p>{conversation.message.message.text}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 )
@@ -51,6 +60,8 @@ function ConversationList({conversations, currentUser, changeChat}) {
                         <div className="username">
                             <h2>{currentUserName}</h2>
                         </div>
+                        
+                        <Logout/>
                     </div>
                 </Container>
             )
@@ -63,6 +74,7 @@ const Container = styled.div`
     grid-template-rows: 10% 75% 15%;
     overflow: hidden;
     background-color: #080420;
+
 
     .brand {
         display: flex;
@@ -108,11 +120,24 @@ const Container = styled.div`
                     height: 3rem;
                 }   
             }
-            .username {
-                h3 {
-                    color: white;
+            .message {
+                height: 7vh;
+                display: grid;
+                grid-template-rows: 55% 45%;
+                .username {
+                    h3 {
+                        color: white;
+                    }
+                }
+                .latestMessage {
+                    width: 100%;
+                    overflow: hidden;
+                    p {
+                        color: #ccc;
+                    }
                 }
             }
+            
         }
         .selected {
             background-color: #9186f3;
@@ -123,7 +148,7 @@ const Container = styled.div`
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 2rem;
+        gap: 1rem;
         .avatar {
             img {
                 height: 4rem;
@@ -132,7 +157,8 @@ const Container = styled.div`
         }
         .username {
             h2 {
-                color: white
+                color: white;
+                overflow: hidden;
             }
         }
         @media screen and (min-width: 720px) and (max-width: 1080px){

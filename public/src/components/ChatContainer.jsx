@@ -8,7 +8,7 @@ import { getAllMessagesRoute, sendMessageRoute } from "../utils/APIRoutes";
 import ChatInput from "./ChatInput";
 import Logout from "./Logout";
 
-function ChatContainer({currentChat, currentUser, socket}) {
+function ChatContainer({updateListConversation, currentChat, currentUser, socket}) {
     const [messages, setMessages] = useState([]);
     const [arrivalMessage, setArrivalMessage] = useState(null);
     const scrollRef = useRef();
@@ -41,14 +41,16 @@ function ChatContainer({currentChat, currentUser, socket}) {
         const msgs = [...messages];
         msgs.push({fromSelf: true, message: msg });
         setMessages(msgs);
+        updateListConversation(new Date())
     };
     useEffect(() => {
         if (socket.current) {
-            socket.current.on("msg-receive", (msg) => {
-                setArrivalMessage({fromSelf: false, message: msg})
+            socket.current.on("msg-receive", (dataSent) => {
+                if (dataSent.from === currentChat._id)
+                    setArrivalMessage({fromSelf: false, message: dataSent.message})
             })
         }
-    }, []);
+    });
     useEffect(() => { 
         arrivalMessage && setMessages(prev => [...prev, arrivalMessage])
     }, [arrivalMessage])
@@ -67,7 +69,6 @@ function ChatContainer({currentChat, currentUser, socket}) {
                         <h3>{currentChat.username}</h3>
                     </div>
                 </div>
-                <Logout/>
             </div>
             <div className="chat-messages">
                 {
