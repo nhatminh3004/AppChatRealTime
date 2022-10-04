@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import { AiOutlineSearch } from 'react-icons/ai';
 import styled from 'styled-components';
 import Logo from "../assets/logo.svg"
 import Logout from './Logout';
@@ -28,6 +29,12 @@ function ConversationList({conversations, currentUser, changeChat, socket}) {
                         <img src={Logo} alt='logo'/>
                         <h3>snappy</h3>
                     </div>
+                    <form onSubmit={null} className="search">
+                        <input type="text" placeholder='Tìm theo tên và số điện thoại'/> 
+                        <button className='submit'>
+                            <AiOutlineSearch/>
+                        </button>
+                    </form>
                     <div className="contacts">
                         {
                             (conversations.map((conversation, index) => {
@@ -71,7 +78,7 @@ function ConversationList({conversations, currentUser, changeChat, socket}) {
 
 const Container = styled.div`
     display: grid;
-    grid-template-rows: 10% 75% 15%;
+    grid-template-rows: 10% 10% 65% 15%;
     overflow: hidden;
     background-color: #080420;
 
@@ -87,6 +94,28 @@ const Container = styled.div`
         h3 {
             color: white;
             text-transform: uppercase;
+        }
+    }
+    .search {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 0.5rem;
+        gap: 0.5rem;
+        input {
+            height: 70%;
+            width: 70%;
+            padding-inline: 0.5rem;
+            border-radius: 1rem;
+        }
+        .submit {
+            padding: 0.4rem;
+            font-size: 1rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            background-color: #9186f3;
+            color: white;
+            font-weight: 500;
         }
     }
 

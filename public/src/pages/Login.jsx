@@ -10,7 +10,7 @@ import { loginRoute } from "../utils/APIRoutes";
 function Login() {
     const navigate = useNavigate();
     const [values, setValues] = useState({
-        username: "",
+        phone: "",
         password: "",
     })
 
@@ -31,9 +31,9 @@ function Login() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         if (handleValidation()) {
-            const {username,password} = values;
+            const {phone,password} = values;
             const {data} = await axios.post(loginRoute, {
-                username,
+                phone,
                 password,
             });
             if (data.status===false) {
@@ -47,12 +47,12 @@ function Login() {
     }   
 
     const handleValidation = () => {
-        const {username, email, password, confirmPassword} = values;
+        const {username, phone, email, password, confirmPassword} = values;
         if (password === "") {
-            toast.error('Username and Password is required', toastOptions);
+            toast.error('Phone and Password is required', toastOptions);
             return false;
         } else if (username === "") {
-            toast.error('Username and Password is required', toastOptions);
+            toast.error('Phone and Password is required', toastOptions);
             return false;
         }
         return true;
@@ -69,7 +69,7 @@ function Login() {
                     <img src={Logo} alt="Logo" />
                     <h1>snappy</h1>
                 </div>
-                <input type="text" placeholder="Username" name="username" onChange={(e) => handleOnChange(e)}  min='3' />
+                <input type="text" placeholder="Phone" name="phone" onChange={(e) => handleOnChange(e)}/>
                 <input type="password" placeholder="Password" name="password" onChange={(e) => handleOnChange(e)} />
                 <button type="submit">Login In</button>
                 <span>Already have an account <Link to="/register">Register</Link></span>

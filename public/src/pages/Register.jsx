@@ -11,6 +11,7 @@ function Register() {
     const navigate = useNavigate();
     const [values, setValues] = useState({
         username: "",
+        phone: "",
         email: "",
         password: "",
         confirmPassword: ""
@@ -31,9 +32,10 @@ function Register() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         if (handleValidation()) {
-            const {username, email, password, confirmPassword} = values;
+            const {username, phone, email, password, confirmPassword} = values;
             const {data} = await axios.post(registerRoute, {
                 username,
+                phone,
                 email,
                 password,
             });
@@ -48,7 +50,7 @@ function Register() {
     }   
 
     const handleValidation = () => {
-        const {username, email, password, confirmPassword} = values;
+        const {username, phone, email, password, confirmPassword} = values;
         if (password != confirmPassword) {
             toast.error('Password and Confirm Password should be the same', toastOptions);
             return false;
@@ -57,6 +59,10 @@ function Register() {
             return false;
         } else if (password.length < 8) {
             toast.error('Password should be equal or greater than 8 characters', toastOptions);
+            return false;
+        }
+        else if (phone.length != 10) {
+            toast.error('Phone must have exactly 10 numbers', toastOptions);
             return false;
         } else if (email.length === 0) {
             toast.error('Email is required', toastOptions);
@@ -77,6 +83,7 @@ function Register() {
                     <h1>snappy</h1>
                 </div>
                 <input type="text" placeholder="Username" name="username" onChange={(e) => handleOnChange(e)} />
+                <input type="number" placeholder="Phone" name="phone" onChange={(e) => handleOnChange(e)} />
                 <input type="email" placeholder="Email" name="email" onChange={(e) => handleOnChange(e)} />
                 <input type="password" placeholder="Password" name="password" onChange={(e) => handleOnChange(e)} />
                 <input type="password" placeholder="Confirm Password" name="confirmPassword" onChange={(e) => handleOnChange(e)} />
