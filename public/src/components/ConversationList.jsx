@@ -3,14 +3,18 @@ import React, { useEffect, useState } from 'react';
 import { AiOutlineSearch } from 'react-icons/ai';
 import styled from 'styled-components';
 import Logo from "../assets/logo.svg"
+import { searchUsers } from '../utils/APIRoutes';
+import ContactItems from './ContactItems';
 import Logout from './Logout';
+import SearchResults from './SearchResults';
 
 function ConversationList({conversations, currentUser, changeChat, socket}) {
     const [currentUserName, setCurrentUserName] = useState(undefined);
     const [currentUserImage, setCurrentUserImage] = useState(undefined);
     const [currentSelected, setCurrentSelected] = useState(undefined);
-    
-    
+    const [searchKey, setSearchKey] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
+
     useEffect(() => {
         if(currentUser) {
             setCurrentUserImage(currentUser.avatarImage);
@@ -21,6 +25,14 @@ function ConversationList({conversations, currentUser, changeChat, socket}) {
         setCurrentSelected(contact._id);
         changeChat(contact);
     }
+    const onHandleSearch = async (e) => {
+        e.preventDefault();
+        const data = await axios.get(`${searchUsers}/${searchKey}`);
+        setSearchResults(data.data);
+    }
+    const onHandleClearSearchResults = () => {
+        setSearchResults([]);
+    }
     return <>
         {
             currentUserImage && currentUserName && (
@@ -29,37 +41,18 @@ function ConversationList({conversations, currentUser, changeChat, socket}) {
                         <img src={Logo} alt='logo'/>
                         <h3>snappy</h3>
                     </div>
-                    <form onSubmit={null} className="search">
-                        <input type="text" placeholder='Tìm theo tên và số điện thoại'/> 
+                    <form onSubmit={(e) => onHandleSearch(e)} className="search">
+                        <input type="text" value={searchKey} onChange={(e) => setSearchKey(e.target.value)} placeholder='Tìm theo tên và số điện thoại'/> 
                         <button className='submit'>
                             <AiOutlineSearch/>
                         </button>
                     </form>
-                    <div className="contacts">
-                        {
-                            (conversations.map((conversation, index) => {
-                                return  (
-                                    <div 
-                                    className={`contact ${conversation.user_info._id === currentSelected ? "selected" : ""}`} 
-                                    key={index}
-                                    onClick={() => changeCurrentChat(index, conversation.user_info)}
-                                    >
-                                        <div className="avatar">
-                                            <img src={`data:image/svg+xml;base64,${conversation.user_info.avatarImage}`} alt="avatar"/>
-                                        </div>
-                                        <div className='message'>
-                                            <div className="username">
-                                                <h3>{conversation.user_info.username}</h3>
-                                            </div>
-                                            <div className="latestMessage">
-                                                <p>{conversation.message.message.text}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )
-                            }))
-                        }
-                    </div>
+                    {
+                        searchResults.length != 0 ? 
+                        <SearchResults searchResults={searchResults} changeCurrentChat={changeCurrentChat} currentSelected={currentSelected} onHandleClearSearchResults={onHandleClearSearchResults}/>
+                        : <ContactItems conversations={conversations} changeCurrentChat={changeCurrentChat} currentSelected={currentSelected}/>
+                    
+                    }
                     <div className="current-user">
                         <div className="avatar">
                             <img src={`data:image/svg+xml;base64,${currentUserImage}`} alt="avatar"/>
@@ -116,60 +109,6 @@ const Container = styled.div`
             background-color: #9186f3;
             color: white;
             font-weight: 500;
-        }
-    }
-
-    .contacts {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        overflow: auto;
-        gap: 0.8rem;
-        &::-webkit-scrollbar {
-            width: 0.2rem;
-            &-thumb {
-                background-color: #ffffff39;
-                width: 0.1rem;
-                border-radius: 1rem;
-            }
-        }
-        .contact {
-            background-color: #ffffff39;
-            min-height: 5rem;
-            width: 90%;
-            cursor: pointer;
-            border-radius: 0.2rem;
-            padding: 0.4rem;
-            gap:1rem;
-            align-items: center;
-            display: flex;
-            transition: 0.5s ease-in-out;
-            .avatar {
-                img {
-                    height: 3rem;
-                }   
-            }
-            .message {
-                height: 7vh;
-                display: grid;
-                grid-template-rows: 55% 45%;
-                .username {
-                    h3 {
-                        color: white;
-                    }
-                }
-                .latestMessage {
-                    width: 100%;
-                    overflow: hidden;
-                    p {
-                        color: #ccc;
-                    }
-                }
-            }
-            
-        }
-        .selected {
-            background-color: #9186f3;
         }
     }
     .current-user {

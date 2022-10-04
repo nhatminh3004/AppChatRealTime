@@ -83,7 +83,7 @@ function Register() {
                     <h1>snappy</h1>
                 </div>
                 <input type="text" placeholder="Username" name="username" onChange={(e) => handleOnChange(e)} />
-                <input type="number" placeholder="Phone" name="phone" onChange={(e) => handleOnChange(e)} />
+                <input type="text" placeholder="Phone" name="phone" onChange={(e) => handleOnChange(e)} />
                 <input type="email" placeholder="Email" name="email" onChange={(e) => handleOnChange(e)} />
                 <input type="password" placeholder="Password" name="password" onChange={(e) => handleOnChange(e)} />
                 <input type="password" placeholder="Confirm Password" name="confirmPassword" onChange={(e) => handleOnChange(e)} />
@@ -117,6 +117,7 @@ const FormContainer = styled.div`
             text-transform: uppercase
         }
     }
+    
     form {
         display: flex;
         flex-direction: column;
@@ -138,6 +139,7 @@ const FormContainer = styled.div`
             outline: none;
         }
     }
+    
     button {
         background-color: #997af0;
         padding: 1rem 2rem;

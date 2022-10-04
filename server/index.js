@@ -50,4 +50,10 @@ io.on("connection", (socket) => {
       socket.to(sendUserSocket).emit("msg-receive", dataSent);
     }
   });
+  socket.on("send-invitation", (data) => {
+    const sendUserSocket = onlineUsers.get(data.to);
+    if (sendUserSocket) {
+      socket.to(sendUserSocket).emit("invitation-receive", data.from);
+    }
+  });
 });

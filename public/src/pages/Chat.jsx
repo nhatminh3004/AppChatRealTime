@@ -22,6 +22,7 @@ function Chat() {
     const [openMessageContainer, setOpenMessageContainer] = useState(true);
     const [conversations, setConversations] = useState([]);
     const [haveNewMessage, setHaveNewMessage] = useState({});
+    const [haveInvitation, setHaveInvitation] = useState(undefined);
 
     useEffect(() => {
         checkLogin();
@@ -81,6 +82,11 @@ function Chat() {
             socket.current.on("msg-receive", (dataSent) => {
                 setHaveNewMessage(new Date());
             })
+            
+            socket.current.on("invitation-receive", (data) => {
+                setHaveInvitation(data);
+                console.log(data);
+            })
         }
     });
 
@@ -94,7 +100,7 @@ function Chat() {
 
     return <Container>
         <div className="container">
-            <SidebarNav changeNav={onHandleSelectNav} />
+            <SidebarNav changeNav={onHandleSelectNav} haveInvitation={haveInvitation} />
             {
                 openMessageContainer ? (
                     <>

@@ -39,5 +39,12 @@ const userSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
+  sentInvitations: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      unique: true,
+      ref: "User",
+    },
+  ],
 });
 module.exports = mongoose.model("Users", userSchema);

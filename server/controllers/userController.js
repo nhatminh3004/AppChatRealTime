@@ -70,3 +70,28 @@ module.exports.getAllUsers = async (req, res, next) => {
     next(error);
   }
 };
+
+module.exports.searchUser = async (req, res, next) => {
+  try {
+    const searchKey = req.params.keyword;
+    const users = await User.find({
+      username: { $regex: ".*" + searchKey + ".*", $options: "i" },
+    });
+    return res.json(users);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.addSentInvitation = async (req, res, next) => {
+  try {
+    const from = req.body.from;
+    const to = req.body.to;
+    const userData = await User.findByIdAndUpdate(from, {
+      $push: { sentInvitations: to },
+    });
+    return res.json(userData.sentInvitations);
+  } catch (error) {
+    next(error);
+  }
+};

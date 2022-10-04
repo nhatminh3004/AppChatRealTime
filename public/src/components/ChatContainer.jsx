@@ -2,15 +2,16 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useRef } from "react";
 import { useEffect } from "react";
-import {v4 as uuidv4} from 'uuid'
+import { AiOutlineCheck } from "react-icons/ai";
+import { FiUserPlus } from 'react-icons/fi';
 import styled from "styled-components";
-import { getAllMessagesRoute, sendMessageRoute } from "../utils/APIRoutes";
+import { addSentInvitation, getAllMessagesRoute, sendMessageRoute } from "../utils/APIRoutes";
 import ChatInput from "./ChatInput";
-import Logout from "./Logout";
 
 function ChatContainer({updateListConversation, currentChat, currentUser, socket}) {
     const [messages, setMessages] = useState([]);
     const [arrivalMessage, setArrivalMessage] = useState(null);
+    const [sentInvitation, setSentInvitation] = useState(false);
     const scrollRef = useRef();
     useEffect(() => {
         getAllMessagesFromDB();
@@ -57,9 +58,45 @@ function ChatContainer({updateListConversation, currentChat, currentUser, socket
     useEffect(() => {
         scrollRef.current?.scrollIntoView({behaviour: "smooth"})
     }, [messages])
+
+    const checkFriends = () => {
+        if (currentUser.listFriends.length === 0)
+            return false;
+        return currentUser.listFriends.map(friend => {
+            if (friend === currentChat._id)
+                return true;
+            return false;
+        })
+    }
+    useEffect(() => {
+        if (currentUser) {
+            if (currentUser.sentInvitations.length === 0) {
+                setSentInvitation(false);
+                
+            } else {
+                currentUser.sentInvitations.map(sentInvitation => {
+                    if (sentInvitation === currentUser._id)
+                        setSentInvitation(true);
+                    setSentInvitation(false);
+                })
+            }
+        }
+    })
+    const onHandleAddFriend = async () => {
+        await axios.post(`${addSentInvitation}`, {
+            from: currentChat._id,
+            to: currentUser._id
+        });
+        socket.current.emit("send-invitation", {
+            from: currentUser._id,
+            to: currentChat._id
+        });
+        setSentInvitation(true);
+    }
+
     return (
     <>
-        {currentChat && (<Container>
+        {currentChat && currentUser && (<Container>
             <div className="chat-header">
                 <div className="user-details">
                     <div className="avatar">
@@ -69,7 +106,16 @@ function ChatContainer({updateListConversation, currentChat, currentUser, socket
                         <h3>{currentChat.username}</h3>
                     </div>
                 </div>
+                
             </div>
+            {!sentInvitation ? 
+                (!checkFriends() && 
+                    <div className="addFriend" onClick={() => onHandleAddFriend()}>
+                        <FiUserPlus /> <p className="add-text">Add friend</p>
+                    </div>) : 
+                    (!checkFriends() && <div className="sentInvitation">
+                        <AiOutlineCheck /> <p className="sent-text">Sent invitation</p>
+                    </div>)}
             <div className="chat-messages">
                 {
                     messages.map((message, index) => {
@@ -92,7 +138,7 @@ function ChatContainer({updateListConversation, currentChat, currentUser, socket
 const Container = styled.div`
     padding-top: 1rem;
     display: grid;
-    grid-template-rows: 10% 78% 12%;
+    grid-template-rows: 10% 6% 72% 12%;
     gap: 0.1rem;
     overflow: hidden;
     @media screen and (min-width: 720px) and (max-width: 1080px){
@@ -117,8 +163,29 @@ const Container = styled.div`
                     color: white;
                 }
             }
-        }
+        }    
     }
+    .addFriend {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        background-color: #9186f3;
+        cursor: pointer;
+        .add-text {
+            margin-left: 0.5rem;
+        }
+    }  
+    .sentInvitation {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        background-color: #ccc;
+        .sent-text {
+            margin-left: 0.5rem;
+        }
+    } 
     .chat-messages {
         padding: 1rem 2rem;
         display: flex;
