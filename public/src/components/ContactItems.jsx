@@ -1,7 +1,9 @@
 import React from 'react';
 import styled from "styled-components";
+import AvatarDefault from "../assets/avatar_default.png"
 
 function ContactItems({conversations, changeCurrentChat, currentSelected}) {
+    console.log(conversations);
     return ( 
         <Container>
             {
@@ -13,7 +15,10 @@ function ContactItems({conversations, changeCurrentChat, currentSelected}) {
                         onClick={() => changeCurrentChat(index, conversation.user_info)}
                                     >
                             <div className="avatar">
-                                <img src={`data:image/svg+xml;base64,${conversation.user_info.avatarImage}`} alt="avatar"/>
+                                {conversation.user_info && conversation.user_info.avatarImage != "" ? 
+                                    <img src={`data:image/svg+xml;base64,${conversation.user_info.avatarImage}`} alt="avatar"/>
+                                    : <img src={AvatarDefault} alt="avatar"/>
+                                }
                             </div>
                             <div className='message'>
                                 <div className="username">

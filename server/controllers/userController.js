@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 
 module.exports.register = async (req, res, next) => {
   try {
-    const { username, phone, email, password } = req.body;
+    const { username, phone, email, password, avatarImage } = req.body;
     const phoneCheck = await User.findOne({ phone });
     if (phoneCheck)
       return res.json({ msg: "Phone number already used", status: false });

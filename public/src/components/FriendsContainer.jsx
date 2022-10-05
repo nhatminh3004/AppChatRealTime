@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Logo from "../assets/logo.svg"
 import Logout from './Logout';
+import AvatarDefault from "../assets/avatar_default.png"
 
 function FriendsContainer({contacts, currentUser, changeChat}) {
     const [currentUserName, setCurrentUserName] = useState(undefined);
     const [currentUserImage, setCurrentUserImage] = useState(undefined);
     const [currentSelected, setCurrentSelected] = useState(undefined);
-    console.log(currentUser.username);
     useEffect(() => {
         if(currentUser) {
             setCurrentUserImage(currentUser.avatarImage);
@@ -20,7 +20,7 @@ function FriendsContainer({contacts, currentUser, changeChat}) {
     }
     return <>
         {
-            currentUserImage && currentUserName && (
+            currentUserName && (
                 <Container>
                     <div className="brand">
                         <img src={Logo} alt='logo'/>
@@ -36,7 +36,10 @@ function FriendsContainer({contacts, currentUser, changeChat}) {
                                     onClick={() => changeCurrentChat(index, contact)}
                                     >
                                         <div className="avatar">
-                                            <img src={`data:image/svg+xml;base64,${contact.avatarImage}`} alt="avatar"/>
+                                            {contact.avatarImage ? 
+                                                <img src={`data:image/svg+xml;base64,${contact.avatarImage}`} alt="avatar"/>
+                                                : <img src={AvatarDefault} alt="avatar"/>
+                                            }
                                         </div>
                                         <div className="username">
                                             <h3>{contact.username}</h3>
@@ -48,7 +51,10 @@ function FriendsContainer({contacts, currentUser, changeChat}) {
                     </div>
                     <div className="current-user">
                         <div className="avatar">
+                        {currentUserImage ? 
                             <img src={`data:image/svg+xml;base64,${currentUserImage}`} alt="avatar"/>
+                            : <img src={AvatarDefault} alt="avatar"/>
+                        }
                         </div>
                         <div className="username">
                             <h2>{currentUserName}</h2>
@@ -131,7 +137,7 @@ const Container = styled.div`
         gap: 1rem;
         .avatar {
             img {
-                height: 4rem;
+                height: 3rem;
                 max-inline-size: 100%;
             }
         }
@@ -139,6 +145,7 @@ const Container = styled.div`
             h2 {
                 color: white;
                 overflow: hidden;
+                max-width: 150px;
             }
         }
         @media screen and (min-width: 720px) and (max-width: 1080px){

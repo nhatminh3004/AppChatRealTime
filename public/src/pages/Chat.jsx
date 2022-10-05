@@ -29,6 +29,13 @@ function Chat() {
     }, []);
     useEffect(() => {
         if (currentUser) {
+            if (currentUser.sentInvitations.length > 0) {
+                setHaveInvitation(currentUser.sentInvitations[currentUser.sentInvitations.length-1]);
+            } 
+        }
+    });
+    useEffect(() => {
+        if (currentUser) {
             addUserToSocket();
         }
     })
@@ -50,12 +57,8 @@ function Chat() {
 
     const getContactsFromDB = async () => {
         if (currentUser) {
-            if (currentUser.isAvatarImageSet) {
-                const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
-                setContacts(data.data); 
-            } else {
-                navigate("/setAvatar");
-            }
+            const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
+            setContacts(data.data); 
         }
     }
     useEffect(() => {
@@ -67,12 +70,8 @@ function Chat() {
     }, [haveNewMessage]);
     const getConversationsFromDB = async () => {
         if (currentUser) {
-            if (currentUser.isAvatarImageSet) {
-                const data = await axios.get(`${myConversationsRoute}/${currentUser._id}`);
-                setConversations(data.data); 
-            } else {
-                navigate("/setAvatar");
-            }
+            const data = await axios.get(`${myConversationsRoute}/${currentUser._id}`);
+            setConversations(data.data); 
         }
     }
 

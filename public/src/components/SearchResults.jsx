@@ -1,6 +1,7 @@
 import React from 'react';
 import { AiOutlineCloseCircle } from 'react-icons/ai';
 import styled from "styled-components";
+import AvatarDefault from "../assets/avatar_default.png"
 
 function SearchResults({searchResults, changeCurrentChat, currentSelected, onHandleClearSearchResults}) {
     return ( 
@@ -18,7 +19,10 @@ function SearchResults({searchResults, changeCurrentChat, currentSelected, onHan
                         onClick={() => changeCurrentChat(index, searchResult)}
                                     >
                             <div className="avatar">
-                                <img src={`data:image/svg+xml;base64,${searchResult.avatarImage}`} alt="avatar"/>
+                                {searchResult.user_info && searchResult.user_info.avatarImage != "" ? 
+                                    <img src={`data:image/svg+xml;base64,${searchResult.user_info.avatarImage}`} alt="avatar"/>
+                                    : <img src={AvatarDefault} alt="avatar"/>
+                                }
                             </div>
                             <div className="username">
                                 <h3>{searchResult.username}</h3>

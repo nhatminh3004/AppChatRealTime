@@ -7,8 +7,9 @@ import { searchUsers } from '../utils/APIRoutes';
 import ContactItems from './ContactItems';
 import Logout from './Logout';
 import SearchResults from './SearchResults';
+import AvatarDefault from "../assets/avatar_default.png"
 
-function ConversationList({conversations, currentUser, changeChat, socket}) {
+function ConversationList({ conversations, currentUser, changeChat, socket}) {
     const [currentUserName, setCurrentUserName] = useState(undefined);
     const [currentUserImage, setCurrentUserImage] = useState(undefined);
     const [currentSelected, setCurrentSelected] = useState(undefined);
@@ -35,7 +36,7 @@ function ConversationList({conversations, currentUser, changeChat, socket}) {
     }
     return <>
         {
-            currentUserImage && currentUserName && (
+            currentUserName && (
                 <Container>
                     <div className="brand">
                         <img src={Logo} alt='logo'/>
@@ -55,7 +56,10 @@ function ConversationList({conversations, currentUser, changeChat, socket}) {
                     }
                     <div className="current-user">
                         <div className="avatar">
-                            <img src={`data:image/svg+xml;base64,${currentUserImage}`} alt="avatar"/>
+                            {currentUserImage && currentUserImage != "" ? 
+                                <img src={`data:image/png;base64,${currentUserImage}`} alt="avatar"/>
+                                : <img src={AvatarDefault} alt="avatar"/>
+                            }
                         </div>
                         <div className="username">
                             <h2>{currentUserName}</h2>
@@ -119,13 +123,14 @@ const Container = styled.div`
         gap: 1rem;
         .avatar {
             img {
-                height: 4rem;
+                height: 3rem;
                 max-inline-size: 100%;
             }
         }
         .username {
             h2 {
                 color: white;
+                max-width: 150px;
                 overflow: hidden;
             }
         }
