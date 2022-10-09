@@ -82,9 +82,12 @@ function Chat() {
                 setHaveNewMessage(new Date());
             })
             
-            socket.current.on("invitation-receive", (data) => {
+            socket.current.on("invitation-receive", async (data) => {
                 setHaveInvitation(data);
-                console.log(data);
+                currentUser.sentInvitations = [...currentUser.sentInvitations, data];
+                localStorage.setItem("chat-app-user", JSON.stringify(currentUser));
+                setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
+
             })
         }
     });
@@ -96,7 +99,6 @@ function Chat() {
     const onHandleSelectNav = (isMessageContainer) => {
         setOpenMessageContainer(isMessageContainer);
     }
-
     return <Container>
         <div className="container">
             <SidebarNav changeNav={onHandleSelectNav} haveInvitation={haveInvitation} />

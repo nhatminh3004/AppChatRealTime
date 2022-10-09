@@ -3,7 +3,6 @@ import styled from "styled-components";
 import AvatarDefault from "../assets/avatar_default.png"
 
 function ContactItems({conversations, changeCurrentChat, currentSelected}) {
-    console.log(conversations);
     return ( 
         <Container>
             {
