@@ -4,6 +4,8 @@ const {
   getAllUsers,
   searchUser,
   addSentInvitation,
+  acceptFriend,
+  denyAddFriend,
 } = require("../controllers/userController");
 const { login } = require("../controllers/userController");
 
@@ -13,6 +15,8 @@ router.post("/register", register);
 router.post("/login", login);
 router.post("/setAvatar/:id", setAvatar);
 router.post("/invite", addSentInvitation);
+router.post("/acceptFriend", acceptFriend);
+router.post("/denyAddFriend", denyAddFriend);
 router.get("/allusers/:id", getAllUsers);
 router.get("/search/:keyword", searchUser);
 

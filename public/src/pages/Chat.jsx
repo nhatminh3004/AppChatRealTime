@@ -23,6 +23,7 @@ function Chat() {
     const [conversations, setConversations] = useState([]);
     const [haveNewMessage, setHaveNewMessage] = useState({});
     const [haveInvitation, setHaveInvitation] = useState(undefined);
+    const [arrivalMessage, setArrivalMessage] = useState(null);
 
     useEffect(() => {
         checkLogin();
@@ -78,7 +79,11 @@ function Chat() {
     
     useEffect(() => {
         if (socket.current) {
+            console.log("!2124");
             socket.current.on("msg-receive", (dataSent) => {
+                console.log("!asfasfasf");
+                if (dataSent.from === currentChat._id)
+                    setArrivalMessage({fromSelf: false, message: dataSent.message})
                 setHaveNewMessage(new Date());
             })
             
@@ -89,6 +94,7 @@ function Chat() {
                 setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
 
             })
+            
         }
     });
 
@@ -98,6 +104,10 @@ function Chat() {
 
     const onHandleSelectNav = (isMessageContainer) => {
         setOpenMessageContainer(isMessageContainer);
+    }
+
+    const onHandleReloadLatestMsg = () => {
+        setHaveNewMessage(new Date());
     }
     return <Container>
         <div className="container">
@@ -109,7 +119,7 @@ function Chat() {
                         {
                             isLoaded && currentChat === undefined ? 
                                 (<Welcome currentUser={currentUser} />) :
-                                (<ChatContainer updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
+                                (<ChatContainer arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
                                 
                         }
                     </>
@@ -119,7 +129,7 @@ function Chat() {
                         {
                             isLoaded && currentChat === undefined ? 
                                 (<Welcome currentUser={currentUser} />) :
-                                (<ChatContainer updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
+                                (<ChatContainer arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
                                 
                         }
                     </>

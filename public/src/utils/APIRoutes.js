@@ -6,6 +6,7 @@ export const allUsersRoute = `${host}/api/auth/allusers`;
 export const searchUsers = `${host}/api/auth/search`;
 export const addSentInvitation = `${host}/api/auth/invite`;
 export const acceptAddFriend = `${host}/api/auth/acceptFriend`;
+export const denyAddFriend = `${host}/api/auth/denyAddFriend`;
 export const myConversationsRoute = `${host}/api/messages/myConversations`;
 export const sendMessageRoute = `${host}/api/messages/addmsg`;
 export const getAllMessagesRoute = `${host}/api/messages/getmsg`;

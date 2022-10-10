@@ -95,3 +95,33 @@ module.exports.addSentInvitation = async (req, res, next) => {
     next(error);
   }
 };
+
+module.exports.acceptFriend = async (req, res, next) => {
+  try {
+    const currentUser = req.body.currentUser;
+    const currentChat = req.body.currentChat;
+    await User.findByIdAndUpdate(currentUser._id, {
+      $push: { listFriends: currentChat._id },
+      $pull: { sentInvitations: currentChat._id },
+    });
+    await User.findByIdAndUpdate(currentChat._id, {
+      $push: { listFriends: currentUser._id },
+      $pull: { sentInvitations: currentUser._id },
+    });
+    return res.json("Add friend successfully");
+  } catch (error) {
+    next(error);
+  }
+};
+module.exports.denyAddFriend = async (req, res, next) => {
+  try {
+    const from = req.body.from;
+    const to = req.body.to;
+    await User.findByIdAndUpdate(from, {
+      $pull: { sentInvitations: to },
+    });
+    return res.json("Deny invitation successfully");
+  } catch (error) {
+    next(error);
+  }
+};

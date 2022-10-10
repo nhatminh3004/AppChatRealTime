@@ -5,17 +5,17 @@ import { useEffect } from "react";
 import { AiOutlineCheck } from "react-icons/ai";
 import { FiUserPlus } from 'react-icons/fi';
 import styled from "styled-components";
-import { acceptAddFriend, addSentInvitation, getAllMessagesRoute, sendMessageRoute } from "../utils/APIRoutes";
+import { acceptAddFriend, addSentInvitation, denyAddFriend, getAllMessagesRoute, sendMessageRoute } from "../utils/APIRoutes";
 import ChatInput from "./ChatInput";
 import AvatarDefault from "../assets/avatar_default.png"
 import { BsCheckLg } from "react-icons/bs";
 import { GrClose } from "react-icons/gr";
 
-function ChatContainer({updateListConversation, currentChat, currentUser, socket}) {
+function ChatContainer({arrivalMessage, setArrivalMessage, updateListConversation, currentChat, currentUser, setCurrentUser, setCurrentChat, socket}) {
     const [messages, setMessages] = useState([]);
-    const [arrivalMessage, setArrivalMessage] = useState(null);
     const [sentInvitation, setSentInvitation] = useState(false);
     const [haveInvitation, setHaveInvitation] = useState(false);
+    const [isFriend, setIsFriend] = useState(false);
     const scrollRef = useRef();
     useEffect(() => {
         getAllMessagesFromDB();
@@ -50,11 +50,30 @@ function ChatContainer({updateListConversation, currentChat, currentUser, socket
     };
     useEffect(() => {
         if (socket.current) {
-            socket.current.on("msg-receive", (dataSent) => {
-                if (dataSent.from === currentChat._id)
-                    setArrivalMessage({fromSelf: false, message: dataSent.message})
+            socket.current.on("response-deny-invitation", (data) => {
+                if (data.from._id === currentChat._id) {
+                    setCurrentChat(data.from);
+                    setSentInvitation(false)
+                }
             })
+            socket.current.on("response-accept-friend", async (data) => {
+                if (data.to === currentUser._id) {
+                    setIsFriend(true);
+                    currentUser.listFriends = [currentUser.listFriends, data.from]
+                    if (currentUser && currentUser.sentInvitations) {
+                        currentUser.sentInvitations.map((invitation, index) => {
+                            if (invitation === currentChat._id) {
+                                currentUser.sentInvitations.splice(index, 1);
+                            }
+                        })
+                    }
+                    localStorage.setItem("chat-app-user", JSON.stringify(currentUser));
+                    setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
+                }
+            })
+            
         }
+        
     });
     useEffect(() => { 
         arrivalMessage && setMessages(prev => [...prev, arrivalMessage])
@@ -62,31 +81,36 @@ function ChatContainer({updateListConversation, currentChat, currentUser, socket
     useEffect(() => {
         scrollRef.current?.scrollIntoView({behaviour: "smooth"})
     }, [messages])
-
-    const checkFriends = () => {
-        if (currentUser.listFriends.length === 0)
-            return false;
-        return currentUser.listFriends.map(friend => {
-            if (friend === currentChat._id)
-                return true;
-            return false;
-        })
-    }
+    useEffect(() => {
+        if (currentUser && currentUser.listFriends)
+            if (currentUser.listFriends.length === 0)
+                setIsFriend(false);
+            else {
+                currentUser.listFriends.map((friend, index) => {
+                    if (friend === currentChat._id) {
+                        setIsFriend(true);
+                    } else {
+                        if (index === currentUser.listFriends.length - 1) {
+                            setIsFriend(false);
+                        }
+                    }
+                })
+            }
+    }, [currentChat]);
     const onHandleAddFriend = async () => {
         await axios.post(`${addSentInvitation}`, {
-            from: currentChat._id,
-            to: currentUser._id
+            from: currentUser._id,
+            to: currentChat._id
         });
         socket.current.emit("send-invitation", {
             from: currentUser._id,
             to: currentChat._id
         });
         setSentInvitation(true);
-        
     }
 
     useEffect(() => {
-        if (currentUser && currentChat) {
+        if (currentUser && currentChat && currentChat.sentInvitations) {
             currentChat.sentInvitations.map((invitation) => {
                 if (currentUser._id === invitation) {
                     setSentInvitation(true);
@@ -95,9 +119,8 @@ function ChatContainer({updateListConversation, currentChat, currentUser, socket
         }
     });
     useEffect(() => {
-        if (currentUser && currentChat) {
+        if (currentUser && currentChat && currentUser.sentInvitations) {
             currentUser.sentInvitations.map((invitation) => {
-                console.log(currentChat._id === invitation);
                 if (currentChat._id === invitation) {
                     setHaveInvitation(true);
                 }
@@ -108,17 +131,44 @@ function ChatContainer({updateListConversation, currentChat, currentUser, socket
         currentUser.listFriends = [...currentUser.listFriends, currentChat._id];
         await axios.post(`${acceptAddFriend}`, {
             currentUser: currentUser,
-            friendId: currentChat._id
+            currentChat: currentChat
         });
         socket.current.emit("acceptted", {
             from: currentUser._id,
             to: currentChat._id
         });
-        setSentInvitation(true);
+        if (currentUser && currentUser.sentInvitations) {
+            currentUser.sentInvitations.map((invitation, index) => {
+                if (invitation === currentChat._id) {
+                    currentUser.sentInvitations.splice(index, 1);
+                }
+            })
+        }
+        localStorage.setItem("chat-app-user", JSON.stringify(currentUser));
+        setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
+        setIsFriend(true);
+        setHaveInvitation(false);
     }
 
-    const onHandleDeny = () => {
-
+    const onHandleDeny = async () => {
+        if (currentUser && currentUser.sentInvitations) {
+            currentUser.sentInvitations.map((invitation, index) => {
+                if (invitation === currentChat._id) {
+                    currentUser.sentInvitations.splice(index, 1);
+                }
+            })
+        }
+        await axios.post(`${denyAddFriend}`, {
+            from: currentUser._id,
+            to: currentChat._id
+        })
+        socket.current.emit("denyAddFriend", {
+            from: currentUser,
+            to: currentChat
+        });
+        localStorage.setItem("chat-app-user", JSON.stringify(currentUser));
+        setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
+        setHaveInvitation(false);
     }
     return (
     <>
@@ -151,13 +201,13 @@ function ChatContainer({updateListConversation, currentChat, currentUser, socket
                     </div>
                 )
                 : (!sentInvitation ? 
-                (!checkFriends() && 
+                (!isFriend ? 
                     <div className="addFriend" onClick={() => onHandleAddFriend()}>
                         <FiUserPlus /> <p className="add-text">Add friend</p>
-                    </div>) : 
-                    (!checkFriends() && <div className="sentInvitation">
+                    </div> : <div></div>) : 
+                    (!isFriend ?  <div className="sentInvitation">
                         <AiOutlineCheck /> <p className="sent-text">Sent invitation</p>
-                    </div>))
+                    </div> : <div></div>))
                     }
             <div className="chat-messages">
                 {
@@ -181,7 +231,8 @@ function ChatContainer({updateListConversation, currentChat, currentUser, socket
 const Container = styled.div`
     padding-top: 1rem;
     display: grid;
-    grid-template-rows: 10% 10% 68% 12%;
+    grid-template-rows:  10% 10% 68% 12%;
+    
     gap: 0.1rem;
     overflow: hidden;
     @media screen and (min-width: 720px) and (max-width: 1080px){
@@ -214,6 +265,7 @@ const Container = styled.div`
         justify-content: center;
         color: white;
         background-color: #9186f3;
+        max-height: 1.5rem;
         cursor: pointer;
         .add-text {
             margin-left: 0.5rem;
@@ -225,6 +277,7 @@ const Container = styled.div`
         justify-content: center;
         color: #000;
         background-color: #ccc;
+        max-height: 1.5rem;
         .sent-text {
             margin-left: 0.5rem;
         }

@@ -45,15 +45,28 @@ io.on("connection", (socket) => {
   });
   socket.on("send-msg", (data) => {
     const sendUserSocket = onlineUsers.get(data.to);
+    console.log(onlineUsers);
     if (sendUserSocket) {
       const dataSent = { message: data.message, from: data.from };
-      socket.to(sendUserSocket).emit("msg-receive", dataSent);
+      io.to(`${sendUserSocket}`).emit("msg-receive", dataSent);
     }
   });
   socket.on("send-invitation", (data) => {
     const sendUserSocket = onlineUsers.get(data.to);
     if (sendUserSocket) {
-      socket.to(sendUserSocket).emit("invitation-receive", data.from);
+      io.to(`${sendUserSocket}`).emit("invitation-receive", data.from);
+    }
+  });
+  socket.on("acceptted", (data) => {
+    const sendUserSocket = onlineUsers.get(data.to);
+    if (sendUserSocket) {
+      io.to(`${sendUserSocket}`).emit("response-accept-friend", data);
+    }
+  });
+  socket.on("denyAddFriend", (data) => {
+    const sendUserSocket = onlineUsers.get(data.to._id);
+    if (sendUserSocket) {
+      io.to(`${sendUserSocket}`).emit("response-deny-invitation", data);
     }
   });
 });
