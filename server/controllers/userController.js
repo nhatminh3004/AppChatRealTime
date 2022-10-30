@@ -42,6 +42,18 @@ module.exports.login = async (req, res, next) => {
     next(error);
   }
 };
+module.exports.checkPhoneTonTai = async (req, res, next) => {
+  try {
+    const  {phone}  = req.body;
+    console.log("số dthoai",phone);
+    const phoneCheck = await User.findOne({phone});
+    if (phoneCheck)
+    return res.json({ msg: "Phone number already used", status: false });
+  } catch (error) {
+    next(error);
+  }
+  return res.json({ msg: "Phone Hợp lệ", status: true });
+};
 
 module.exports.setAvatar = async (req, res, next) => {
   try {

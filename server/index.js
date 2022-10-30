@@ -18,13 +18,11 @@ app.use("/api/conversations", conversationRoutes);
 mongoose.connect(process.env.MONGO_CONNECT_LINK,{useNewUrlParser:true, useUnifiedTopology:true}).then(()=>{
   console.log('database is connected');
 }).catch(err => console.log(err.message));
-app.listen(process.env.PORT,() => {
-  console.log('app listen port :',process.env.PORT);
-})
 
 
-const server = app.listen(3000, () => {
-  console.log("Server started on port:", 3000);
+
+const server = app.listen(process.env.PORT, () => {
+  console.log("Server started on port:", process.env.PORT);
 });
 
 const io = socket(server, {
