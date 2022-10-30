@@ -22,7 +22,7 @@ import firebase from 'firebase/compat/app'
 const heightCuaStatusBar = StatusBarManager.HEIGHT;
 const {height,width} = Dimensions.get('window');
 
-export default function VerifyOtpScreen({route: {params:{phoneNumber}},navigation}) {
+export default function VerifyOtpDoiMatKhauScreen({route: {params:{phoneNumber}},navigation}) {
   //mới
   
   const [verifycationID,setverifycationID] = useState(null);
@@ -54,17 +54,19 @@ const xacThucOtp =() =>{
     verifycationID,code1
   );
   firebase.auth().signInWithCredential(credital).then(() => {
-    navigation.navigate("Signup",{phoneNumber});
+    navigation.navigate("ResetPassWord",{phoneNumber});
+   
   }).catch((error)=>{
     
     console.log(error.code);
     if(error.code ==='auth/invalid-verification-code' || error.code ==='auth/missing-verification-id'){
+      
       alert('Sai Code');
       // navigation.goBack();
     }
     else{
       alert('vui lòng thử lại');
-      // alert('Đăng nhập thành công');
+     
       
  
     } 
@@ -88,7 +90,7 @@ const xacThucOtp =() =>{
      
       <View style={styles.headerContainer}>
         <Ionicons name='chevron-back-outline' size={30} onPress={() => {navigation.goBack()}}/>
-        <Text style={styles.headerTitle}>Xác thực đăng ký</Text>
+        <Text style={styles.headerTitle}>Xác thực đổi mật khẩu</Text>
       </View>
       <Separator height={50}/>
       <Text style={styles.title}>Xác thực số điện thoại của bạn <Text style={styles.phoneNumBerText}>{phoneNumber}</Text></Text>

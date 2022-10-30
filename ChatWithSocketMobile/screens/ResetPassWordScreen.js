@@ -1,36 +1,33 @@
-
+//phiên bản mới nhất
 import { Text, StyleSheet, View,TextInput,TouchableOpacity, Dimensions } from 'react-native'
 
 
 import React, { useState } from 'react'
 import Separator from '../ultis/Separator'
+
+import { Entypo } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
-import axios from 'axios';
 import  Ionicons  from '@expo/vector-icons/Ionicons'; 
 import  Feather  from '@expo/vector-icons/Feather'; 
 import { StatusBar } from 'expo-status-bar';
 import {NativeModules} from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons'; 
+import KeyboardAvoidingView from 'react-native/Libraries/Components/Keyboard/KeyboardAvoidingView';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage'
 const {StatusBarManager} = NativeModules;
 
 const heightCuaStatusBar = StatusBarManager.HEIGHT;
 const {height,width} = Dimensions.get('window');
 
-export default function Siginin({navigation}) {
+export default function ResetPassWordScreen({route: {params:{phoneNumber}},navigation}) {
   const [isMatKhau,setMatKhau]=useState(true);//true là mật khẩu ẩn
   const [isEye,setEye]=useState(true);//eye là mắt đóng và true là đóng
+  console.log(phoneNumber);
+ 
   const [error,setError]=useState('');
-  const [userInfo,setUserInfo] = useState({
-    phone:'',
-    password:'',
-  });
-  const updateError= (error,stateUpdate) =>{
-    stateUpdate(error);
-    setTimeout(() =>{
-      stateUpdate('');
-    },2500);
-}
-  const {phone,password} = userInfo
   let trangThaiIconEye;
+  
   const EyeFunction = (isEye) =>{
       if(isEye===true){
        
@@ -41,28 +38,51 @@ export default function Siginin({navigation}) {
         trangThaiIconEye='eye'
       }
   }
-  const handleOnChangeText= (value,fieldName) =>{
-    console.log(value,fieldName);
-    setUserInfo({...userInfo,[fieldName]: value})
-  }
-  const submitFormSignIn= async () =>{
-    try {
-      const res = await axios.post('http://192.168.1.31:5000/api/auth/login',{...userInfo});
-      console.log(res.data);
-      if(res.data.status===false){
-        return updateError('Sai tài khoản hoặc mật khẩu ',setError);
-      }
-        console.log(res.data.user._id);
-      navigation.replace("Chat")
-    } catch (error) {
-      console.log(error);
-    }
-  }
   
-  // console.log('is Eye',isEye);
-  // console.log('is Mat Khau',isMatKhau);
+  
+  
+
   EyeFunction(isEye);
-  // console.log('A:',trangThaiIconEye);
+
+  //Xử lý đăng ký backend
+    const [userInfo,setUserInfo] = useState({
+      phone:phoneNumber,
+      newpassword:'',
+    });
+    const {phone,newpassword} = userInfo
+  //
+    const handleOnChangeText= (value,fieldName) =>{
+      console.log(value,fieldName);
+      setUserInfo({...userInfo,[fieldName]: value})
+    }
+   
+     const updateError= (error,stateUpdate) =>{
+          stateUpdate(error);
+          setTimeout(() =>{
+            stateUpdate('');
+          },2500);
+     }
+   const isValidForm = () =>{
+    
+      if(!newpassword.trim() || newpassword.length<3 || newpassword.length>20) return updateError('Mật khẩu mới phải từ 3 đến 20 ký tự ',setError);
+     else {
+      return true;
+     }
+      
+   }
+    
+    const submitForm =   async () => {
+      if(isValidForm()){
+       
+        const res = await axios.post('http://192.168.1.31:5000/api/auth/doiMatKhau', userInfo);
+    console.log(res.data);
+       
+        navigation.replace("Signin");
+      }
+      
+    }
+
+    
   return (
     
     <View style={styles.container}>
@@ -70,56 +90,55 @@ export default function Siginin({navigation}) {
       <Separator height={heightCuaStatusBar}/>
      
       <View style={styles.headerContainer}>
-        <Ionicons name='chevron-back-outline' size={30} onPress={() =>{navigation.goBack()}}/>
-        <Text style={styles.headerTitle}>Đăng nhập</Text>
+        <Ionicons name='chevron-back-outline' size={30} onPress={() =>{navigation.replace("Signin")}}/>
+        <Text style={styles.headerTitle}>Đăng Ký</Text>
       </View>
-      <Separator height={50}/>
-      <Text style={styles.title}>Chào mừng bạn</Text>
-      <Text style={styles.content}>Nhập số điện thoại và mật khẩu, sau đó bạn có thể chat mọi lúc mọi nơi</Text>
-      <Separator height={20}/>
-       {/* Nếu error tồn tại thì xuất hiện lỗi ngược lại ko xuất hiện */}
-       {error ? <View style={styles.thongbaoContainer}>
+      <Separator height={10}/>
+      <Text style={styles.title}>Bằng việc cập nhật lại mật khẩu của bạn</Text>
+      <Text style={styles.content}>sẽ giúp bạn tránh việc quên mật khẩu của mình</Text>
+      <Separator height={10}/>
+      {/* Nếu error tồn tại thì xuất hiện lỗi ngược lại ko xuất hiện */}
+      {error ? <View style={styles.thongbaoContainer}>
           <AntDesign name="notification" size={30} color="#A9A9A9" style={{marginRight:10}}/>
           <Text style={styles.thongBaoLoi}>{error}</Text>
         </View> : null}
+      <Separator height={50}/>
       <View style={styles.inputContainer}>
         <View style={styles.inputSubContainer}>
           <Feather name='user' size={30} color='#A9A9A9' style={{marginRight:10}}/>
-          <TextInput value={phone} placeholder='Nhập số điện thoại' keyboardType='phone-pad' maxLength={15} placeholderTextColor='#A9A9A9' style={styles.inputText}  onChangeText={value => handleOnChangeText(value,'phone')}/>
+          <TextInput value={phone} autoCapitalize='none' placeholder='Số điện thoại' editable={false} placeholderTextColor='#A9A9A9' style={styles.inputText} />
         </View>
       </View>
-      <Separator height={15}/>
+      <Separator height={10}/>
+     
       <View style={styles.inputContainer}>
         <View style={styles.inputSubContainer}>
         <Feather  name='lock' size={30} color='#A9A9A9' style={{marginRight:10}}/>
-          <TextInput value={password} placeholder='Nhập mật khẩu' placeholderTextColor='#A9A9A9' style={styles.inputText} secureTextEntry={isMatKhau} onChangeText={value => handleOnChangeText(value,'password')}/>
+          <TextInput value={newpassword} placeholder='Nhập mật khẩu mới' placeholderTextColor='#A9A9A9' style={styles.inputText} secureTextEntry={isMatKhau}  onChangeText={value => handleOnChangeText(value,'newpassword')}/>
          
           <Feather  name={trangThaiIconEye} size={30} color='#A9A9A9' style={{marginRight:10}} onPress={()=>{setMatKhau(!isMatKhau,setEye(!isEye))} 
         }/>
-      
         </View>
       </View>
-        <Text></Text>
-        <View style={styles.fogotPasswordContainer}>
-        <View>
-          {/* <Text>Nhớ đăng nhập</Text> */}
-        </View> 
-       
-        <Text style={styles.fogotPassWordText} onPress={()=>{navigation.navigate("OtpTestDoiMatKhau")}}>Quên mật khẩu</Text>
-      </View>
-      <TouchableOpacity style={styles.signInButton} onPress={submitFormSignIn}>
-         <Text style={styles.signInButtonText}>Đăng nhập</Text>
+
+    
+      <TouchableOpacity style={styles.signInButton} onPress={() => submitForm()} >
+         <Text style={styles.signInButtonText}>Đổi Mật Khẩu</Text>
       </TouchableOpacity>
+      
+     
         <View style={styles.signUpContainer}>
-          <Text style={styles.banchuacoAccountText}>Bạn không có tài khoản ?</Text>
-          <Text style={styles.dangkyNgayText} onPress={()=>{navigation.navigate("OtpTest")}}>Đăng ký ngay tại đây</Text>
+          <Text style={styles.banchuacoAccountText}>Bạn đã có tài khoản ?</Text>
+          <Text style={styles.dangkyNgayText} onPress={()=>{navigation.replace("Signin")}}>Trở về đăng nhập</Text>
         </View>
     </View>
     
   )
+      }
 
  
-}
+
+
 
 
 
@@ -172,6 +191,12 @@ const styles = StyleSheet.create({
   inputSubContainer:{
     flexDirection:'row',
     alignItems:'center',
+    // backgroundColor:'red',
+  },
+  thongbaoContainer:{
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
     // backgroundColor:'red',
   },
   inputText:{
@@ -234,17 +259,17 @@ const styles = StyleSheet.create({
     fontWeight:'bold',
     marginLeft:9
   },
+  phoneNumBerText:{
+    fontSize:18,
+    fontWeight:'bold',
+    lineHeight:18*1.4,
+    color:'red',
+  },
   thongBaoLoi:{
     color:'red',
     fontSize:18,
     textAlign:'center',
 
-  },
-  thongbaoContainer:{
-    flexDirection:'row',
-    alignItems:'center',
-    justifyContent:'center'
-    // backgroundColor:'red',
-  },
+  }
   
 })

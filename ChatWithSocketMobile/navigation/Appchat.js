@@ -2,18 +2,19 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { View } from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import Siginin from '../screens/Siginin';
-
 import { NavigationContainer } from '@react-navigation/native';
 import SplashScreen from '../screens/SplashScreen';
 import OnboardScreen from '../screens/OnboardScreen';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import SplashScreenLanHai from '../screens/SplashScreenLanHai';
-import OtpXacThucScreen from '../screens/OtpXacThucScreen';
 import VerifyOtpScreen from '../screens/VerifyOtpScreen';
 import OtpTest from '../screens/OtpTest';
 import Signupp from '../screens/Signupp';
 import ChatScreen from '../screens/ChatScreen';
+import OtpTestDoiMatKhau from '../screens/OtpTestDoiMatKhau';
+import VerifyOtpDoiMatKhauScreen from '../screens/VerifyOtpDoiMatKhauScreen';
+import ResetPassWordScreen from '../screens/ResetPassWordScreen';
 const Stack = createStackNavigator();
 
 function StackNavigator() {
@@ -43,6 +44,9 @@ function StackNavigator() {
      <Stack.Screen name="Home" component={HomeScreen} />
      <Stack.Screen name="Signin" component={Siginin}  />
      <Stack.Screen name="OtpTest" component={OtpTest}  />
+     <Stack.Screen name="OtpTestDoiMatKhau" component={OtpTestDoiMatKhau}/>
+     <Stack.Screen name="VerifyOtpDoiMatKhauScreen" component={VerifyOtpDoiMatKhauScreen}/>
+     <Stack.Screen name="ResetPassWord" component={ResetPassWordScreen}/>
      <Stack.Screen name="OtpVerify" component={VerifyOtpScreen}  />
      <Stack.Screen name="Signup" component={Signupp}  />
      <Stack.Screen name="Chat" component={ChatScreen}  />
@@ -58,7 +62,9 @@ function StackNavigator() {
      <Stack.Screen name="Home" component={HomeScreen}  />
      <Stack.Screen name="Signin" component={Siginin}  />
      <Stack.Screen name="OtpTest" component={OtpTest}  />
-     <Stack.Screen name="Otp" component={OtpXacThucScreen}  />
+    <Stack.Screen name="OtpTestDoiMatKhau" component={OtpTestDoiMatKhau}/>
+    <Stack.Screen name="VerifyOtpDoiMatKhauScreen" component={VerifyOtpDoiMatKhauScreen}/>
+    <Stack.Screen name="ResetPassWord" component={ResetPassWordScreen}/>
      <Stack.Screen name="OtpVerify" component={VerifyOtpScreen}  />
      <Stack.Screen name="Signup" component={Signupp}  />
      <Stack.Screen name="Chat" component={ChatScreen}  />

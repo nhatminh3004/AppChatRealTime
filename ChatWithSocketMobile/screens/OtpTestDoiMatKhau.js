@@ -22,7 +22,7 @@ const {StatusBarManager} = NativeModules;
 const heightCuaStatusBar = StatusBarManager.HEIGHT;
 const {height,width} = Dimensions.get('window');
 //
-function OtpTest({navigation}) {
+function OtpTestDoiMatKhau({navigation}) { 
   const [phoneNumber,setPhoneNumber] = useState("");
   
   const getDropDownStyle =(y) => ({...styles.countryDropDownList,top: y+ 60})
@@ -46,10 +46,10 @@ const checkPhoneTonTai= async () =>{
     const res = await axios.post('http://192.168.1.31:5000/api/auth/checkPhoneTonTai',{...userPhone});
     console.log("phone Request",{phoneNumber});
     console.log(res.data);
-    if(res.data.status===false || phoneNumber.length<=11){
-      return updateError('Số điện thoại đã đăng ký hoặc nhập sai ',setError);
+    if(res.data.status===true || phoneNumber.length<=11){
+      return updateError('Số điện thoại Không tồn tại trong hệ thống ',setError);
     }
-   navigation.navigate("OtpVerify",{phoneNumber})
+   navigation.navigate("VerifyOtpDoiMatKhauScreen",{phoneNumber})
   } catch (error) {
     console.log(error);
   }
@@ -78,7 +78,7 @@ const checkPhoneTonTai= async () =>{
      
       <View style={styles.headerContainer}>
         <Ionicons name='chevron-back-outline' size={30} onPress={() =>{navigation.goBack()}}/>
-        <Text style={styles.headerTitle}>Xác thực mã OTP đăng ký tài khoản</Text>
+        <Text style={styles.headerTitle}>Xác thực mã OTP đổi mật khẩu</Text>
       </View>
       <Separator height={50}/>
       <Text style={styles.title}>Chào mừng bạn</Text>
@@ -126,14 +126,14 @@ const checkPhoneTonTai= async () =>{
       </TouchableOpacity>
         <View style={styles.signUpContainer}>
           <Text style={styles.banchuacoAccountText}>Bạn đã có tài khoản ?</Text>
-          <Text style={styles.dangkyNgayText} onPress={()=>{navigation.goBack()}}>Đăng nhập ngay</Text>
+          <Text style={styles.dangkyNgayText} onPress={()=>{navigation.replace("Signin")}}>Đăng nhập ngay</Text>
         </View>
     </View>
   )
 
 }
 
-export default OtpTest
+export default OtpTestDoiMatKhau
 const styles = StyleSheet.create({
   container:{
     flex:1,
