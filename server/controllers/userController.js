@@ -1,5 +1,6 @@
 const User = require("../model/userModel");
 const bcrypt = require("bcrypt");
+const { use } = require("../routes/userRoutes");
 
 module.exports.register = async (req, res, next) => {
   try {
@@ -25,6 +26,18 @@ module.exports.register = async (req, res, next) => {
     console.log(error);
     next(error);
   }
+};
+module.exports.doiMatKhau = async (req, res) => {
+ 
+    const  {phone,newpassword}  = req.body;
+    console.log("số dthoai",phone);
+    console.log("password new:",newpassword);
+const hashedPassword = await bcrypt.hash(newpassword, 10);
+const user = await User.findOne({phone});
+console.log("user_id",user._id);
+const usersauKhiDoiMatKhau = await User.findByIdAndUpdate({_id:user._id},{password:hashedPassword},{new:true});
+
+   return res.json({ status: true, data:usersauKhiDoiMatKhau });
 };
 
 module.exports.login = async (req, res, next) => {

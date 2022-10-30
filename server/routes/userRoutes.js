@@ -7,6 +7,7 @@ const {
   acceptFriend,
   denyAddFriend,
   checkPhoneTonTai,
+  doiMatKhau,
 } = require("../controllers/userController");
 const { login } = require("../controllers/userController");
 
@@ -17,6 +18,7 @@ router.get("/test",(req,res) =>{
 res.send('Hello');
 })
 router.post("/login", login);
+router.post("/doiMatKhau",doiMatKhau);
 router.post("/checkPhoneTonTai",checkPhoneTonTai);
 router.post("/setAvatar/:id", setAvatar);
 router.post("/invite", addSentInvitation);
