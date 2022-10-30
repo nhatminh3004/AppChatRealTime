@@ -19,8 +19,10 @@ module.exports.register = async (req, res, next) => {
       gender,
     });
     delete user.password;
+    await user.save();
     return res.json({ status: true, user });
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };
