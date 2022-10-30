@@ -5,28 +5,34 @@ import { useEffect } from "react";
 import { AiOutlineCheck } from "react-icons/ai";
 import { FiUserPlus } from 'react-icons/fi';
 import styled from "styled-components";
-import { acceptAddFriend, addSentInvitation, denyAddFriend, getAllMessagesRoute, sendMessageRoute } from "../utils/APIRoutes";
+import { acceptAddFriend, addSentInvitation, denyAddFriend, getAllMessagesRoute, sendImagesRoute, sendMessageRoute } from "../utils/APIRoutes";
 import ChatInput from "./ChatInput";
 import AvatarDefault from "../assets/avatar_default.png"
 import { BsCheckLg } from "react-icons/bs";
 import { GrClose } from "react-icons/gr";
 
-function ChatContainer({arrivalMessage, setArrivalMessage, updateListConversation, currentChat, currentUser, setCurrentUser, setCurrentChat, socket}) {
+function ChatContainer({arrivalMessage, updateListConversation, currentChat, currentUser, setCurrentUser, socket}) {
     const [messages, setMessages] = useState([]);
     const [sentInvitation, setSentInvitation] = useState(false);
     const [haveInvitation, setHaveInvitation] = useState(false);
     const [isFriend, setIsFriend] = useState(false);
+    const [isSingle, setIsSingle] = useState(true);
+    const [images, setImages] = useState([]);
+
     const scrollRef = useRef();
     useEffect(() => {
         getAllMessagesFromDB();
+        if (currentChat && currentChat.conversation.members.length === 2) {
+            setIsSingle(true);
+        }
     }, [currentChat])
 
     const getAllMessagesFromDB = async () => {
         if (currentChat) {
 
             const response = await axios.post(`${getAllMessagesRoute}`, {
-                from: currentUser._id,
-                to: currentChat._id
+                userId: currentUser._id,
+                conversationId: currentChat.conversation._id
             })
             setMessages(response.data);
         }
@@ -35,12 +41,12 @@ function ChatContainer({arrivalMessage, setArrivalMessage, updateListConversatio
     const handleSendMsg = async (msg) => {
         await axios.post(sendMessageRoute, {
             from: currentUser._id,
-            to: currentChat._id,
+            conversationId: currentChat.conversation._id,
             message:msg
         })
         socket.current.emit("send-msg", {
-            from: currentUser._id,
-            to: currentChat._id,
+            from: {userId: currentUser._id, conversationId: currentChat.conversation._id},
+            to: currentChat.conversation.members,
             message: msg
         })
         const msgs = [...messages];
@@ -48,25 +54,45 @@ function ChatContainer({arrivalMessage, setArrivalMessage, updateListConversatio
         setMessages(msgs);
         updateListConversation(new Date())
     };
+
+    const handleFileUpload = async (e) => {
+        const { files } = e.target;
+        if (files && files.length) {
+            const filename = files[0].name;
+            console.log("fileName", files);
+            var parts = filename.split(".");
+            const fileType = parts[parts.length - 1];
+            console.log("fileType", fileType); //ex: zip, rar, jpg, svg etc.
+             await axios.post(`${sendImagesRoute}`, {files})
+            setImages(files);
+            socket.current.emit("send-msg", {
+                from: {userId: currentUser._id, conversationId: currentChat.conversation._id},
+                to: currentChat.conversation.members,
+                message: files
+            })
+        }
+    }
     useEffect(() => {
         if (socket.current) {
             socket.current.on("response-deny-invitation", (data) => {
-                if (data.from._id === currentChat._id) {
-                    setCurrentChat(data.from);
+                if (data.from._id === currentChat.users_info[0]._id) {
+                    // setCurrentChat(data.from);
                     setSentInvitation(false)
                 }
             })
             socket.current.on("response-accept-friend", async (data) => {
+                // console.log(data);
                 if (data.to === currentUser._id) {
                     setIsFriend(true);
                     currentUser.listFriends = [currentUser.listFriends, data.from]
                     if (currentUser && currentUser.sentInvitations) {
                         currentUser.sentInvitations.map((invitation, index) => {
-                            if (invitation === currentChat._id) {
+                            if (invitation === currentChat.users_info._id) {
                                 currentUser.sentInvitations.splice(index, 1);
                             }
                         })
                     }
+                    console.log("currentUser", currentUser);
                     localStorage.setItem("chat-app-user", JSON.stringify(currentUser));
                     setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
                 }
@@ -82,12 +108,12 @@ function ChatContainer({arrivalMessage, setArrivalMessage, updateListConversatio
         scrollRef.current?.scrollIntoView({behaviour: "smooth"})
     }, [messages])
     useEffect(() => {
-        if (currentUser && currentUser.listFriends)
+        if (currentUser && currentUser.listFriends && currentChat.conversation.members.length === 2)
             if (currentUser.listFriends.length === 0)
                 setIsFriend(false);
             else {
                 currentUser.listFriends.map((friend, index) => {
-                    if (friend === currentChat._id) {
+                    if (friend === currentChat.users_info[0]._id) {
                         setIsFriend(true);
                     } else {
                         if (index === currentUser.listFriends.length - 1) {
@@ -100,18 +126,18 @@ function ChatContainer({arrivalMessage, setArrivalMessage, updateListConversatio
     const onHandleAddFriend = async () => {
         await axios.post(`${addSentInvitation}`, {
             from: currentUser._id,
-            to: currentChat._id
+            to: currentChat.users_info[0]._id
         });
         socket.current.emit("send-invitation", {
             from: currentUser._id,
-            to: currentChat._id
+            to: currentChat.users_info[0]._id
         });
         setSentInvitation(true);
     }
 
     useEffect(() => {
-        if (currentUser && currentChat && currentChat.sentInvitations) {
-            currentChat.sentInvitations.map((invitation) => {
+        if (currentChat && currentChat.users_info.length === 2 && currentUser && currentChat && currentChat.sentInvitations) {
+            currentChat.users_info[0].sentInvitations.map((invitation) => {
                 if (currentUser._id === invitation) {
                     setSentInvitation(true);
                 }
@@ -121,25 +147,25 @@ function ChatContainer({arrivalMessage, setArrivalMessage, updateListConversatio
     useEffect(() => {
         if (currentUser && currentChat && currentUser.sentInvitations) {
             currentUser.sentInvitations.map((invitation) => {
-                if (currentChat._id === invitation) {
+                if ( currentChat.users_info.length === 1  && currentChat.users_info[0]._id === invitation) {
                     setHaveInvitation(true);
                 }
             })
         }
     }, [currentUser]);
     const onHandAcceptFriend = async () => {
-        currentUser.listFriends = [...currentUser.listFriends, currentChat._id];
+        currentUser.listFriends = [...currentUser.listFriends, currentChat.users_info[0]._id];
         await axios.post(`${acceptAddFriend}`, {
             currentUser: currentUser,
-            currentChat: currentChat
+            currentChat: currentChat.users_info[0]
         });
         socket.current.emit("acceptted", {
             from: currentUser._id,
-            to: currentChat._id
+            to: currentChat.users_info[0]._id
         });
         if (currentUser && currentUser.sentInvitations) {
             currentUser.sentInvitations.map((invitation, index) => {
-                if (invitation === currentChat._id) {
+                if (invitation === currentChat.users_info[0]._id) {
                     currentUser.sentInvitations.splice(index, 1);
                 }
             })
@@ -153,18 +179,18 @@ function ChatContainer({arrivalMessage, setArrivalMessage, updateListConversatio
     const onHandleDeny = async () => {
         if (currentUser && currentUser.sentInvitations) {
             currentUser.sentInvitations.map((invitation, index) => {
-                if (invitation === currentChat._id) {
+                if (invitation === currentChat.users_info[0]._id) {
                     currentUser.sentInvitations.splice(index, 1);
                 }
             })
         }
         await axios.post(`${denyAddFriend}`, {
             from: currentUser._id,
-            to: currentChat._id
+            to: currentChat.users_info[0]._id
         })
         socket.current.emit("denyAddFriend", {
             from: currentUser,
-            to: currentChat
+            to: currentChat.users_info[0]
         });
         localStorage.setItem("chat-app-user", JSON.stringify(currentUser));
         setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
@@ -176,17 +202,17 @@ function ChatContainer({arrivalMessage, setArrivalMessage, updateListConversatio
             <div className="chat-header">
                 <div className="user-details">
                     <div className="avatar">
-                        {currentChat.avatarImage != "" ? 
+                        {currentChat.avatarImage && currentChat.avatarImage != "" ? 
                             <img src={`data:image/svg+xml;base64,${currentChat.avatarImage}`} alt="avatar"/>
                             : <img src={AvatarDefault} alt="avatar"/>
                         }
                     </div>
                     <div className="username">
-                        <h3>{currentChat.username}</h3>
+                        <h3>{currentChat.conversation.members.length > 2 ? currentChat.conversation.name : currentChat.users_info[0].username}</h3>
                     </div>
                 </div>
             </div>
-            { haveInvitation ? 
+            {isSingle && (haveInvitation ? 
                 (
                     <div className="haveInvitation">
                         <div className="title-invitation">You have an invitation</div>
@@ -207,7 +233,7 @@ function ChatContainer({arrivalMessage, setArrivalMessage, updateListConversatio
                     </div> : <div></div>) : 
                     (!isFriend ?  <div className="sentInvitation">
                         <AiOutlineCheck /> <p className="sent-text">Sent invitation</p>
-                    </div> : <div></div>))
+                    </div> : <div></div>)))
                     }
             <div className="chat-messages">
                 {
@@ -222,27 +248,29 @@ function ChatContainer({arrivalMessage, setArrivalMessage, updateListConversatio
                     })
                 }
             </div>
-            <ChatInput handleSendMsg={handleSendMsg} />
+            <ChatInput handleSendMsg={handleSendMsg} handleFileUpload={handleFileUpload} images={images} />
         </Container>)}
     </>
     );
 }
 
 const Container = styled.div`
-    padding-top: 1rem;
-    display: grid;
-    grid-template-rows:  10% 10% 68% 12%;
-    
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
     gap: 0.1rem;
     overflow: hidden;
-    @media screen and (min-width: 720px) and (max-width: 1080px){
+    /* @media screen and (min-width: 720px) and (max-width: 1080px){
         grid-auto-rows: 15% 70% 15%;
-    }
+    } */
     .chat-header {
         display: flex;
+        flex: 1;
         justify-content: space-between;
         align-items: center;
-        padding: 0.2rem;
+        padding: 1rem;
+        background-color: #0d0d30;
         .user-details {
             display: flex;
             align-items: center;
@@ -260,29 +288,31 @@ const Container = styled.div`
         }    
     }
     .addFriend {
+        flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         background-color: #9186f3;
-        max-height: 1.5rem;
         cursor: pointer;
         .add-text {
             margin-left: 0.5rem;
         }
+
     }  
     .sentInvitation {
+        flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #000;
         background-color: #ccc;
-        max-height: 1.5rem;
         .sent-text {
             margin-left: 0.5rem;
         }
     } 
     .haveInvitation {
+        flex: 1;
         display: grid;
         grid-template-rows: 50% 50%;
         background-color: #16151584;
@@ -290,7 +320,7 @@ const Container = styled.div`
         .title-invitation {
             color: #fff;
             text-align: center;
-            padding: 0.5rem 0;
+            padding: 0.3rem 0;
         }
         .btn-response-invitation {
             width: 100%;
@@ -316,6 +346,7 @@ const Container = styled.div`
 
     }
     .chat-messages {
+        flex: 12;
         padding: 1rem 2rem;
         display: flex;
         flex-direction: column;

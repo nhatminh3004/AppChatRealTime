@@ -23,12 +23,14 @@ function ConversationList({ conversations, currentUser, changeChat, socket}) {
         }
     }, [currentUser]);
     const changeCurrentChat = (index, contact) => {
-        setCurrentSelected(contact._id);
+        setCurrentSelected(contact.conversation._id);
         changeChat(contact);
     }
     const onHandleSearch = async (e) => {
         e.preventDefault();
-        const data = await axios.get(`${searchUsers}/${searchKey}`);
+        console.log("searchKey", searchKey);
+        console.log("id", currentUser._id);
+        const data = await axios.post(`${searchUsers}`, {searchKey, id: currentUser._id});
         setSearchResults(data.data);
     }
     const onHandleClearSearchResults = () => {

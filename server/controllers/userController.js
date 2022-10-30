@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 
 module.exports.register = async (req, res, next) => {
   try {
-    const { username, phone, email, password, avatarImage } = req.body;
+    const { username, phone, email, password, gender } = req.body;
     const phoneCheck = await User.findOne({ phone });
     if (phoneCheck)
       return res.json({ msg: "Phone number already used", status: false });
@@ -16,6 +16,7 @@ module.exports.register = async (req, res, next) => {
       email,
       username,
       password: hashedPassword,
+      gender,
     });
     delete user.password;
     return res.json({ status: true, user });
@@ -73,11 +74,13 @@ module.exports.getAllUsers = async (req, res, next) => {
 
 module.exports.searchUser = async (req, res, next) => {
   try {
-    const searchKey = req.params.keyword;
+    const { searchKey, id } = req.body;
     const users = await User.find({
       username: { $regex: ".*" + searchKey + ".*", $options: "i" },
+      _id: { $ne: id },
     });
-    return res.json(users);
+    const userByPhone = await User.find({ phone: searchKey, _id: { $ne: id } });
+    return res.json([...users, ...userByPhone]);
   } catch (error) {
     next(error);
   }
@@ -119,6 +122,9 @@ module.exports.denyAddFriend = async (req, res, next) => {
     const to = req.body.to;
     await User.findByIdAndUpdate(from, {
       $pull: { sentInvitations: to },
+    });
+    await User.findByIdAndUpdate(to, {
+      $pull: { sentInvitations: from },
     });
     return res.json("Deny invitation successfully");
   } catch (error) {

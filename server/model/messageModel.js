@@ -7,17 +7,42 @@ const messageSchema = new mongoose.Schema(
         type: String,
         required: true,
       },
+      files: [
+        {
+          type: String,
+          required: true,
+        },
+      ],
     },
-    users: [
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    deletedUserIds: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
     ],
-    sender: {
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    react: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        type: {
+          type: Number,
+        },
+      },
+    ],
+    replyToMessage: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      ref: "Message",
     },
   },
   {

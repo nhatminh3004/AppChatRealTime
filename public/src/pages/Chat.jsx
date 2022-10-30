@@ -4,7 +4,6 @@ import axios from 'axios'
 import {useNavigate} from 'react-router-dom'
 import {io} from 'socket.io-client'
 import { allUsersRoute, host, myConversationsRoute } from "../utils/APIRoutes";
-import Contacts from "../components/Contacts";
 import Welcome from "../components/Welcome";
 import ChatContainer from "../components/ChatContainer";
 import { useRef } from "react";
@@ -72,6 +71,7 @@ function Chat() {
     const getConversationsFromDB = async () => {
         if (currentUser) {
             const data = await axios.get(`${myConversationsRoute}/${currentUser._id}`);
+            console.log(data.data);
             setConversations(data.data); 
         }
     }
@@ -79,11 +79,10 @@ function Chat() {
     
     useEffect(() => {
         if (socket.current) {
-            console.log("!2124");
             socket.current.on("msg-receive", (dataSent) => {
-                console.log("!asfasfasf");
-                if (dataSent.from === currentChat._id)
+                if (currentChat.conversation._id === dataSent.from.conversationId) {
                     setArrivalMessage({fromSelf: false, message: dataSent.message})
+                }
                 setHaveNewMessage(new Date());
             })
             
@@ -161,11 +160,12 @@ const Container = styled.div`
     align-items: center;
     background-color: #131324;
     .container {
-        height: 85vh;
-        width: 85vw;
+        height: 100%;
+        width: 100%;
         background-color: #00000076;
         display: grid;
-        grid-template-columns: 5% 25% 70%;
+        grid-template-columns: 4% 25% 71%;
+
         @media screen and (min-width: 720px) and (max-width: 1080px){
             grid-template-columns: 5% 35% 60%;
         }

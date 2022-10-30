@@ -18,6 +18,6 @@ router.post("/invite", addSentInvitation);
 router.post("/acceptFriend", acceptFriend);
 router.post("/denyAddFriend", denyAddFriend);
 router.get("/allusers/:id", getAllUsers);
-router.get("/search/:keyword", searchUser);
+router.post("/search", searchUser);
 
 module.exports = router;

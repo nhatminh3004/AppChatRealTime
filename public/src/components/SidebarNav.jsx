@@ -18,7 +18,7 @@ function SidebarNav({changeNav, haveInvitation}) {
 }
 
 const Container = styled.div`
-    width: 100%;
+    /* width: 5vw; */
     display: flex;
     flex-direction: column;
     .button {

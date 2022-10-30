@@ -8,26 +8,49 @@ function ContactItems({conversations, changeCurrentChat, currentSelected}) {
             {
                 (conversations.map((conversation, index) => {
                     return  (
-                        <div 
-                        className={`contact ${conversation.user_info._id === currentSelected ? "selected" : ""}`} 
-                        key={index}
-                        onClick={() => changeCurrentChat(index, conversation.user_info)}
-                                    >
-                            <div className="avatar">
-                                {conversation.user_info && conversation.user_info.avatarImage != "" ? 
-                                    <img src={`data:image/svg+xml;base64,${conversation.user_info.avatarImage}`} alt="avatar"/>
-                                    : <img src={AvatarDefault} alt="avatar"/>
-                                }
-                            </div>
-                            <div className='message'>
-                                <div className="username">
-                                    <h3>{conversation.user_info.username}</h3>
+                        !conversation.leaderId ? (
+                            <div 
+                            className={`contact ${conversation.conversation._id === currentSelected ? "selected" : ""}`} 
+                            key={index}
+                            onClick={() => changeCurrentChat(index, conversation)}
+                                        >
+                                <div className="avatar">
+                                    {conversation.users_info && conversation.users_info[0].avatarImage != "" ? 
+                                        <img src={`data:image/svg+xml;base64,${conversation.users_info[0].avatarImage}`} alt="avatar"/>
+                                        : <img src={AvatarDefault} alt="avatar"/>
+                                    }
                                 </div>
-                                <div className="latestMessage">
-                                    <p>{conversation.message.message.text}</p>
+                                <div className='message'>
+                                    <div className="username">
+                                        <h3>{conversation.conversation.members.length > 2 ? conversation.conversation.name : conversation.users_info[0].username}</h3>
+                                    </div>
+                                    <div className="latestMessage">
+                                        <p>{conversation.lastMessage.message.message.text}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        ):(
+                            <div 
+                            className={`contact ${conversation._id === currentSelected ? "selected" : ""}`} 
+                            key={index}
+                            onClick={() => changeCurrentChat(index, conversation)}
+                                        >
+                                <div className="avatar">
+                                    {conversation.user_info && conversation.user_info.avatarImage != "" ? 
+                                        <img src={`data:image/svg+xml;base64,${conversation.user_info[0].avatarImage}`} alt="avatar"/>
+                                        : <img src={AvatarDefault} alt="avatar"/>
+                                    }
+                                </div>
+                                <div className='message'>
+                                    <div className="username">
+                                        <h3>{conversation.name}</h3>
+                                    </div>
+                                    <div className="latestMessage">
+                                        <p>{conversation.lastMessage.message.text}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )
                     )
                 }))
             }

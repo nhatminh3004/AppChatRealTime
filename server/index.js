@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const socket = require("socket.io");
 const userRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const conversationRoutes = require("./routes/conversationRoutes");
 
 const app = express();
 require("dotenv").config();
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use("/api/auth", userRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/conversations", conversationRoutes);
 
 mongoose
   .connect(process.env.MONGO_URL, {
@@ -44,11 +46,15 @@ io.on("connection", (socket) => {
     onlineUsers.set(userId, socket.id);
   });
   socket.on("send-msg", (data) => {
-    const sendUserSocket = onlineUsers.get(data.to);
-    console.log(onlineUsers);
-    if (sendUserSocket) {
-      const dataSent = { message: data.message, from: data.from };
-      io.to(`${sendUserSocket}`).emit("msg-receive", dataSent);
+    for (var i = 0; i < data.to.length; i++) {
+      if (data.to[i].userId !== data.from.userId) {
+        const sendUserSocket = onlineUsers.get(data.to[i].userId);
+        // console.log(onlineUsers);
+        if (sendUserSocket) {
+          const dataSent = { message: data.message, from: data.from };
+          io.to(`${sendUserSocket}`).emit("msg-receive", dataSent);
+        }
+      }
     }
   });
   socket.on("send-invitation", (data) => {

@@ -1,9 +1,18 @@
+import axios from 'axios';
 import React from 'react';
 import { AiOutlineCloseCircle } from 'react-icons/ai';
 import styled from "styled-components";
 import AvatarDefault from "../assets/avatar_default.png"
+import { createConversation } from '../utils/APIRoutes';
 
 function SearchResults({searchResults, changeCurrentChat, currentSelected, onHandleClearSearchResults}) {
+    
+    const onHandleSelect = async (index, searchResult) => {
+        const currentUser = await JSON.parse(localStorage.getItem("chat-app-user"));
+        const conversation = await axios.post(createConversation, {searchResultId: searchResult, myId: currentUser._id})
+        console.log(conversation.data);
+        changeCurrentChat(index, conversation.data);
+    }
     return ( 
         <Container>
             <div className='header'>
@@ -16,7 +25,7 @@ function SearchResults({searchResults, changeCurrentChat, currentSelected, onHan
                         <div 
                         className={`contact ${searchResult._id === currentSelected ? "selected" : ""}`} 
                         key={index}
-                        onClick={() => changeCurrentChat(index, searchResult)}
+                        onClick={() => onHandleSelect(index, searchResult)}
                                     >
                             <div className="avatar">
                                 {searchResult.user_info && searchResult.user_info.avatarImage != "" ? 

@@ -40,47 +40,6 @@ module.exports.getAllMessage = async (req, res, next) => {
 module.exports.getMyConversations = async (req, res, next) => {
   try {
     const id = req.params.id;
-    // const convertations = await messageModel.aggregate([
-    //   {
-    //     $match: {
-    //       sender: new mongoose.Types.ObjectId(id),
-    //     },
-    //   },
-    //   {
-    //     $sort: {
-    //       updatedAt: -1,
-    //     },
-    //   },
-    //   {
-    //     $group: {
-    //       _id: "$users",
-    //       message: { $first: "$$ROOT" },
-    //     },
-    //   },
-    //   {
-    //     $project: {
-    //       _id: 0,
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "users",
-    //       localField: "message.users.1",
-    //       foreignField: "_id",
-    //       as: "user_info",
-    //     },
-    //   },
-    //   {
-    //     $unwind: {
-    //       path: "$user_info",
-    //     },
-    //   },
-    //   {
-    //     $sort: {
-    //       "message.updatedAt": -1,
-    //     },
-    //   },
-    // ]);
     const conversations = await messageModel.aggregate([
       {
         $match: {

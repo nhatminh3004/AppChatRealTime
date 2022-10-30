@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import Picker from 'emoji-picker-react';
 import {IoMdSend} from 'react-icons/io'
 import {BsEmojiSmileFill} from 'react-icons/bs'
+import { BsImage } from 'react-icons/bs';
+import axios from 'axios';
+import { sendImagesRoute } from '../utils/APIRoutes';
 
-function ChatInput({handleSendMsg}) {
+function ChatInput({handleSendMsg, handleFileUpload, image}) {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [msg, setMsg] = useState("");
+    const inputFile = useRef(null);
 
     const handleEmojiPickerHideShow = () => {
         setShowEmojiPicker(!showEmojiPicker);
@@ -25,12 +29,21 @@ function ChatInput({handleSendMsg}) {
             setMsg("");
         }
     }
-
+    const onButtonClick = () => {
+        // `current` points to the mounted file input element
+       inputFile.current.click();
+    };
+    
     return <Container>
         <div className="button-container">
             <div className="emoji">
                 <BsEmojiSmileFill onClick={(handleEmojiPickerHideShow)}/>
                 {showEmojiPicker && <Picker onEmojiClick={handleEmojiClick} />}
+            </div>
+            <div className="addImage">
+                <input type='file' id='file' ref={inputFile} accept="image/png, image/jpeg" multiple={true} onChange={handleFileUpload} style={{display: 'none'}}/>
+                <button className='btn-addImage' onClick={onButtonClick}><BsImage /></button>
+                
             </div>
         </div>
         <form action="" className="input-container" onSubmit={(e) => sendChat(e)}>
@@ -43,12 +56,13 @@ function ChatInput({handleSendMsg}) {
 }
 
 const Container = styled.div`
-    display: grid;
-    grid-template-columns: 5% 95%;
-    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     background-color: #080420;
-    padding: 0 2rem;
+    padding: 15px 2rem;
     padding-bottom: 0.3rem;
+    gap: 0.5rem;
     @media screen and (min-width: 720px) and (max-width: 1080px){
         padding: 0 1rem;
         gap: 1rem;
@@ -56,14 +70,14 @@ const Container = styled.div`
     }
     .button-container {
         display: flex;
-        align-items: center;
         color: white;
         gap: 1rem;
         .emoji {
+            cursor: pointer;
             position: relative;
             svg {
                 font-size: 1.5rem;
-                color: #ffff00c8;
+                color: #ebe7ff;
                 cursor: pointer;
             }
             .emoji-picker-react {
@@ -93,7 +107,17 @@ const Container = styled.div`
                 }
             }
         }
-
+        .addImage {
+            cursor: pointer;
+            .btn-addImage {
+                background-color: transparent;
+                svg {
+                    font-size: 1.5rem;
+                    color: #ebe7ff;
+                    cursor: pointer;
+                }
+            }
+        }
     }
     .input-container {
         width: 100%;
@@ -108,6 +132,7 @@ const Container = styled.div`
             color: white;
             border:none;
             padding-left: 1rem;
+            padding-block: 0.5rem;
             font-size: 1.2rem;
             &::selection {
                 background-color: #9186f3;
@@ -124,6 +149,7 @@ const Container = styled.div`
             align-items: center;
             background-color: #9a86f3;
             border: none;
+            cursor: pointer;
             svg {
                 font-size: 1rem;
                 color: white;
