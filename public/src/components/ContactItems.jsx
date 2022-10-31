@@ -25,7 +25,7 @@ function ContactItems({conversations, changeCurrentChat, currentSelected}) {
                                         <h3>{conversation.conversation.members.length > 2 ? conversation.conversation.name : conversation.users_info[0].username}</h3>
                                     </div>
                                     <div className="latestMessage">
-                                        <p>{conversation.lastMessage.message.message.text}</p>
+                                        <p>{conversation.lastMessage.message.message.files.length > 0 ? 'file' : `${conversation.lastMessage.message.message.text}`}</p>
                                     </div>
                                 </div>
                             </div>

@@ -7,7 +7,7 @@ import { BsImage } from 'react-icons/bs';
 import axios from 'axios';
 import { sendImagesRoute } from '../utils/APIRoutes';
 
-function ChatInput({handleSendMsg, handleFileUpload, image}) {
+function ChatInput({handleSendMsg, handleFileUpload}) {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [msg, setMsg] = useState("");
     const inputFile = useRef(null);

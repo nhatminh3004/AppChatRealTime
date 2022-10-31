@@ -5,11 +5,14 @@ import { useEffect } from "react";
 import { AiOutlineCheck } from "react-icons/ai";
 import { FiUserPlus } from 'react-icons/fi';
 import styled from "styled-components";
-import { acceptAddFriend, addSentInvitation, denyAddFriend, getAllMessagesRoute, sendImagesRoute, sendMessageRoute } from "../utils/APIRoutes";
 import ChatInput from "./ChatInput";
 import AvatarDefault from "../assets/avatar_default.png"
 import { BsCheckLg } from "react-icons/bs";
 import { GrClose } from "react-icons/gr";
+import {ToastContainer, toast} from 'react-toastify'
+
+import { acceptAddFriend, addSentInvitation, denyAddFriend, getAllMessagesRoute, sendMessageRoute } from "../utils/APIRoutes";
+import { uploadToS3 } from "../utils/AWS";
 
 function ChatContainer({arrivalMessage, updateListConversation, currentChat, currentUser, setCurrentUser, socket}) {
     const [messages, setMessages] = useState([]);
@@ -18,6 +21,14 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
     const [isFriend, setIsFriend] = useState(false);
     const [isSingle, setIsSingle] = useState(true);
     const [images, setImages] = useState([]);
+
+    const toastOptions = {
+        position: 'bottom-right',
+        autoClose: 8000,
+        draggable: true,
+        pauseOnHover: true,
+        theme: "dark"
+    };
 
     const scrollRef = useRef();
     useEffect(() => {
@@ -58,18 +69,39 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
     const handleFileUpload = async (e) => {
         const { files } = e.target;
         if (files && files.length) {
-            const filename = files[0].name;
-            console.log("fileName", files);
-            var parts = filename.split(".");
-            const fileType = parts[parts.length - 1];
-            console.log("fileType", fileType); //ex: zip, rar, jpg, svg etc.
-             await axios.post(`${sendImagesRoute}`, {files})
-            setImages(files);
-            socket.current.emit("send-msg", {
-                from: {userId: currentUser._id, conversationId: currentChat.conversation._id},
-                to: currentChat.conversation.members,
-                message: files
-            })
+            // const filename = files[0].name;
+            // console.log("fileName", files);
+            // var parts = filename.split(".");
+            // const fileType = parts[parts.length - 1];
+            // console.log("fileType", fileType); //ex: zip, rar, jpg, svg etc.
+            //  await axios.post(`${sendImagesRoute}`, {files})
+            // setImages(files);
+            // socket.current.emit("send-msg", {
+            //     from: {userId: currentUser._id, conversationId: currentChat.conversation._id},
+            //     to: currentChat.conversation.members,
+            //     message: files
+            // })
+            const response = uploadToS3(files);
+            if (response.status) {
+                await axios.post(sendMessageRoute, {
+                    from: currentUser._id,
+                    conversationId: currentChat.conversation._id,
+                    files: response.files
+                })
+                
+                socket.current.emit("send-msg", {
+                    from: {userId: currentUser._id, conversationId: currentChat.conversation._id},
+                    to: currentChat.conversation.members,
+                    files: response.files
+                })
+
+                const msgs = [...messages];
+                msgs.push({fromSelf: true, files: response.files});
+                setMessages(msgs);
+                updateListConversation(new Date())
+            } else {
+                toast.error(response.message, toastOptions);
+            }
         }
     }
     useEffect(() => {
@@ -241,6 +273,9 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
                         return (<div ref={scrollRef} key={index}>
                             <div className={`message ${message.fromSelf ? 'sended' : 'received'}`}>
                                 <div className="content">
+                                    <div className="files">
+                                        {message.files && message.files.length > 0 && message.files.map((file) => <div className="img-container"><img key={file} src={file} /></div>) }
+                                    </div>
                                     <p>{message.message}</p>
                                 </div>
                             </div>
@@ -249,6 +284,7 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
                 }
             </div>
             <ChatInput handleSendMsg={handleSendMsg} handleFileUpload={handleFileUpload} images={images} />
+            <ToastContainer />
         </Container>)}
     </>
     );
@@ -370,6 +406,24 @@ const Container = styled.div`
                 font-size: 1.1rem;
                 border-radius: 1rem;
                 color: #d1d1d1;
+                .files {
+                  display: flex;
+                  width: 100%;
+                  justify-content: center;
+                  flex-direction: row;
+                  flex-wrap: wrap;
+                  gap: 0.5rem;
+                  .img-container {
+                      height: 40vh;
+                      flex-grow: 1;
+                      img {
+                        max-height: 100%;
+                        min-width: 100%;
+                        object-fit: cover;
+                        vertical-align: bottom;
+                    }
+                  }
+                }
             }
         }
         .sended {

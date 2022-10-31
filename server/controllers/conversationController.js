@@ -7,9 +7,9 @@ const User = require("../model/userModel");
 
 module.exports.sendMessage = async (req, res, next) => {
   try {
-    const { from, message, conversationId } = req.body;
+    const { from, message, conversationId, files } = req.body;
     const data = await messageModel.create({
-      message: { text: message },
+      message: { text: message, files: files },
       sender: from,
     });
     if (data) {
@@ -66,6 +66,7 @@ module.exports.getAllMessage = async (req, res, next) => {
           {
             fromSelf: message.sender.toString() === userId,
             message: message.message.text,
+            files: message.message.files,
           },
         ];
       }
