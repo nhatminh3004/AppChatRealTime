@@ -53,7 +53,7 @@ export default function Siginin({navigation}) {
         return updateError('Sai tài khoản hoặc mật khẩu ',setError);
       }
         console.log(res.data.user._id);
-      navigation.replace("Chat")
+      navigation.navigate("BottomScreen")
     } catch (error) {
       console.log(error);
     }
