@@ -81,7 +81,7 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
             //     to: currentChat.conversation.members,
             //     message: files
             // })
-            const response = uploadToS3(files);
+            const response = await uploadToS3(files);
             if (response.status) {
                 await axios.post(sendMessageRoute, {
                     from: currentUser._id,
