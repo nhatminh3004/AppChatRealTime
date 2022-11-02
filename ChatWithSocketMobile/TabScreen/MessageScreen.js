@@ -1,125 +1,124 @@
-import React, { useEffect, useState } from 'react'
-import  io  from 'socket.io-client'; 'socket.io-client'
-import { Text, StyleSheet, View,TextInput,TouchableOpacity, Dimensions, Button , FlatList, LogBox} from 'react-native'
-import { ScrollView } from 'react-native-virtualized-view'
-import { FontAwesome5 } from '@expo/vector-icons'; 
-import ConservisionItem from '../components/ConservisionItem';
+import React, { useEffect, useRef, useState } from "react";
+import io from "socket.io-client";
+("socket.io-client");
+import {
+  Text,
+  StyleSheet,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Dimensions,
+  Button,
+  FlatList,
+  LogBox,
+} from "react-native";
+import { ScrollView } from "react-native-virtualized-view";
+import { FontAwesome5 } from "@expo/vector-icons";
+import ConservisionItem from "../components/ConservisionItem";
+import { host, myConversationsRoute } from "../ultis/ApiRoute";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+// import { io } from "socket.io-client";
+
 function MessageScreen(props) {
-  const {navigation,route}=props;
-  const {navigate,goBack}=navigation;
-  const [users,setUsers]= useState([
-    {
-      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
-      username:'Nhật Minh',
-      last_msg:'Xin Chào',
-      time :'4:00 PM',
-    },
-    {
-      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
-      username:'Vương Lập',
-      last_msg:'Chào Minh',
-      time :'4:00 PM',
-    },
-    {
-      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
-      username:'Ngọc Hải',
-      last_msg:'Chào Lập',
-      time :'4:00 PM',
-    },
-    {
-      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
-      username:'Nhật Minh',
-      last_msg:'Xin Chào',
-      time :'4:00 PM',
-    },
-    {
-      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
-      username:'Nhật Minh',
-      last_msg:'Xin Chào',
-      time :'4:00 PM',
-    },
-    {
-      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
-      username:'Nhật Minh',
-      last_msg:'Xin Chào',
-      time :'4:00 PM',
-    },
-    {
-      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
-      username:'Nhật Minh',
-      last_msg:'Xin Chào',
-      time :'4:00 PM',
-    },
-    {
-      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
-      username:'Nhật Minh',
-      last_msg:'Xin Chào',
-      time :'4:00 PM',
-    },
-    {
-      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
-      username:'Nhật Minh',
-      last_msg:'Xin Chào',
-      time :'4:00 PM',
-    },
-    
-  ])
-  
+  const { navigation, route } = props;
+  const { navigate, goBack } = navigation;
+  const [conversations, setConversations] = useState([]);
+  const [haveNewMessage, setHaveNewMessage] = useState();
+
+  const socket = useRef();
+
+  useEffect(() => {
+    getAllConversations();
+  }, []);
+
+  useEffect(() => {
+    getAllConversations();
+  }, [haveNewMessage]);
+  const getAllConversations = async () => {
+    let currentUser = await AsyncStorage.getItem("User");
+    currentUser = JSON.parse(currentUser);
+    const myConversations = await axios.get(
+      `${myConversationsRoute}/${currentUser._id}`
+    );
+    setConversations(myConversations.data);
+  };
+  useEffect(() => {
+    addUserToSocket();
+  });
+
+  const addUserToSocket = async () => {
+    let currentUser = await AsyncStorage.getItem("User");
+    currentUser = JSON.parse(currentUser);
+    socket.current = io(host);
+    await socket.current.emit("add-user", currentUser._id);
+
+    if (socket.current) {
+      socket.current.on("msg-receive", (dataSent) => {
+        setHaveNewMessage(new Date());
+      });
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* giao diện search người dùng */}
-        <View style={styles.rowSeachInput}>
-          <TextInput style={styles.inputSearhInput} placeholder="Nhập số điện thoại để tìm người dùng" maxLength={13}/>
-          <TouchableOpacity  style={styles.iconSearchInput}>
+      <View style={styles.rowSeachInput}>
+        <TextInput
+          style={styles.inputSearhInput}
+          placeholder="Nhập số điện thoại để tìm người dùng"
+          maxLength={13}
+        />
+        <TouchableOpacity style={styles.iconSearchInput}>
           <FontAwesome5 name="search" size={24} color="black" />
-          </TouchableOpacity>
-        </View>
-        {/* giao diện List Tin nhắn người dùng*/}
-        <ScrollView>
-          <FlatList
-          data={users}
-          renderItem={({item}) =><ConservisionItem onPress={()=>{navigate("Chat",{user:item})}}  user={item} key={item.avatarImage}/>}
-          />
-        </ScrollView>
-       
-     
-
- 
+        </TouchableOpacity>
+      </View>
+      {/* giao diện List Tin nhắn người dùng*/}
+      <ScrollView>
+        <FlatList
+          data={conversations}
+          renderItem={({ item }) => (
+            <ConservisionItem
+              onPress={() => {
+                navigate("Chat", {
+                  user: item,
+                });
+              }}
+              user={item}
+              key={item.conversation._id}
+            />
+          )}
+        />
+      </ScrollView>
     </View>
-  )
+  );
 }
 
-export default MessageScreen
+export default MessageScreen;
 const styles = StyleSheet.create({
-  container:{
-    flex:1,
-    paddingHorizontal:30,
-    paddingVertical:20,
-    backgroundColor:'#fff'
+  container: {
+    flex: 1,
+    paddingHorizontal: 30,
+    paddingVertical: 20,
+    backgroundColor: "#fff",
   },
-  inputSearhInput:{
-    backgroundColor:'#EEE5DE',
-    paddingHorizontal:30,
-    flex:1,
-    fontSize:15,
-    height:45,
-
+  inputSearhInput: {
+    backgroundColor: "#EEE5DE",
+    paddingHorizontal: 30,
+    flex: 1,
+    fontSize: 15,
+    height: 45,
   },
-  iconSearchInput:{
-    marginLeft:15,
+  iconSearchInput: {
+    marginLeft: 15,
   },
-  rowSeachInput:{
-    backgroundColor:'#EEE5DE',
-    height:45,
-    borderRadius:5,
-    flexDirection:'row',
-    alignItems:'center',
-    paddingHorizontal:10,
-    marginVertical:20,
-    
-
-    
+  rowSeachInput: {
+    backgroundColor: "#EEE5DE",
+    height: 45,
+    borderRadius: 5,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    marginVertical: 20,
   },
- 
-
-})
+});

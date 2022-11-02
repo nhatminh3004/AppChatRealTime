@@ -41,14 +41,15 @@ global.onlineUsers = new Map();
 io.on("connection", (socket) => {
   global.chatSocket = socket;
   socket.on("add-user", (userId) => {
+    console.log("user added", userId);
     onlineUsers.set(userId, socket.id);
   });
   socket.on("send-msg", (data) => {
     for (var i = 0; i < data.to.length; i++) {
       if (data.to[i].userId !== data.from.userId) {
         const sendUserSocket = onlineUsers.get(data.to[i].userId);
-        // console.log(onlineUsers);
         if (sendUserSocket) {
+          console.log(sendUserSocket);
           const dataSent = {
             message: data.message,
             from: data.from,
