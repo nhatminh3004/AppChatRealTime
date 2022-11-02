@@ -18,6 +18,7 @@ import {NativeModules} from 'react-native';
 import FlagItem from '../components/FlagItem';
 import { AntDesign } from '@expo/vector-icons';
 import axios from 'axios';
+import {checkPhoneTonTaiRoute} from '../ultis/ApiRoute';
 const {StatusBarManager} = NativeModules;
 const heightCuaStatusBar = StatusBarManager.HEIGHT;
 const {height,width} = Dimensions.get('window');
@@ -43,7 +44,7 @@ const handleOnChangeText= (value,fieldName) =>{
 }
 const checkPhoneTonTai= async () =>{
   try {
-    const res = await axios.post('http://192.168.1.31:5000/api/auth/checkPhoneTonTai',{...userPhone});
+    const res = await axios.post(`${checkPhoneTonTaiRoute}`,{...userPhone});
     console.log("phone Request",{phoneNumber});
     console.log(res.data);
     if(res.data.status===true || phoneNumber.length<=11){

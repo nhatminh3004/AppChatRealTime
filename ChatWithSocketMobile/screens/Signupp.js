@@ -15,6 +15,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import KeyboardAvoidingView from 'react-native/Libraries/Components/Keyboard/KeyboardAvoidingView';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import {registerRoute} from '../ultis/ApiRoute';
 const {StatusBarManager} = NativeModules;
 
 const heightCuaStatusBar = StatusBarManager.HEIGHT;
@@ -98,7 +99,7 @@ export default function Signupp({route: {params:{phoneNumber}},navigation}) {
     const submitForm =  async () => {
       if(isValidForm()){
         console.log('Thong tin User : ',userInfo);
-        const res = await axios.post('http://192.168.1.31:5000/api/auth/register', userInfo);
+        const res = await axios.post(`${registerRoute}`, userInfo);
     console.log(res.data);
        
         navigation.replace("Signin");

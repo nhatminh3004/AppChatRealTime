@@ -1,28 +1,90 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import  io  from 'socket.io-client'; 'socket.io-client'
-import { Text, StyleSheet, View,TextInput,TouchableOpacity, Dimensions, Button } from 'react-native'
-function MessageScreen({navigation}) {
-  // const socket=io("http://192.168.1.31:5000");
-  // const [chatMessage,setchatMessage]=useState("");
-  // const submitChat= () =>{
-  //   socket.emit("chat minh",chatMessage);
+import { Text, StyleSheet, View,TextInput,TouchableOpacity, Dimensions, Button , FlatList, LogBox} from 'react-native'
+import { ScrollView } from 'react-native-virtualized-view'
+import { FontAwesome5 } from '@expo/vector-icons'; 
+import ConservisionItem from '../components/ConservisionItem';
+function MessageScreen(props) {
+  const {navigation,route}=props;
+  const {navigate,goBack}=navigation;
+  const [users,setUsers]= useState([
+    {
+      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
+      username:'Nhật Minh',
+      last_msg:'Xin Chào',
+      time :'4:00 PM',
+    },
+    {
+      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
+      username:'Vương Lập',
+      last_msg:'Chào Minh',
+      time :'4:00 PM',
+    },
+    {
+      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
+      username:'Ngọc Hải',
+      last_msg:'Chào Lập',
+      time :'4:00 PM',
+    },
+    {
+      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
+      username:'Nhật Minh',
+      last_msg:'Xin Chào',
+      time :'4:00 PM',
+    },
+    {
+      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
+      username:'Nhật Minh',
+      last_msg:'Xin Chào',
+      time :'4:00 PM',
+    },
+    {
+      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
+      username:'Nhật Minh',
+      last_msg:'Xin Chào',
+      time :'4:00 PM',
+    },
+    {
+      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
+      username:'Nhật Minh',
+      last_msg:'Xin Chào',
+      time :'4:00 PM',
+    },
+    {
+      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
+      username:'Nhật Minh',
+      last_msg:'Xin Chào',
+      time :'4:00 PM',
+    },
+    {
+      avatarImage:'https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000',
+      username:'Nhật Minh',
+      last_msg:'Xin Chào',
+      time :'4:00 PM',
+    },
     
-  //   setchatMessage("");
-  // }
-  // console.log(chatMessage);
+  ])
+  
   return (
     <View style={styles.container}>
-        <Text>Message Screen</Text>
-       <TouchableOpacity onPress={() => {navigation.navigate("Chat",{tinnhan:"Minh"})}}>
-
-          <Text>Click Chi tiết tin nhắn</Text>
-  
+      {/* giao diện search người dùng */}
+        <View style={styles.rowSeachInput}>
+          <TextInput style={styles.inputSearhInput} placeholder="Nhập số điện thoại để tìm người dùng" maxLength={13}/>
+          <TouchableOpacity  style={styles.iconSearchInput}>
+          <FontAwesome5 name="search" size={24} color="black" />
           </TouchableOpacity>
+        </View>
+        {/* giao diện List Tin nhắn người dùng*/}
+        <ScrollView>
+          <FlatList
+          data={users}
+          renderItem={({item}) =><ConservisionItem onPress={()=>{navigate("Chat",{user:item})}}  user={item} key={item.avatarImage}/>}
+          />
+        </ScrollView>
+       
+     
 
-  {/* <TextInput style={{height:40,borderWidth:2}} autoCorrect={false} value={chatMessage} onSubmitEditing={submitChat} onChangeText={text => {
-  setchatMessage(text);
-  
-      }}/> */}
+ 
     </View>
   )
 }
@@ -31,8 +93,33 @@ export default MessageScreen
 const styles = StyleSheet.create({
   container:{
     flex:1,
-    justifyContent:'center',
+    paddingHorizontal:30,
+    paddingVertical:20,
+    backgroundColor:'#fff'
+  },
+  inputSearhInput:{
+    backgroundColor:'#EEE5DE',
+    paddingHorizontal:30,
+    flex:1,
+    fontSize:15,
+    height:45,
+
+  },
+  iconSearchInput:{
+    marginLeft:15,
+  },
+  rowSeachInput:{
+    backgroundColor:'#EEE5DE',
+    height:45,
+    borderRadius:5,
+    flexDirection:'row',
     alignItems:'center',
-    backgroundColor:'gray'
-  }
+    paddingHorizontal:10,
+    marginVertical:20,
+    
+
+    
+  },
+ 
+
 })

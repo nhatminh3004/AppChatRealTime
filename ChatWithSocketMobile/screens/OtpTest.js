@@ -6,6 +6,7 @@ import React,{useRef,useState} from 'react'
 //
 
 //mới
+import {checkPhoneTonTaiRoute} from '../ultis/ApiRoute';
 import { Text, StyleSheet, View,TextInput,TouchableOpacity, Dimensions,Image,FlatList,Alert} from 'react-native'
 import Separator from '../ultis/Separator'
 import {CountryCode} from '../ultis';
@@ -43,7 +44,7 @@ const handleOnChangeText= (value,fieldName) =>{
 }
 const checkPhoneTonTai= async () =>{
   try {
-    const res = await axios.post('http://192.168.1.31:5000/api/auth/checkPhoneTonTai',{...userPhone});
+    const res = await axios.post(`${checkPhoneTonTaiRoute}`,{...userPhone});
     console.log("phone Request",{phoneNumber});
     console.log(res.data);
     if(res.data.status===false || phoneNumber.length<=11){
