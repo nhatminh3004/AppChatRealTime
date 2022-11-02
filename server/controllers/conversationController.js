@@ -114,7 +114,6 @@ module.exports.getMyConversations = async (req, res, next) => {
         }
       }
     }
-    console.log(newConversations);
 
     res.json(newConversations);
   } catch (error) {
@@ -126,12 +125,12 @@ module.exports.createConversation = async (req, res, next) => {
   try {
     const { searchResultId, myId } = req.body;
     let conversation = await conversationModel
-      .findOne({ "members.userId": searchResultId, "members.userId": myId })
+      .findOne({ "members.userId": { $all: [searchResultId, myId] } })
       .sort({ updatedAt: -1 });
     if (conversation) {
       let users_info = [];
       for (var j = 0; j < conversation.members.length; j++) {
-        if (conversation.members[j].userId !== myId) {
+        if (!conversation.members[j].userId.equals(myId)) {
           const user = await userModel.findOne({
             _id: conversation.members[j].userId,
           });
@@ -146,6 +145,7 @@ module.exports.createConversation = async (req, res, next) => {
         users_info,
         lastMessage,
       };
+      console.log(conversation);
       return res.json(conversation);
     } else {
       let newConversation = await conversationModel.create({
@@ -157,7 +157,7 @@ module.exports.createConversation = async (req, res, next) => {
       if (newConversation) {
         let users_info = [];
         for (var j = 0; j < newConversation.members.length; j++) {
-          if (newConversation.members[j].userId !== myId) {
+          if (!newConversation.members[j].equals(myId)) {
             const user = await userModel.findOne({
               _id: newConversation.members[j].userId,
             });
@@ -168,6 +168,7 @@ module.exports.createConversation = async (req, res, next) => {
           conversation: newConversation,
           users_info,
         };
+        console.log(newConversation);
         return res.json(newConversation);
       } else {
         return res.json({

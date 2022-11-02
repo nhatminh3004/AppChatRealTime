@@ -16,7 +16,7 @@ const s3 = new AWS.S3({
   secretAccessKey: "t2vKMWdfATcli6mwmzwvzZQDxCrmVVPFHn+Xhk8p",
 });
 
-export const uploadToS3 = (files) => {
+export const uploadToS3 = async (files) => {
   let response = {};
   let filesResults = [];
   if (files) {
@@ -32,14 +32,14 @@ export const uploadToS3 = (files) => {
         Body: files[i],
       };
       filesResults = [...filesResults, `${CLOUND_FRONT_URL}${filePath}`];
-      s3.upload(params, (error) => {
+      await s3.upload(params, (error) => {
         if (error) {
           console.log("error = ", error);
           // return res.send("Internal Server Error");
           response = { status: false, message: "Fail to upload file" };
           return response;
         }
-      });
+      }).promise();
     }
     console.log(filesResults);
     response = {

@@ -9,7 +9,8 @@ function SearchResults({searchResults, changeCurrentChat, currentSelected, onHan
     
     const onHandleSelect = async (index, searchResult) => {
         const currentUser = await JSON.parse(localStorage.getItem("chat-app-user"));
-        const conversation = await axios.post(createConversation, {searchResultId: searchResult, myId: currentUser._id})
+        console.log(searchResult);
+        const conversation = await axios.post(createConversation, {searchResultId: searchResult._id, myId: currentUser._id})
         console.log(conversation.data);
         changeCurrentChat(index, conversation.data);
     }
