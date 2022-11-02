@@ -21,22 +21,7 @@ module.exports.sendMessage = async (req, res, next) => {
         }
       );
       if (newConversation) {
-        let users_info = [];
-        for (var j = 0; j < newConversation.members.length; j++) {
-          const user = await userModel.findOne({
-            _id: newConversation.members[j].userId,
-          });
-          users_info = [...users_info, user];
-        }
-        const lastMessage = await messageModel.findOne({
-          _id: newConversation.lastMessageId,
-        });
-        newConversation = {
-          conversation: newConversation,
-          users_info,
-          lastMessage,
-        };
-        return res.json(newConversation);
+        return res.json(data);
       } else {
         return res.json({
           msg: "Create conversation fail",
@@ -65,8 +50,7 @@ module.exports.getAllMessage = async (req, res, next) => {
           ...projectMessages,
           {
             fromSelf: message.sender.toString() === userId,
-            message: message.message.text,
-            files: message.message.files,
+            message: message,
           },
         ];
       }

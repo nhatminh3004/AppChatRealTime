@@ -52,7 +52,6 @@ io.on("connection", (socket) => {
           const dataSent = {
             message: data.message,
             from: data.from,
-            files: data.files,
           };
           io.to(`${sendUserSocket}`).emit("msg-receive", dataSent);
         }

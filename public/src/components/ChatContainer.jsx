@@ -45,12 +45,13 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
                 userId: currentUser._id,
                 conversationId: currentChat.conversation._id
             })
+            console.log(response.data);
             setMessages(response.data);
         }
     }
 
     const handleSendMsg = async (msg) => {
-        await axios.post(sendMessageRoute, {
+        const newMessage = await axios.post(sendMessageRoute, {
             from: currentUser._id,
             conversationId: currentChat.conversation._id,
             message:msg
@@ -58,10 +59,11 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
         socket.current.emit("send-msg", {
             from: {userId: currentUser._id, conversationId: currentChat.conversation._id},
             to: currentChat.conversation.members,
-            message: msg
+            message: newMessage.data
         })
+        console.log(newMessage.data);
         const msgs = [...messages];
-        msgs.push({fromSelf: true, message: msg });
+        msgs.push({fromSelf: true, message: newMessage.data });
         setMessages(msgs);
         updateListConversation(new Date())
     };
@@ -83,7 +85,7 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
             // })
             const response = await uploadToS3(files);
             if (response.status) {
-                await axios.post(sendMessageRoute, {
+                const newConversation = await axios.post(sendMessageRoute, {
                     from: currentUser._id,
                     conversationId: currentChat.conversation._id,
                     files: response.files
@@ -92,7 +94,7 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
                 socket.current.emit("send-msg", {
                     from: {userId: currentUser._id, conversationId: currentChat.conversation._id},
                     to: currentChat.conversation.members,
-                    files: response.files
+                    message: newConversation.data
                 })
 
                 const msgs = [...messages];
@@ -269,14 +271,15 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
                     }
             <div className="chat-messages">
                 {
-                    messages.map((message, index) => {
+                    messages && messages.map((message, index) => {
+                        // console.log(message);
                         return (<div ref={scrollRef} key={index}>
                             <div className={`message ${message.fromSelf ? 'sended' : 'received'}`}>
                                 <div className="content">
                                     <div className="files">
-                                        {message.files && message.files.length > 0 && message.files.map((file) => <div className="img-container"><img key={file} src={file} /></div>) }
+                                        {message.message.message.files && message.message.message.files.length > 0 && message.message.message.files.map((file,index) => <div className="img-container"><img key={index} src={file} /></div>) }
                                     </div>
-                                    <p>{message.message}</p>
+                                    <p>{message.message.message.text}</p>
                                 </div>
                             </div>
                         </div>);
@@ -419,7 +422,7 @@ const Container = styled.div`
                       img {
                         max-height: 100%;
                         min-width: 100%;
-                        object-fit: cover;
+                        object-fit: contain;
                         vertical-align: bottom;
                     }
                   }

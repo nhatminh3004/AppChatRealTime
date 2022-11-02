@@ -81,7 +81,7 @@ function Chat() {
         if (socket.current) {
             socket.current.on("msg-receive", (dataSent) => {
                 if (currentChat.conversation._id === dataSent.from.conversationId) {
-                    setArrivalMessage({fromSelf: false, message: dataSent.message, files: dataSent.files})
+                    setArrivalMessage({fromSelf: false, message: dataSent.message})
                 }
                 setHaveNewMessage(new Date());
             })
