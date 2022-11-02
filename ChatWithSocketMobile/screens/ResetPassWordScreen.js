@@ -14,6 +14,7 @@ import {NativeModules} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import KeyboardAvoidingView from 'react-native/Libraries/Components/Keyboard/KeyboardAvoidingView';
 import axios from 'axios';
+import {doimatkhauRoute} from '../ultis/ApiRoute';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 const {StatusBarManager} = NativeModules;
 
@@ -74,7 +75,7 @@ export default function ResetPassWordScreen({route: {params:{phoneNumber}},navig
     const submitForm =   async () => {
       if(isValidForm()){
        
-        const res = await axios.post('http://192.168.1.31:5000/api/auth/doiMatKhau', userInfo);
+        const res = await axios.post(`${doimatkhauRoute}`, userInfo);
     console.log(res.data);
        
         navigation.replace("Signin");

@@ -10,10 +10,13 @@ import  Ionicons  from '@expo/vector-icons/Ionicons';
 import  Feather  from '@expo/vector-icons/Feather'; 
 import { StatusBar } from 'expo-status-bar';
 import {NativeModules} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {loginRoute} from '../ultis/ApiRoute';
 const {StatusBarManager} = NativeModules;
 
 const heightCuaStatusBar = StatusBarManager.HEIGHT;
 const {height,width} = Dimensions.get('window');
+
 
 export default function Siginin({navigation}) {
   const [isMatKhau,setMatKhau]=useState(true);//true là mật khẩu ẩn
@@ -47,12 +50,14 @@ export default function Siginin({navigation}) {
   }
   const submitFormSignIn= async () =>{
     try {
-      const res = await axios.post('http://192.168.1.31:5000/api/auth/login',{...userInfo});
+      const res = await axios.post(`${loginRoute}`,{...userInfo});
       console.log(res.data);
       if(res.data.status===false){
         return updateError('Sai tài khoản hoặc mật khẩu ',setError);
       }
-        console.log(res.data.user._id);
+       const userJson = JSON.stringify(res.data.user);
+       AsyncStorage.setItem("User",userJson);
+      console.log(typeof userJson);
       navigation.navigate("BottomScreen")
     } catch (error) {
       console.log(error);
