@@ -16,6 +16,7 @@ import { ScrollView } from "react-native-virtualized-view";
 import { FontAwesome5 } from "@expo/vector-icons";
 import ConservisionItem from "../components/ConservisionItem";
 import { host, myConversationsRoute } from "../ultis/ApiRoute";
+import { Ionicons } from '@expo/vector-icons'; 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 // import { io } from "socket.io-client";
@@ -27,14 +28,13 @@ function MessageScreen(props) {
   const [haveNewMessage, setHaveNewMessage] = useState();
 
   const socket = useRef();
-
+//khi nhân tin nhắn từ người lạ sẽ hiện ra list conservation
+useEffect(() => {
+  getAllConversations();
+}, [haveNewMessage]);
   useEffect(() => {
     getAllConversations();
   }, []);
-
-  useEffect(() => {
-    getAllConversations();
-  }, [haveNewMessage]);
   const getAllConversations = async () => {
     let currentUser = await AsyncStorage.getItem("User");
     currentUser = JSON.parse(currentUser);
@@ -42,7 +42,9 @@ function MessageScreen(props) {
       `${myConversationsRoute}/${currentUser._id}`
     );
     setConversations(myConversations.data);
+    console.log("myConversations Data",myConversations.data);
   };
+  //Khi nhân tin nhắn cập nhật lại last mess
   useEffect(() => {
     addUserToSocket();
   });
@@ -71,6 +73,10 @@ function MessageScreen(props) {
         />
         <TouchableOpacity style={styles.iconSearchInput}>
           <FontAwesome5 name="search" size={24} color="black" />
+        </TouchableOpacity>
+         {/* giao diện load lại Conservation  */}
+        <TouchableOpacity style={styles.iconSearchInput} onPress={getAllConversations} >
+        <Ionicons name="ios-reload" size={24} color="black" />
         </TouchableOpacity>
       </View>
       {/* giao diện List Tin nhắn người dùng*/}
@@ -106,7 +112,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEE5DE",
     paddingHorizontal: 30,
     flex: 1,
-    fontSize: 15,
+    fontSize: 13,
     height: 45,
   },
   iconSearchInput: {
