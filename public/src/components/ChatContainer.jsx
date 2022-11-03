@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useRef } from "react";
 import { useEffect } from "react";
 import { AiOutlineCheck } from "react-icons/ai";
@@ -10,17 +10,19 @@ import AvatarDefault from "../assets/avatar_default.png"
 import { BsCheckLg } from "react-icons/bs";
 import { GrClose } from "react-icons/gr";
 import {ToastContainer, toast} from 'react-toastify'
+import { FileIcon, defaultStyles } from 'react-file-icon';
 
 import { acceptAddFriend, addSentInvitation, denyAddFriend, getAllMessagesRoute, sendMessageRoute } from "../utils/APIRoutes";
 import { uploadToS3 } from "../utils/AWS";
+import ViewFiles from "./ViewFiles";
 
-function ChatContainer({arrivalMessage, updateListConversation, currentChat, currentUser, setCurrentUser, socket}) {
+function ChatContainer({arrivalMessage, updateListConversation, currentChat, currentUser, setCurrentUser, socket, openImageViewer,files}) {
     const [messages, setMessages] = useState([]);
     const [sentInvitation, setSentInvitation] = useState(false);
     const [haveInvitation, setHaveInvitation] = useState(false);
     const [isFriend, setIsFriend] = useState(false);
     const [isSingle, setIsSingle] = useState(true);
-    const [images, setImages] = useState([]);
+    
 
     const toastOptions = {
         position: 'bottom-right',
@@ -37,7 +39,7 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
             setIsSingle(true);
         }
     }, [currentChat])
-
+    
     const getAllMessagesFromDB = async () => {
         if (currentChat) {
 
@@ -49,7 +51,7 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
             setMessages(response.data);
         }
     }
-
+    
     const handleSendMsg = async (msg) => {
         const newMessage = await axios.post(sendMessageRoute, {
             from: currentUser._id,
@@ -98,13 +100,24 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
                 })
 
                 const msgs = [...messages];
-                msgs.push({fromSelf: true, files: response.files});
+                msgs.push({fromSelf: true, message: newConversation.data});
                 setMessages(msgs);
                 updateListConversation(new Date())
             } else {
                 toast.error(response.message, toastOptions);
             }
         }
+    }
+    const formatBytes = (bytes, decimals = 2) => {
+        if (!+bytes) return '0 Bytes'
+    
+        const k = 1024
+        const dm = decimals < 0 ? 0 : decimals
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+    
+        const i = Math.floor(Math.log(bytes) / Math.log(k))
+    
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
     }
     useEffect(() => {
         if (socket.current) {
@@ -277,7 +290,46 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
                             <div className={`message ${message.fromSelf ? 'sended' : 'received'}`}>
                                 <div className="content">
                                     <div className="files">
-                                        {message.message.message.files && message.message.message.files.length > 0 && message.message.message.files.map((file,index) => <div className="img-container"><img key={index} src={file} /></div>) }
+                                        {message.message.message.files && message.message.message.files.length > 0 && 
+                                        message.message.message.files.map((file,index) => 
+                                        {
+                                            var parts = file.url.split(".");
+                                            const fileType = parts[parts.length - 1];
+                                            if (fileType === "jpg" || fileType === "jpeg" || fileType === "png") {
+                                                return <div className="img-container">
+                                                        <img onClick={ () => openImageViewer(index, message.message.message.files) } key={index} src={file.url} />
+                                                    </div>
+                                            }
+                                            else if (fileType === "docx") {
+                                                return <div className="file-container" onClick={ () => openImageViewer(index, message.message.message.files) }>
+                                                    <FileIcon extension={`${fileType}`}  {...defaultStyles.docx}  />
+                                                    <div className="file-info">
+                                                        <p>{file.fileName}</p>
+                                                        <p className="file-size">{formatBytes(file.size,2)}</p>
+                                                    </div>
+                                                </div>
+                                                // return <FileIcon extension="asv" {...defaultStyles}  />
+                                            }
+                                            else if (fileType === "pdf") {
+                                                return <div className="file-container" onClick={ () => openImageViewer(index, message.message.message.files) }>
+                                                    <FileIcon extension={`${fileType}`}  {...defaultStyles.pdf}  />
+                                                    <div className="file-info">
+                                                        <p>{file.fileName}</p>
+                                                        <p className="file-size">{formatBytes(file.size,2)}</p>
+                                                    </div>
+                                                </div>
+                                                // return <FileIcon extension="asv" {...defaultStyles}  />
+                                            } else {
+                                                return <div className="file-container" onClick={ () => openImageViewer(index, message.message.message.files) }>
+                                                    <FileIcon extension={`${fileType}`}  {...defaultStyles}  />
+                                                    <div className="file-info">
+                                                        <p>{file.fileName}</p>
+                                                        <p className="file-size">{formatBytes(file.size,2)}</p>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }) 
+                                    }
                                     </div>
                                     <p>{message.message.message.text}</p>
                                 </div>
@@ -286,7 +338,7 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
                     })
                 }
             </div>
-            <ChatInput handleSendMsg={handleSendMsg} handleFileUpload={handleFileUpload} images={images} />
+            <ChatInput handleSendMsg={handleSendMsg} handleFileUpload={handleFileUpload} images={files} />
             <ToastContainer />
         </Container>)}
     </>
@@ -295,6 +347,7 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
 
 const Container = styled.div`
     display: flex;
+    position: relative;
     flex-direction: column;
     align-items: stretch;
     justify-content: stretch;
@@ -403,7 +456,7 @@ const Container = styled.div`
             display: flex;
             align-items: center;
             .content {
-                max-width: 40%;
+                max-width: 50%;
                 overflow-wrap: break-word;
                 padding: 1rem;
                 font-size: 1.1rem;
@@ -424,6 +477,29 @@ const Container = styled.div`
                         min-width: 100%;
                         object-fit: contain;
                         vertical-align: bottom;
+                        &:hover {
+                            opacity: 0.5;
+                            cursor: pointer;
+                        }
+                    }
+                  }
+                  .file-container {
+                    width: 100%;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 0.5rem;
+                    svg {
+                        width: 5vw;
+                        height: 8vh;
+                    }
+                    .file-info {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.5rem;
+                        .file-size {
+                            font-size: 0.8rem;
+                        }
                     }
                   }
                 }
@@ -441,6 +517,17 @@ const Container = styled.div`
                 background-color: #9900ff20;
             }
         }
+    }
+    .view-files-container {
+        position: absolute;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        z-index: 1;
+    }
+    .view-files-container-disable {
+        display: none;
     }
 `;
 

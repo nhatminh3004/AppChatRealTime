@@ -21,27 +21,47 @@ export const uploadToS3 = async (files) => {
   let filesResults = [];
   if (files) {
     for (var i = 0; i < files.length; i++) {
+      if (files[i].size > 10000000000) {
+        response = {
+          status: false,
+          message: "File size too large",
+          files: filesResults,
+        };
+        return response;
+      }
+    }
+    for (var i = 0; i < files.length; i++) {
+      console.log(files[i]);
+
       const filename = files[i].name;
       var parts = filename.split(".");
       const fileType = parts[parts.length - 1];
 
-      const filePath = `${uuidv4() + Date.now().toString()}.${fileType}`;
+      let filePath = `${uuidv4() + Date.now().toString()}.${fileType}`;
       const params = {
         Bucket: "app-chat-s3",
         Key: filePath,
         Body: files[i],
       };
-      filesResults = [...filesResults, `${CLOUND_FRONT_URL}${filePath}`];
-      await s3.upload(params, (error) => {
-        if (error) {
-          console.log("error = ", error);
-          // return res.send("Internal Server Error");
-          response = { status: false, message: "Fail to upload file" };
-          return response;
-        }
-      }).promise();
+      filesResults = [
+        ...filesResults,
+        {
+          url: `${CLOUND_FRONT_URL}${filePath}`,
+          fileName: filename,
+          size: files[i].size,
+        },
+      ];
+      await s3
+        .upload(params, (error) => {
+          if (error) {
+            console.log("error = ", error);
+            // return res.send("Internal Server Error");
+            response = { status: false, message: "Fail to upload file" };
+            return response;
+          }
+        })
+        .promise();
     }
-    console.log(filesResults);
     response = {
       status: true,
       message: "Upload successfully",

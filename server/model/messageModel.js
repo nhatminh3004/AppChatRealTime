@@ -8,7 +8,15 @@ const messageSchema = new mongoose.Schema(
       },
       files: [
         {
-          type: String,
+          url: {
+            type: String,
+          },
+          fileName: {
+            type: String,
+          },
+          size: {
+            type: Number,
+          },
         },
       ],
     },

@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components"
 import axios from 'axios'
 import {useNavigate} from 'react-router-dom'
 import {io} from 'socket.io-client'
+import { useRef } from "react";
+
 import { allUsersRoute, host, myConversationsRoute } from "../utils/APIRoutes";
 import Welcome from "../components/Welcome";
 import ChatContainer from "../components/ChatContainer";
-import { useRef } from "react";
 import SidebarNav from "../components/SidebarNav";
 import FriendsContainer from "../components/FriendsContainer";
 import ConversationList from "../components/ConversationList";
+import ViewFiles from "../components/ViewFiles";
 
 function Chat() {
     const socket = useRef();
@@ -23,6 +25,9 @@ function Chat() {
     const [haveNewMessage, setHaveNewMessage] = useState({});
     const [haveInvitation, setHaveInvitation] = useState(undefined);
     const [arrivalMessage, setArrivalMessage] = useState(null);
+    const [files, setFiles] = useState([]);
+    const [currentImage, setCurrentImage] = useState(0);
+    const [isViewerOpen, setIsViewerOpen] = useState(false);
 
     useEffect(() => {
         checkLogin();
@@ -108,6 +113,17 @@ function Chat() {
     const onHandleReloadLatestMsg = () => {
         setHaveNewMessage(new Date());
     }
+    const openImageViewer = useCallback((index, files) => {
+        setCurrentImage(index);
+        setIsViewerOpen(true);
+        setFiles(files);
+    }, []);
+
+    const closeImageViewer = () => {
+        setCurrentImage(0);
+        setIsViewerOpen(false);
+        setFiles([]);
+    };
     return <Container>
         <div className="container">
             <SidebarNav changeNav={onHandleSelectNav} haveInvitation={haveInvitation} />
@@ -118,7 +134,7 @@ function Chat() {
                         {
                             isLoaded && currentChat === undefined ? 
                                 (<Welcome currentUser={currentUser} />) :
-                                (<ChatContainer arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
+                                (<ChatContainer openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
                                 
                         }
                     </>
@@ -128,7 +144,7 @@ function Chat() {
                         {
                             isLoaded && currentChat === undefined ? 
                                 (<Welcome currentUser={currentUser} />) :
-                                (<ChatContainer arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
+                                (<ChatContainer openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
                                 
                         }
                     </>
@@ -148,6 +164,7 @@ function Chat() {
                 ) : (<FriendsContainer/>)
             } */}
         </div>
+        <ViewFiles closeImageViewer={closeImageViewer} files={files} currentImage={currentImage} isViewerOpen={isViewerOpen}/>
     </Container> ;
 }
 

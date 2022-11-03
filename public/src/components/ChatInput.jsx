@@ -6,6 +6,8 @@ import {BsEmojiSmileFill} from 'react-icons/bs'
 import { BsImage } from 'react-icons/bs';
 import axios from 'axios';
 import { sendImagesRoute } from '../utils/APIRoutes';
+import { GrAttachment } from 'react-icons/gr';
+import { ImAttachment } from 'react-icons/im';
 
 function ChatInput({handleSendMsg, handleFileUpload}) {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -43,7 +45,10 @@ function ChatInput({handleSendMsg, handleFileUpload}) {
             <div className="addImage">
                 <input type='file' id='file' ref={inputFile} accept="image/png, image/jpeg" multiple={true} onChange={handleFileUpload} style={{display: 'none'}}/>
                 <button className='btn-addImage' onClick={onButtonClick}><BsImage /></button>
-                
+            </div>
+            <div className="addImage">
+                <input type='file' id='file' ref={inputFile} multiple={true} onChange={handleFileUpload} style={{display: 'none'}}/>
+                <button className='btn-addImage' onClick={onButtonClick}><ImAttachment /></button>
             </div>
         </div>
         <form action="" className="input-container" onSubmit={(e) => sendChat(e)}>
