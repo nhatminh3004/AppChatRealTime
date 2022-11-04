@@ -13,9 +13,6 @@ function ConservisionItem(props) {
   const [isSingle, setIsSingle] = useState(true);
 
   let { users_info, conversation, lastMessage } = props.user;
-  let isSearchResult = props.isSearchResult;
-  let setIsSearchResult = props.setIsSearchResult;
-  let setSearchResult = props.setSearchResult;
   const { onPress } = props;
 
   useEffect(() => {
@@ -25,18 +22,6 @@ function ConservisionItem(props) {
   }, [props]);
   return (
     <View style={styles.container}>
-      {isSearchResult && (
-        <TouchableOpacity
-          style={styles.conservation}
-          onPress={() => {
-            setIsSearchResult(!isSearchResult);
-            setSearchResult([]);
-          }}
-        >
-          <Text>Out</Text>
-        </TouchableOpacity>
-      )}
-
       <TouchableOpacity style={styles.conservation} onPress={onPress}>
         {isSingle ? (
           <View

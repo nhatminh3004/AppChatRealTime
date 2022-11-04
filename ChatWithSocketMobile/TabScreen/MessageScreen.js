@@ -32,7 +32,8 @@ function MessageScreen(props) {
   const [conversations, setConversations] = useState([]);
   const [haveNewMessage, setHaveNewMessage] = useState();
   const [searchText, setsearchText] = useState("");
-
+  const [searchResult, setSearchResult] = useState([]);
+  const [isSearchResult, setIsSearchResult] = useState(false);
   const socket = useRef();
   //khi nhân tin nhắn từ người lạ sẽ hiện ra list conservation
   useEffect(() => {
@@ -78,20 +79,20 @@ function MessageScreen(props) {
       searchResultId: search_result.data[0]._id,
       myId: currentUser._id,
     });
-    console.log("Kết quả search : ", search_result.data[0]._id);
-    console.log("Kết quả tạo Conversation : ", result_CreateConversation.data);
+    // console.log("Kết quả search : ", search_result.data[0]._id);
+    // console.log("Kết quả tạo Conversation : ", result_CreateConversation.data);
     // setConversations(...conversations,result_CreateConversation.data.conversation)
-    console.log("Sau khi search :", conversations[0]);
-    console.log(result_CreateConversation.data.lastMessage);
+    // console.log("Sau khi search :", conversations[0]);
+    // console.log(result_CreateConversation.data.lastMessage);
     let resultConversation = result_CreateConversation.data;
     let newLastMessage = {
       message: result_CreateConversation.data.lastMessage,
     };
     resultConversation.lastMessage = newLastMessage;
-    let newConversations = [...conversations, resultConversation];
-    setConversations(newConversations);
+    setSearchResult([resultConversation]);
+    setIsSearchResult(true);
   };
-
+  // console.log("search", searchResult);
   return (
     <View style={styles.container}>
       {/* giao diện search người dùng */}
@@ -115,23 +116,46 @@ function MessageScreen(props) {
         </TouchableOpacity>
       </View>
       {/* giao diện List Tin nhắn người dùng*/}
-      <ScrollView>
-        <FlatList
-          data={conversations}
-          renderItem={({ item }) => (
-            <ConservisionItem
-              onPress={() => {
-                navigate("Chat", {
-                  user: item,
-                  setHaveNewMessage: setHaveNewMessage,
-                });
-              }}
-              user={item}
-              key={item.conversation._id}
-            />
-          )}
-        />
-      </ScrollView>
+      {searchResult.length > 0 ? (
+        <ScrollView>
+          <FlatList
+            data={searchResult}
+            renderItem={({ item }) => (
+              <ConservisionItem
+                onPress={() => {
+                  navigate("Chat", {
+                    user: item,
+                    setHaveNewMessage: setHaveNewMessage,
+                  });
+                }}
+                user={item}
+                isSearchResult={isSearchResult}
+                setIsSearchResult={setIsSearchResult}
+                setSearchResult={setSearchResult}
+                key={item.conversation._id}
+              />
+            )}
+          />
+        </ScrollView>
+      ) : (
+        <ScrollView>
+          <FlatList
+            data={conversations}
+            renderItem={({ item }) => (
+              <ConservisionItem
+                onPress={() => {
+                  navigate("Chat", {
+                    user: item,
+                    setHaveNewMessage: setHaveNewMessage,
+                  });
+                }}
+                user={item}
+                key={item.conversation._id}
+              />
+            )}
+          />
+        </ScrollView>
+      )}
     </View>
   );
 }
