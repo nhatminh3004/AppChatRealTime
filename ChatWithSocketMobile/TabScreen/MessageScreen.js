@@ -15,7 +15,7 @@ import {
 import { ScrollView } from "react-native-virtualized-view";
 import { FontAwesome5 } from "@expo/vector-icons";
 import ConservisionItem from "../components/ConservisionItem";
-import { host, myConversationsRoute } from "../ultis/ApiRoute";
+import { host, myConversationsRoute,searchUsers,createConversation } from "../ultis/ApiRoute";
 import { Ionicons } from '@expo/vector-icons'; 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -26,7 +26,8 @@ function MessageScreen(props) {
   const { navigate, goBack } = navigation;
   const [conversations, setConversations] = useState([]);
   const [haveNewMessage, setHaveNewMessage] = useState();
-
+  const [searchText, setsearchText] = useState("");
+ 
   const socket = useRef();
 //khi nhân tin nhắn từ người lạ sẽ hiện ra list conservation
 useEffect(() => {
@@ -61,17 +62,35 @@ useEffect(() => {
       });
     }
   };
+  const handleSearch = async () => {
+    let currentUser = await AsyncStorage.getItem("User");
+    currentUser = JSON.parse(currentUser);
+    const search_result  = await axios.post(searchUsers,{
+      "searchKey":searchText,
+      "id":currentUser._id
+    })
+    const result_CreateConversation = await axios.post(createConversation,{
+      searchResultId:search_result.data[0]._id,
+      myId:currentUser._id
+    })
+    console.log("Kết quả search : ",search_result.data[0]._id);
+    console.log("Kết quả tạo Conversation : ",result_CreateConversation.data.conversation);
+    // setConversations(...conversations,result_CreateConversation.data.conversation)
+    console.log("Sau khi search :",conversations);
+  };
 
   return (
     <View style={styles.container}>
       {/* giao diện search người dùng */}
       <View style={styles.rowSeachInput}>
         <TextInput
+        defaultValue={searchText}
           style={styles.inputSearhInput}
           placeholder="Nhập số điện thoại để tìm người dùng"
           maxLength={13}
+          onChangeText={(newSearch) => setsearchText(newSearch)}
         />
-        <TouchableOpacity style={styles.iconSearchInput}>
+        <TouchableOpacity style={styles.iconSearchInput} onPress={handleSearch}>
           <FontAwesome5 name="search" size={24} color="black" />
         </TouchableOpacity>
          {/* giao diện load lại Conservation  */}
