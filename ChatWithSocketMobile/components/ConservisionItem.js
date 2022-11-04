@@ -63,12 +63,18 @@ function ConservisionItem(props) {
                   justifyContent: "space-between",
                 }}
               >
-                {lastMessage.message.message.files.length > 0 ? (
+                {lastMessage &&
+                lastMessage.message &&
+                lastMessage.message.message &&
+                lastMessage.message.message.files &&
+                lastMessage.message.message.files.length > 0 ? (
                   <Text style={styles.last_msg}>[files]</Text>
                 ) : (
-                  <Text style={styles.last_msg}>
-                    {lastMessage.message.message.text}
-                  </Text>
+                  lastMessage && (
+                    <Text style={styles.last_msg}>
+                      {lastMessage.message.message.text}
+                    </Text>
+                  )
                 )}
               </View>
             </View>
@@ -101,12 +107,18 @@ function ConservisionItem(props) {
                   justifyContent: "space-between",
                 }}
               >
-                {lastMessage.message.message.files.length > 0 ? (
+                {lastMessage &&
+                lastMessage.message &&
+                lastMessage.message.message &&
+                lastMessage.message.message.files &&
+                lastMessage.message.message.files.length > 0 ? (
                   <Text style={styles.last_msg}>[files]</Text>
                 ) : (
-                  <Text style={styles.last_msg}>
-                    {lastMessage.message.message.text}
-                  </Text>
+                  lastMessage && (
+                    <Text style={styles.last_msg}>
+                      {lastMessage.message.message.text}
+                    </Text>
+                  )
                 )}
               </View>
             </View>

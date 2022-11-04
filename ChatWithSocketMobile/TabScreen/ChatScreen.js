@@ -108,6 +108,7 @@ function ChatScreen(props) {
     setHaveNewMessage(new Date());
     setText("");
   };
+  
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#0091FF" style="light" translucent />
