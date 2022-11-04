@@ -72,6 +72,7 @@ function Login() {
                 <input type="text" placeholder="Phone" name="phone" onChange={(e) => handleOnChange(e)}/>
                 <input type="password" placeholder="Password" name="password" onChange={(e) => handleOnChange(e)} />
                 <button type="submit">Login In</button>
+                <span><Link to="/forgotPassword">Forgot password ?</Link></span>
                 <span>Already have an account <Link to="/register">Register</Link></span>
             </form>
         </FormContainer>

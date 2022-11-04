@@ -33,6 +33,7 @@ function ChatScreen(props) {
   const { navigation, route } = props;
   const { navigate, goBack } = navigation;
   const { users_info, conversation, lastMessage } = props.route.params.user; // nhận từ bên MessageScreen
+  const setHaveNewMessage = props.route.params.setHaveNewMessage; // nhận từ bên MessageScreen
   const [messages, setMessages] = useState([]);
   const [arraivalMessage, setArrivalMessage] = useState({});
   const [text, setText] = useState("");
@@ -104,7 +105,7 @@ function ChatScreen(props) {
     const msgs = [...messages];
     msgs.push({ fromSelf: true, message: newMessage.data });
     setMessages(msgs);
-
+    setHaveNewMessage(new Date());
     setText("");
   };
   return (

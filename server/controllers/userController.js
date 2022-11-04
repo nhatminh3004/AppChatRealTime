@@ -28,16 +28,19 @@ module.exports.register = async (req, res, next) => {
   }
 };
 module.exports.doiMatKhau = async (req, res) => {
- 
-    const  {phone,newpassword}  = req.body;
-    console.log("số dthoai",phone);
-    console.log("password new:",newpassword);
-const hashedPassword = await bcrypt.hash(newpassword, 10);
-const user = await User.findOne({phone});
-console.log("user_id",user._id);
-const usersauKhiDoiMatKhau = await User.findByIdAndUpdate({_id:user._id},{password:hashedPassword},{new:true});
+  const { phone, newpassword } = req.body;
+  // console.log("số dthoai", phone);
+  // console.log("password new:", newpassword);
+  const hashedPassword = await bcrypt.hash(newpassword, 10);
+  const user = await User.findOne({ phone });
+  // console.log("user_id", user._id);
+  const usersauKhiDoiMatKhau = await User.findByIdAndUpdate(
+    { _id: user._id },
+    { password: hashedPassword },
+    { new: true }
+  );
 
-   return res.json({ status: true, data:usersauKhiDoiMatKhau });
+  return res.json({ status: true, data: usersauKhiDoiMatKhau });
 };
 
 module.exports.login = async (req, res, next) => {
@@ -57,11 +60,11 @@ module.exports.login = async (req, res, next) => {
 };
 module.exports.checkPhoneTonTai = async (req, res, next) => {
   try {
-    const  {phone}  = req.body;
-    console.log("số dthoai",phone);
-    const phoneCheck = await User.findOne({phone});
+    const { phone } = req.body;
+    console.log("số dthoai", phone);
+    const phoneCheck = await User.findOne({ phone });
     if (phoneCheck)
-    return res.json({ msg: "Phone number already used", status: false });
+      return res.json({ msg: "Phone number already used", status: false });
   } catch (error) {
     next(error);
   }

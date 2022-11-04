@@ -16,7 +16,7 @@ import { ScrollView } from "react-native-virtualized-view";
 import { FontAwesome5 } from "@expo/vector-icons";
 import ConservisionItem from "../components/ConservisionItem";
 import { host, myConversationsRoute } from "../ultis/ApiRoute";
-import { Ionicons } from '@expo/vector-icons'; 
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 // import { io } from "socket.io-client";
@@ -28,10 +28,10 @@ function MessageScreen(props) {
   const [haveNewMessage, setHaveNewMessage] = useState();
 
   const socket = useRef();
-//khi nhân tin nhắn từ người lạ sẽ hiện ra list conservation
-useEffect(() => {
-  getAllConversations();
-}, [haveNewMessage]);
+  //khi nhân tin nhắn từ người lạ sẽ hiện ra list conservation
+  useEffect(() => {
+    getAllConversations();
+  }, [haveNewMessage]);
   useEffect(() => {
     getAllConversations();
   }, []);
@@ -42,7 +42,7 @@ useEffect(() => {
       `${myConversationsRoute}/${currentUser._id}`
     );
     setConversations(myConversations.data);
-    console.log("myConversations Data",myConversations.data);
+    console.log("myConversations Data", myConversations.data);
   };
   //Khi nhân tin nhắn cập nhật lại last mess
   useEffect(() => {
@@ -74,9 +74,12 @@ useEffect(() => {
         <TouchableOpacity style={styles.iconSearchInput}>
           <FontAwesome5 name="search" size={24} color="black" />
         </TouchableOpacity>
-         {/* giao diện load lại Conservation  */}
-        <TouchableOpacity style={styles.iconSearchInput} onPress={getAllConversations} >
-        <Ionicons name="ios-reload" size={24} color="black" />
+        {/* giao diện load lại Conservation  */}
+        <TouchableOpacity
+          style={styles.iconSearchInput}
+          onPress={getAllConversations}
+        >
+          <Ionicons name="ios-reload" size={24} color="black" />
         </TouchableOpacity>
       </View>
       {/* giao diện List Tin nhắn người dùng*/}
@@ -88,6 +91,7 @@ useEffect(() => {
               onPress={() => {
                 navigate("Chat", {
                   user: item,
+                  setHaveNewMessage: setHaveNewMessage,
                 });
               }}
               user={item}
