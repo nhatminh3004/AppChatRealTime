@@ -12,3 +12,4 @@ export const createConversation = `${host}/api/conversations/createConversation`
 export const sendMessageRoute = `${host}/api/conversations/sendMessage`;
 export const sendImagesRoute = `${host}/api/conversations/sendImages`;
 export const getAllMessagesRoute = `${host}/api/conversations/getmsg`;
+export const evictMessageRoute = `${host}/api/conversations/evictMessage`;

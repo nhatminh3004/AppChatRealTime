@@ -28,6 +28,7 @@ function Chat() {
     const [files, setFiles] = useState([]);
     const [currentImage, setCurrentImage] = useState(0);
     const [isViewerOpen, setIsViewerOpen] = useState(false);
+    const [messageEvict, setMessageEvict] = useState(undefined);
 
     useEffect(() => {
         checkLogin();
@@ -98,6 +99,11 @@ function Chat() {
                 setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
 
             })
+            socket.current.on("reply-evict-message", async (data) => {
+                setHaveNewMessage(new Date());
+                console.log(data.messageId);
+                setMessageEvict(data.messageId);
+            })
             
         }
     });
@@ -134,7 +140,7 @@ function Chat() {
                         {
                             isLoaded && currentChat === undefined ? 
                                 (<Welcome currentUser={currentUser} />) :
-                                (<ChatContainer openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
+                                (<ChatContainer messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
                                 
                         }
                     </>
@@ -144,7 +150,7 @@ function Chat() {
                         {
                             isLoaded && currentChat === undefined ? 
                                 (<Welcome currentUser={currentUser} />) :
-                                (<ChatContainer openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
+                                (<ChatContainer messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
                                 
                         }
                     </>

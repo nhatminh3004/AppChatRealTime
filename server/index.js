@@ -41,7 +41,7 @@ global.onlineUsers = new Map();
 io.on("connection", (socket) => {
   global.chatSocket = socket;
   socket.on("add-user", (userId) => {
-    console.log("user added", userId);
+    // console.log("user added", userId);
     onlineUsers.set(userId, socket.id);
   });
   socket.on("send-msg", (data) => {
@@ -49,12 +49,23 @@ io.on("connection", (socket) => {
       if (data.to[i].userId !== data.from.userId) {
         const sendUserSocket = onlineUsers.get(data.to[i].userId);
         if (sendUserSocket) {
-          console.log(sendUserSocket);
+          // console.log(sendUserSocket);
           const dataSent = {
             message: data.message,
             from: data.from,
           };
           io.to(`${sendUserSocket}`).emit("msg-receive", dataSent);
+        }
+      }
+    }
+  });
+  socket.on("evict-message", (data) => {
+    for (var i = 0; i < data.to.length; i++) {
+      if (data.to[i].userId !== data.from) {
+        const sendUserSocket = onlineUsers.get(data.to[i].userId);
+        if (sendUserSocket) {
+          const dataSent = { messageId: data.messageId };
+          io.to(`${sendUserSocket}`).emit("reply-evict-message", dataSent);
         }
       }
     }

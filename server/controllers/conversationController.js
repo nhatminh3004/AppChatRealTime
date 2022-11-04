@@ -68,7 +68,7 @@ module.exports.getMyConversations = async (req, res, next) => {
     const conversations = await conversationModel
       .find({ "members.userId": userId })
       .sort({ updatedAt: -1 });
-    // console.log(conversations);
+    // console.log(conversations[0].members);
     let newConversations = [];
     if (conversations.length > 0) {
       // newConversations = [];
@@ -159,6 +159,33 @@ module.exports.createConversation = async (req, res, next) => {
           msg: "Create conversation fail",
         });
       }
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.evictMessage = async (req, res, next) => {
+  try {
+    const { messageId, conversationId } = req.body;
+
+    await conversationModel.findByIdAndUpdate(conversationId, {
+      $pull: { messages: messageId },
+    });
+    let conversation = await conversationModel.findById(conversationId);
+    console.log(conversation);
+    // let conversation = await conversationModel.findById(conversationId);
+    if (conversation.lastMessageId.equals(messageId)) {
+      const result = await conversationModel.findByIdAndUpdate(conversationId, {
+        lastMessageId: conversation.messages[conversation.messages.length - 1],
+      });
+      if (result) {
+        await messageModel.findByIdAndRemove(messageId);
+      }
+      return res.json(result);
+    } else {
+      await messageModel.findByIdAndRemove(messageId);
+      return res.json(conversation);
     }
   } catch (error) {
     next(error);

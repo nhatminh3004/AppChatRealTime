@@ -7,22 +7,23 @@ import { FiUserPlus } from 'react-icons/fi';
 import styled from "styled-components";
 import ChatInput from "./ChatInput";
 import AvatarDefault from "../assets/avatar_default.png"
-import { BsCheckLg } from "react-icons/bs";
+import { BsCheckLg, BsEmojiSmile, BsReplyFill, BsThreeDotsVertical } from "react-icons/bs";
 import { GrClose } from "react-icons/gr";
 import {ToastContainer, toast} from 'react-toastify'
 import { FileIcon, defaultStyles } from 'react-file-icon';
 
-import { acceptAddFriend, addSentInvitation, denyAddFriend, getAllMessagesRoute, sendMessageRoute } from "../utils/APIRoutes";
-import { uploadToS3 } from "../utils/AWS";
+import { acceptAddFriend, addSentInvitation, denyAddFriend, evictMessageRoute, getAllMessagesRoute, sendMessageRoute } from "../utils/APIRoutes";
+import { deleteFromS3, uploadToS3 } from "../utils/AWS";
 import ViewFiles from "./ViewFiles";
 
-function ChatContainer({arrivalMessage, updateListConversation, currentChat, currentUser, setCurrentUser, socket, openImageViewer,files}) {
+function ChatContainer({messageEvict, arrivalMessage, updateListConversation, currentChat, currentUser, setCurrentUser, socket, openImageViewer,files}) {
     const [messages, setMessages] = useState([]);
     const [sentInvitation, setSentInvitation] = useState(false);
     const [haveInvitation, setHaveInvitation] = useState(false);
     const [isFriend, setIsFriend] = useState(false);
     const [isSingle, setIsSingle] = useState(true);
-    
+    const [showMoreOption, setShowMoreOption] = useState(false);
+    const [evictMessage, setEvictMessage] = useState(false); 
 
     const toastOptions = {
         position: 'bottom-right',
@@ -40,6 +41,13 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
         }
     }, [currentChat])
     
+    // useEffect(() => {
+    //     getAllMessagesFromDB();
+    //     if (currentChat && currentChat.conversation.members.length === 2) {
+    //         setIsSingle(true);
+    //     }
+    // }, [evictMessage]);
+
     const getAllMessagesFromDB = async () => {
         if (currentChat) {
 
@@ -63,7 +71,6 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
             to: currentChat.conversation.members,
             message: newMessage.data
         })
-        console.log(newMessage.data);
         const msgs = [...messages];
         msgs.push({fromSelf: true, message: newMessage.data });
         setMessages(msgs);
@@ -151,6 +158,18 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
     useEffect(() => { 
         arrivalMessage && setMessages(prev => [...prev, arrivalMessage])
     }, [arrivalMessage])
+    useEffect(() => { 
+        if (messageEvict) {
+            let msg = [...messages];
+            for(var i = 0; i < msg.length; i++) {
+                if (messageEvict === msg[i].message._id) {
+                    msg.splice(i, 1);
+                }
+            }
+            setMessages(msg);
+        }
+    }, [messageEvict])
+    
     useEffect(() => {
         scrollRef.current?.scrollIntoView({behaviour: "smooth"})
     }, [messages])
@@ -243,6 +262,36 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
         setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
         setHaveInvitation(false);
     }
+
+    const onHandleEvict = async (message) => {
+        await axios.post(`${evictMessageRoute}`, {
+            messageId: message._id, 
+            conversationId: currentChat.conversation._id
+        });
+
+        socket.current.emit("evict-message", {
+            from: currentUser._id, 
+            to: currentChat.conversation.members,
+            messageId: message._id
+        })
+        if (message.message.files && message.message.files.length > 0) {
+            let url = [];
+            for(var i = 0; i < message.message.files.length; i++) {
+                url = [...url, message.message.files[i].url];
+            }
+            // await deleteFromS3(url);
+        }
+
+        let msg = [...messages];
+        for(var i = 0; i < msg.length; i++) {
+            if (message._id === msg[i].message._id) {
+                msg.splice(i, 1);
+            }
+        }
+        
+        setMessages(msg);
+        updateListConversation(new Date())
+    }
     return (
     <>
         {currentChat && currentUser && (<Container>
@@ -286,7 +335,7 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
                 {
                     messages && messages.map((message, index) => {
                         // console.log(message);
-                        return (<div ref={scrollRef} key={index}>
+                        return (<div ref={scrollRef} key={index} >
                             <div className={`message ${message.fromSelf ? 'sended' : 'received'}`}>
                                 <div className="content">
                                     <div className="files">
@@ -332,6 +381,21 @@ function ChatContainer({arrivalMessage, updateListConversation, currentChat, cur
                                     }
                                     </div>
                                     <p>{message.message.message.text}</p>
+                                </div>
+                                <div className="options">
+                                    <div className="icon-option icon-react"><BsEmojiSmile /></div>
+                                    <div className="icon-option icon-reply"><BsReplyFill /></div>
+                                    <div className="icon-option icon-more" onClick={() => setShowMoreOption(!showMoreOption)}><BsThreeDotsVertical /></div>
+                                    {showMoreOption && 
+                                    <div className="more-option">
+                                        <div className="option-item">
+                                            Xóa tin nhắn ở phía bạn
+                                        </div>
+                                        {message.fromSelf && <div className="option-item" onClick={() => onHandleEvict(message.message)}>
+                                            Thu hồi tin nhắn
+                                        </div>}
+                                    </div>
+                                    }
                                 </div>
                             </div>
                         </div>);
@@ -455,6 +519,22 @@ const Container = styled.div`
         .message {
             display: flex;
             align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            &:hover {
+                .options {
+                    position: relative;
+                    display: flex;
+                    height: 50px;
+                    gap: 0.5rem;
+                    align-items: center;
+                    justify-content: center;
+                    .icon-option {
+                        font-size: 1.2rem;
+                        color: #fff;
+                    }
+                }
+            }
             .content {
                 max-width: 50%;
                 overflow-wrap: break-word;
@@ -504,11 +584,40 @@ const Container = styled.div`
                   }
                 }
             }
+            .options {
+                display: none;
+            }
+            .more-option {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                position: absolute;
+                top: -30px;
+                left: 40px;
+                width: 200px;
+                background-color: #4f04ff21;
+                z-index: 1;
+                .option-item {
+                    color: #fff;
+                    font-size: 1.1rem;
+                    padding: 0.2rem;
+                    &:hover {
+                        opacity: 0.8;
+                        cursor: pointer;
+                    }
+                }
+            }
         }
         .sended {
-            justify-content: flex-end;
+            justify-content: flex-start;
+            flex-direction: row-reverse;
             .content {
                 background-color: #4f04ff21;
+            }
+            .more-option {
+                left: -120px;
+                top: -50px;
             }
         }
         .received {

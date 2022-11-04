@@ -70,3 +70,34 @@ export const uploadToS3 = async (files) => {
     return response;
   }
 };
+
+export const deleteFromS3 = async (files) => {
+  let response = {};
+  if (files) {
+    for (var i = 0; i < files.length; i++) {
+      // console.log(files[i]);
+      var parts = files[i].split("/");
+      const key = parts[parts.length - 1];
+      console.log(key);
+      const params = {
+        Bucket: "app-chat-s3",
+        Key: key,
+      };
+      await s3
+        .deleteObject(params, (error) => {
+          if (error) {
+            console.log("error = ", error);
+            // return res.send("Internal Server Error");
+            response = { status: false, message: "Fail to remove file" };
+            return response;
+          }
+        })
+        .promise();
+    }
+    response = {
+      status: true,
+      message: "Remove successfully",
+    };
+    return response;
+  }
+};
