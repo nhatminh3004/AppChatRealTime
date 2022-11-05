@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   Dimensions,
+  LogBox,
 } from "react-native";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -23,6 +24,9 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import io from "socket.io-client";
+
+
+
 
 const { StatusBarManager } = NativeModules;
 

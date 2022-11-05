@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Text,
   StyleSheet,
@@ -9,9 +9,12 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 function ChatItem(props) {
   const { fromSelf, message } = props.item;
   const { onPress } = props;
+  let url;
+  console.log("Ảnh chuỗi",message);
   if (message) {
     // console.log(message.message.text);
     return fromSelf ? (
@@ -43,6 +46,7 @@ function ChatItem(props) {
               {message.message.files.length === 0 ? (
                 <Text style={styles.last_msg_BanThan}>
                   {message.message.text}
+           
                 </Text>
               ) : (
                 <View style={styles.last_msg_BanThan}>
@@ -93,17 +97,30 @@ function ChatItem(props) {
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               {message.message.files.length === 0 ? (
-                <Text style={styles.last_msg}>{message.message.text}</Text>
+                 <>
+                 
+               <Text style={styles.last_msg}>{message.message.text}  </Text>
+                 </> 
               ) : (
+                <>
                 <View style={styles.last_msg}>
+                  {console.log("Ảnh:",message.message.files)}
+                  
                   {message.message.files.map((file, index) => {
-                    <Image
-                      key={index}
-                      style={styles.image}
-                      source={{ uri: file }}
-                    />;
+                     url=file.url
+                     console.log("file nhận được :",url);
+                     console.log("index:",index);
+                     
                   })}
+                  <Image
+                  style={{width:90,height:90}}
+                  source={{
+                    uri: url,
+                  }}
+                />
                 </View>
+                </>
+                     
               )}
             </View>
           </View>
