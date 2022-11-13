@@ -73,6 +73,7 @@ function ConservisionItem(props) {
                   lastMessage && (
                     <Text style={styles.last_msg}>
                       {lastMessage.message.message.text}
+                     
                     </Text>
                   )
                 )}

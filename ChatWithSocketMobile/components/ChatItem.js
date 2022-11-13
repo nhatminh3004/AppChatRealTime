@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Text,
   StyleSheet,
@@ -9,9 +9,14 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 function ChatItem(props) {
   const { fromSelf, message } = props.item;
   const { onPress } = props;
+  let url;
+  let urlTypeFile;
+
+  console.log("Ảnh chuỗi",message);
   if (message) {
     // console.log(message.message.text);
     return fromSelf ? (
@@ -43,6 +48,7 @@ function ChatItem(props) {
               {message.message.files.length === 0 ? (
                 <Text style={styles.last_msg_BanThan}>
                   {message.message.text}
+           
                 </Text>
               ) : (
                 <View style={styles.last_msg_BanThan}>
@@ -93,17 +99,62 @@ function ChatItem(props) {
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               {message.message.files.length === 0 ? (
-                <Text style={styles.last_msg}>{message.message.text}</Text>
+                 <>
+                 
+               <Text style={styles.last_msg}>{message.message.text}  </Text>
+                 </> 
               ) : (
+                <>
                 <View style={styles.last_msg}>
+                  {console.log("Ảnh:",message.message.files)}
+                  
                   {message.message.files.map((file, index) => {
-                    <Image
-                      key={index}
-                      style={styles.image}
-                      source={{ uri: file }}
-                    />;
+                     url=file.url
+                     var part=url.split(".");
+                     var typeFile=part[part.length-1];
+                     urlTypeFile=typeFile;
+                     console.log("typeFile:",typeFile);
+                     console.log("file nhận được :",url);
+                    
+                     
                   })}
+                  {  console.log("urlTypeFile:",urlTypeFile)}
+                  {urlTypeFile== "jpg" || urlTypeFile=="jpeg" || urlTypeFile =="png" ? (
+               <Image
+               style={{width:90,height:90}}
+               source={{
+                 uri: url,
+               }}
+             />
+              ) : (
+                  urlTypeFile=="docx" ?( <Image
+                    style={{width:90,height:90}}
+                    source={{
+                      uri: "https://thehanoichamomile.files.wordpress.com/2019/06/12-121390_new-microsoft-word-icon.jpg",
+                    }}
+                  />) :(
+                    urlTypeFile=="pdf" ?(
+                      <Image
+                      style={{width:90,height:90}}
+                      source={{
+                        uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/1667px-PDF_file_icon.svg.png",
+                      }}/>
+                    ) :(
+                      <Image
+                      style={{width:90,height:90}}
+                      source={{
+                        uri: "https://findicons.com/files/icons/2795/office_2013_hd/2000/excel.png",
+                      }}/>
+                    )
+                    
+                  )
+               
+               
+              )}
+              
                 </View>
+                </>
+                     
               )}
             </View>
           </View>

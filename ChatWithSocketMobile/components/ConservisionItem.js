@@ -23,6 +23,7 @@ function ConservisionItem(props) {
       setIsSingle(false);
     }
   }, [props]);
+  console.log("lagmessage Info: ",lastMessage.message.message);
   return (
     <View style={styles.container}>
       {isSearchResult && (
@@ -87,10 +88,14 @@ function ConservisionItem(props) {
                 ) : (
                   lastMessage && (
                     <Text style={styles.last_msg}>
-                      {lastMessage.message.message.text}
+                    {lastMessage.message.message.text}
                     </Text>
                   )
+                  
+                 
                 )}
+                
+               
               </View>
             </View>
           </View>
