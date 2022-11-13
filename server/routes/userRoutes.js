@@ -8,23 +8,25 @@ const {
   denyAddFriend,
   checkPhoneTonTai,
   doiMatKhau,
+  getUsersInfo,
 } = require("../controllers/userController");
 const { login } = require("../controllers/userController");
 
 const router = require("express").Router();
 
 router.post("/register", register);
-router.get("/test",(req,res) =>{
-res.send('Hello');
-})
+router.get("/test", (req, res) => {
+  res.send("Hello");
+});
 router.post("/login", login);
-router.post("/doiMatKhau",doiMatKhau);
-router.post("/checkPhoneTonTai",checkPhoneTonTai);
+router.post("/doiMatKhau", doiMatKhau);
+router.post("/checkPhoneTonTai", checkPhoneTonTai);
 router.post("/setAvatar/:id", setAvatar);
 router.post("/invite", addSentInvitation);
 router.post("/acceptFriend", acceptFriend);
 router.post("/denyAddFriend", denyAddFriend);
 router.get("/allusers/:id", getAllUsers);
 router.post("/search", searchUser);
+router.post("/getUsersInfo", getUsersInfo);
 
 module.exports = router;

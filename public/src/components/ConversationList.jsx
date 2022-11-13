@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { AiOutlineSearch } from 'react-icons/ai';
+import { AiOutlineSearch, AiOutlineUsergroupAdd } from 'react-icons/ai';
 import styled from 'styled-components';
 import Logo from "../assets/logo.svg"
 import { searchUsers } from '../utils/APIRoutes';
@@ -9,7 +9,7 @@ import Logout from './Logout';
 import SearchResults from './SearchResults';
 import AvatarDefault from "../assets/avatar_default.png"
 
-function ConversationList({ conversations, currentUser, changeChat, socket}) {
+function ConversationList({ setIsOpenList, conversations, currentUser, changeChat, socket}) {
     const [currentUserName, setCurrentUserName] = useState(undefined);
     const [currentUserImage, setCurrentUserImage] = useState(undefined);
     const [currentSelected, setCurrentSelected] = useState(undefined);
@@ -44,12 +44,17 @@ function ConversationList({ conversations, currentUser, changeChat, socket}) {
                         <img src={Logo} alt='logo'/>
                         <h3>snappy</h3>
                     </div>
-                    <form onSubmit={(e) => onHandleSearch(e)} className="search">
-                        <input type="text" value={searchKey} onChange={(e) => setSearchKey(e.target.value)} placeholder='Tìm theo tên và số điện thoại'/> 
-                        <button className='submit'>
-                            <AiOutlineSearch/>
-                        </button>
-                    </form>
+                    <div className='options'>
+                        <form onSubmit={(e) => onHandleSearch(e)} className="search">
+                            <input type="text" value={searchKey} onChange={(e) => setSearchKey(e.target.value)} placeholder='Tìm theo tên và số điện thoại'/> 
+                            <button className='submit'>
+                                <AiOutlineSearch/>
+                            </button>
+                        </form>
+                        <div onClick={() => setIsOpenList(true)} className="btn-group">
+                            <AiOutlineUsergroupAdd />
+                        </div>
+                    </div>
                     {
                         searchResults.length != 0 ? 
                         <SearchResults searchResults={searchResults} changeCurrentChat={changeCurrentChat} currentSelected={currentSelected} onHandleClearSearchResults={onHandleClearSearchResults}/>
@@ -95,26 +100,52 @@ const Container = styled.div`
             text-transform: uppercase;
         }
     }
-    .search {
+    .options {
         display: flex;
+        width: 100%;
+        /* height: 50px; */
+        justify-content: space-between;
+        padding: 0 1rem;
         align-items: center;
-        justify-content: center;
-        padding-bottom: 0.5rem;
-        gap: 0.5rem;
-        input {
-            height: 70%;
-            width: 70%;
-            padding-inline: 0.5rem;
-            border-radius: 1rem;
+        .search {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* padding-bottom: 0.5rem; */
+            gap: 0.5rem;
+            width: 90%;
+            input {
+                height: 70%;
+                width: 70%;
+                padding: 0.7rem;
+                border-radius: 1rem;
+            }
+            .submit {
+                padding: 0.4rem;
+                font-size: 1rem;
+                border-radius: 1rem;
+                cursor: pointer;
+                background-color: #9186f3;
+                color: white;
+                font-weight: 500;
+            }
         }
-        .submit {
+        .btn-group {
+            height: 40px;
+            width: 40px;
+            /* width: 70%; */
             padding: 0.4rem;
-            font-size: 1rem;
             border-radius: 1rem;
             cursor: pointer;
             background-color: #9186f3;
-            color: white;
-            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            svg {
+                color: white;
+                font-weight: 500;
+                font-size: 1.5rem;
+            }
         }
     }
     .current-user {

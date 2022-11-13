@@ -2,12 +2,12 @@ import axios from "axios";
 import React, { useState, useCallback } from "react";
 import { useRef } from "react";
 import { useEffect } from "react";
-import { AiOutlineCheck } from "react-icons/ai";
+import { AiOutlineCheck, AiOutlineUsergroupAdd } from "react-icons/ai";
 import { FiUserPlus } from 'react-icons/fi';
 import styled from "styled-components";
 import ChatInput from "./ChatInput";
 import AvatarDefault from "../assets/avatar_default.png"
-import { BsCheckLg, BsEmojiSmile, BsReplyFill, BsThreeDotsVertical } from "react-icons/bs";
+import { BsCheckLg, BsEmojiSmile, BsInfoCircle, BsReplyFill, BsThreeDotsVertical } from "react-icons/bs";
 import { GrClose } from "react-icons/gr";
 import {ToastContainer, toast} from 'react-toastify'
 import { FileIcon, defaultStyles } from 'react-file-icon';
@@ -15,8 +15,9 @@ import { FileIcon, defaultStyles } from 'react-file-icon';
 import { acceptAddFriend, addSentInvitation, denyAddFriend, evictMessageRoute, getAllMessagesRoute, sendMessageRoute } from "../utils/APIRoutes";
 import { deleteFromS3, uploadToS3 } from "../utils/AWS";
 import ViewFiles from "./ViewFiles";
+import InfoTab from "./InfoTab";
 
-function ChatContainer({messageEvict, arrivalMessage, updateListConversation, currentChat, currentUser, setCurrentUser, socket, openImageViewer,files}) {
+function ChatContainer({setIsOpenListAddMember, setExceiptionUser, setCurrentChat, messageEvict, arrivalMessage, updateListConversation, currentChat, currentUser, setCurrentUser, socket, openImageViewer,files}) {
     const [messages, setMessages] = useState([]);
     const [sentInvitation, setSentInvitation] = useState(false);
     const [haveInvitation, setHaveInvitation] = useState(false);
@@ -24,6 +25,7 @@ function ChatContainer({messageEvict, arrivalMessage, updateListConversation, cu
     const [isSingle, setIsSingle] = useState(true);
     const [showMoreOption, setShowMoreOption] = useState(false);
     const [evictMessage, setEvictMessage] = useState(false); 
+    const [openInfo, setOpenInfo] = useState(false);
 
     const toastOptions = {
         position: 'bottom-right',
@@ -67,12 +69,12 @@ function ChatContainer({messageEvict, arrivalMessage, updateListConversation, cu
             message:msg
         })
         socket.current.emit("send-msg", {
-            from: {userId: currentUser._id, conversationId: currentChat.conversation._id},
+            from: {user: currentUser, conversationId: currentChat.conversation._id},
             to: currentChat.conversation.members,
             message: newMessage.data
         })
         const msgs = [...messages];
-        msgs.push({fromSelf: true, message: newMessage.data });
+        msgs.push({fromSelf: true, message: newMessage.data, senderUser: currentUser });
         setMessages(msgs);
         updateListConversation(new Date())
     };
@@ -80,18 +82,6 @@ function ChatContainer({messageEvict, arrivalMessage, updateListConversation, cu
     const handleFileUpload = async (e) => {
         const { files } = e.target;
         if (files && files.length) {
-            // const filename = files[0].name;
-            // console.log("fileName", files);
-            // var parts = filename.split(".");
-            // const fileType = parts[parts.length - 1];
-            // console.log("fileType", fileType); //ex: zip, rar, jpg, svg etc.
-            //  await axios.post(`${sendImagesRoute}`, {files})
-            // setImages(files);
-            // socket.current.emit("send-msg", {
-            //     from: {userId: currentUser._id, conversationId: currentChat.conversation._id},
-            //     to: currentChat.conversation.members,
-            //     message: files
-            // })
             const response = await uploadToS3(files);
             if (response.status) {
                 const newConversation = await axios.post(sendMessageRoute, {
@@ -99,9 +89,8 @@ function ChatContainer({messageEvict, arrivalMessage, updateListConversation, cu
                     conversationId: currentChat.conversation._id,
                     files: response.files
                 })
-                
                 socket.current.emit("send-msg", {
-                    from: {userId: currentUser._id, conversationId: currentChat.conversation._id},
+                    from: {user: currentUser, conversationId: currentChat.conversation._id},
                     to: currentChat.conversation.members,
                     message: newConversation.data
                 })
@@ -295,114 +284,130 @@ function ChatContainer({messageEvict, arrivalMessage, updateListConversation, cu
     return (
     <>
         {currentChat && currentUser && (<Container>
-            <div className="chat-header">
-                <div className="user-details">
-                    <div className="avatar">
-                        {currentChat.avatarImage && currentChat.avatarImage != "" ? 
-                            <img src={`data:image/svg+xml;base64,${currentChat.avatarImage}`} alt="avatar"/>
-                            : <img src={AvatarDefault} alt="avatar"/>
-                        }
-                    </div>
-                    <div className="username">
-                        <h3>{currentChat.conversation.members.length > 2 ? currentChat.conversation.name : currentChat.users_info[0].username}</h3>
-                    </div>
-                </div>
-            </div>
-            {isSingle && (haveInvitation ? 
-                (
-                    <div className="haveInvitation">
-                        <div className="title-invitation">You have an invitation</div>
-                        <div className="btn-response-invitation">
-                            <div className="accept" onClick={() => onHandAcceptFriend()}>
-                                <BsCheckLg /> <p className="accept-text">Accept</p>
-                            </div>
-                            <div className="deny" onClick={() => onHandleDeny()}>
-                                <GrClose /> <p className="deny-text">Deny</p>
-                            </div>
+            <div className={`chat-container ${openInfo ? "chat-container-small" : ""}`} >
+                <div className="chat-header">
+                    <div className="user-details">
+                        <div className="avatar">
+                            {currentChat.avatarImage && currentChat.avatarImage != "" ? 
+                                <img src={`data:image/svg+xml;base64,${currentChat.avatarImage}`} alt="avatar"/>
+                                : <img src={AvatarDefault} alt="avatar"/>
+                            }
+                        </div>
+                        <div className="username">
+                            <h3>{currentChat.conversation.members.length > 2 ? currentChat.conversation.name : currentChat.users_info[0].username}</h3>
+                            <p>{currentChat.conversation.members.length > 2 && `${currentChat.conversation.members.length} members`}</p>
                         </div>
                     </div>
-                )
-                : (!sentInvitation ? 
-                (!isFriend ? 
-                    <div className="addFriend" onClick={() => onHandleAddFriend()}>
-                        <FiUserPlus /> <p className="add-text">Add friend</p>
-                    </div> : <div></div>) : 
-                    (!isFriend ?  <div className="sentInvitation">
-                        <AiOutlineCheck /> <p className="sent-text">Sent invitation</p>
-                    </div> : <div></div>)))
-                    }
-            <div className="chat-messages">
-                {
-                    messages && messages.map((message, index) => {
-                        // console.log(message);
-                        return (<div ref={scrollRef} key={index} >
-                            <div className={`message ${message.fromSelf ? 'sended' : 'received'}`}>
-                                <div className="content">
-                                    <div className="files">
-                                        {message.message.message.files && message.message.message.files.length > 0 && 
-                                        message.message.message.files.map((file,index) => 
-                                        {
-                                            var parts = file.url.split(".");
-                                            const fileType = parts[parts.length - 1];
-                                            if (fileType === "jpg" || fileType === "jpeg" || fileType === "png") {
-                                                return <div className="img-container">
-                                                        <img onClick={ () => openImageViewer(index, message.message.message.files) } key={index} src={file.url} />
-                                                    </div>
-                                            }
-                                            else if (fileType === "docx") {
-                                                return <div className="file-container" onClick={ () => openImageViewer(index, message.message.message.files) }>
-                                                    <FileIcon extension={`${fileType}`}  {...defaultStyles.docx}  />
-                                                    <div className="file-info">
-                                                        <p>{file.fileName}</p>
-                                                        <p className="file-size">{formatBytes(file.size,2)}</p>
-                                                    </div>
-                                                </div>
-                                                // return <FileIcon extension="asv" {...defaultStyles}  />
-                                            }
-                                            else if (fileType === "pdf") {
-                                                return <div className="file-container" onClick={ () => openImageViewer(index, message.message.message.files) }>
-                                                    <FileIcon extension={`${fileType}`}  {...defaultStyles.pdf}  />
-                                                    <div className="file-info">
-                                                        <p>{file.fileName}</p>
-                                                        <p className="file-size">{formatBytes(file.size,2)}</p>
-                                                    </div>
-                                                </div>
-                                                // return <FileIcon extension="asv" {...defaultStyles}  />
-                                            } else {
-                                                return <div className="file-container" onClick={ () => openImageViewer(index, message.message.message.files) }>
-                                                    <FileIcon extension={`${fileType}`}  {...defaultStyles}  />
-                                                    <div className="file-info">
-                                                        <p>{file.fileName}</p>
-                                                        <p className="file-size">{formatBytes(file.size,2)}</p>
-                                                    </div>
-                                                </div>
-                                            }
-                                        }) 
-                                    }
-                                    </div>
-                                    <p>{message.message.message.text}</p>
+                    <div className="actions" >
+                        {currentUser._id === currentChat.conversation.leaderId &&  <div className="btn-info" onClick={() => {setIsOpenListAddMember(true); setExceiptionUser(currentChat.users_info)}}>
+                            <AiOutlineUsergroupAdd />
+                        </div>}
+                        <div className="btn-info" onClick={() => setOpenInfo(!openInfo)}>
+                            <BsInfoCircle />
+                        </div>
+                    </div>
+                </div>
+                {!currentChat.conversation.leaderId && (haveInvitation ? 
+                    (
+                        <div className="haveInvitation">
+                            <div className="title-invitation">You have an invitation</div>
+                            <div className="btn-response-invitation">
+                                <div className="accept" onClick={() => onHandAcceptFriend()}>
+                                    <BsCheckLg /> <p className="accept-text">Accept</p>
                                 </div>
-                                <div className="options">
-                                    <div className="icon-option icon-react"><BsEmojiSmile /></div>
-                                    <div className="icon-option icon-reply"><BsReplyFill /></div>
-                                    <div className="icon-option icon-more" onClick={() => setShowMoreOption(!showMoreOption)}><BsThreeDotsVertical /></div>
-                                    {showMoreOption && 
-                                    <div className="more-option">
-                                        <div className="option-item">
-                                            Xóa tin nhắn ở phía bạn
-                                        </div>
-                                        {message.fromSelf && <div className="option-item" onClick={() => onHandleEvict(message.message)}>
-                                            Thu hồi tin nhắn
-                                        </div>}
-                                    </div>
-                                    }
+                                <div className="deny" onClick={() => onHandleDeny()}>
+                                    <GrClose /> <p className="deny-text">Deny</p>
                                 </div>
                             </div>
-                        </div>);
-                    })
-                }
+                        </div>
+                    )
+                    : (!sentInvitation ? 
+                    (!isFriend ? 
+                        <div className="addFriend" onClick={() => onHandleAddFriend()}>
+                            <FiUserPlus /> <p className="add-text">Add friend</p>
+                        </div> : <div></div>) : 
+                        (!isFriend ?  <div className="sentInvitation">
+                            <AiOutlineCheck /> <p className="sent-text">Sent invitation</p>
+                        </div> : <div></div>)))
+                        }
+                <div className="chat-messages">
+                    {
+                        messages && messages.map((message, index) => {
+                            // console.log(message);
+                            return (<div ref={scrollRef} key={index} >
+                                <div className={`message ${message.fromSelf ? 'sended' : 'received'}`}>
+                                    {!message.fromSelf && <div className="avatar-message">
+                                        {message.senderUser.avatarImage ? <img src={`${message.senderUser.avatarImage}`} alt="avatar" /> : <img src={AvatarDefault} alt="avatar" />}
+                                    </div>}
+                                    <div className="content">
+                                        {!message.fromSelf && <div className="user-sender"> {message.senderUser.username} </div>}
+                                        <div className="files">
+                                            {message.message.message.files && message.message.message.files.length > 0 && 
+                                            message.message.message.files.map((file,index) => 
+                                            {
+                                                var parts = file.url.split(".");
+                                                const fileType = parts[parts.length - 1];
+                                                if (fileType === "jpg" || fileType === "jpeg" || fileType === "png") {
+                                                    return <div className="img-container">
+                                                            <img onClick={ () => openImageViewer(index, message.message.message.files) } key={index} src={file.url} />
+                                                        </div>
+                                                }
+                                                else if (fileType === "docx") {
+                                                    return <div className="file-container" onClick={ () => openImageViewer(index, message.message.message.files) }>
+                                                        <FileIcon extension={`${fileType}`}  {...defaultStyles.docx}  />
+                                                        <div className="file-info">
+                                                            <p>{file.fileName}</p>
+                                                            <p className="file-size">{formatBytes(file.size,2)}</p>
+                                                        </div>
+                                                    </div>
+                                                    // return <FileIcon extension="asv" {...defaultStyles}  />
+                                                }
+                                                else if (fileType === "pdf") {
+                                                    return <div className="file-container" onClick={ () => openImageViewer(index, message.message.message.files) }>
+                                                        <FileIcon extension={`${fileType}`}  {...defaultStyles.pdf}  />
+                                                        <div className="file-info">
+                                                            <p>{file.fileName}</p>
+                                                            <p className="file-size">{formatBytes(file.size,2)}</p>
+                                                        </div>
+                                                    </div>
+                                                    // return <FileIcon extension="asv" {...defaultStyles}  />
+                                                } else {
+                                                    return <div className="file-container" onClick={ () => openImageViewer(index, message.message.message.files) }>
+                                                        <FileIcon extension={`${fileType}`}  {...defaultStyles}  />
+                                                        <div className="file-info">
+                                                            <p>{file.fileName}</p>
+                                                            <p className="file-size">{formatBytes(file.size,2)}</p>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }) 
+                                        }
+                                        </div>
+                                        <p>{message.message.message.text}</p>
+                                    </div>
+                                    <div className="options">
+                                        <div className="icon-option icon-react"><BsEmojiSmile /></div>
+                                        <div className="icon-option icon-reply"><BsReplyFill /></div>
+                                        <div className="icon-option icon-more" onClick={() => setShowMoreOption(!showMoreOption)}><BsThreeDotsVertical /></div>
+                                        {showMoreOption && 
+                                        <div className="more-option">
+                                            <div className="option-item">
+                                                Xóa tin nhắn ở phía bạn
+                                            </div>
+                                            {message.fromSelf && <div className="option-item" onClick={() => onHandleEvict(message.message)}>
+                                                Thu hồi tin nhắn
+                                            </div>}
+                                        </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>);
+                        })
+                    }
+                </div>
+                <ChatInput handleSendMsg={handleSendMsg} handleFileUpload={handleFileUpload} images={files} />
             </div>
-            <ChatInput handleSendMsg={handleSendMsg} handleFileUpload={handleFileUpload} images={files} />
+            {openInfo && <InfoTab updateListConversation={updateListConversation} setCurrentChat={setCurrentChat} currentChat={currentChat} currentUser={currentUser} socket={socket}/>}
             <ToastContainer />
         </Container>)}
     </>
@@ -412,231 +417,278 @@ function ChatContainer({messageEvict, arrivalMessage, updateListConversation, cu
 const Container = styled.div`
     display: flex;
     position: relative;
-    flex-direction: column;
+    flex-direction: row;
     align-items: stretch;
     justify-content: stretch;
-    gap: 0.1rem;
+    width: 100%;
+    /* gap: 0.1rem; */
     overflow: hidden;
     /* @media screen and (min-width: 720px) and (max-width: 1080px){
         grid-auto-rows: 15% 70% 15%;
     } */
-    .chat-header {
-        display: flex;
-        flex: 1;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-        background-color: #0d0d30;
-        .user-details {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            .avatar {
-                img {
-                    height: 3rem;
-                }
-            }
-            .username {
-                h3 {
-                    color: white;
-                }
-            }
-        }    
-    }
-    .addFriend {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        background-color: #9186f3;
-        cursor: pointer;
-        .add-text {
-            margin-left: 0.5rem;
-        }
-
-    }  
-    .sentInvitation {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #000;
-        background-color: #ccc;
-        .sent-text {
-            margin-left: 0.5rem;
-        }
-    } 
-    .haveInvitation {
-        flex: 1;
-        display: grid;
-        grid-template-rows: 50% 50%;
-        background-color: #16151584;
-        overflow: hidden;
-        .title-invitation {
-            color: #fff;
-            text-align: center;
-            padding: 0.3rem 0;
-        }
-        .btn-response-invitation {
-            width: 100%;
-            display: grid;
-            grid-template-columns: 50% 50%;
-            .accept {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background-color: #5fb85f;
-                padding: 0.3rem 0;
-                cursor: pointer;
-            }
-            .deny {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background-color: #ccc;
-                padding: 0.3rem 0;
-                cursor: pointer;
-            }
-        }
-
-    }
-    .chat-messages {
-        flex: 12;
-        padding: 1rem 2rem;
+    .chat-container {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
-        overflow: auto;
-        &::-webkit-scrollbar {
-            width: 0.2rem;
-            &-thumb {
-                background-color: #ffffff39;
-                width: 0.1rem;
-                border-radius: 1rem;
-            }
+        align-items: stretch;
+        justify-content: stretch;
+        width: 100%;
+        .chat-header {
+            display: flex;
+            flex: 1;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #0d0d30;
+            .user-details {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                .avatar {
+                    img {
+                        height: 3rem;
+                    }
+                }
+                .username {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                    h3 {
+                        color: white;
+                        font-weight: bold;
+                    }
+                    p {
+                        font-size: 1rem;
+                        color: white
+                    }
+                }
+            } 
+            .actions {
+                display: flex;
+                gap: 0.5rem;
+
+                .btn-info {
+                    display: flex;
+                    align-items: center;
+                    padding: 0.4rem;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    background-color: #9186f3;
+                    color: white;
+                    svg {
+                        font-size: 1.2rem;
+                        font-weight: 700;
+                    }
+                }
+            }   
         }
-        .message {
+        .addFriend {
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            &:hover {
-                .options {
-                    position: relative;
+            color: white;
+            background-color: #9186f3;
+            cursor: pointer;
+            .add-text {
+                margin-left: 0.5rem;
+            }
+    
+        }  
+        .sentInvitation {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            background-color: #ccc;
+            .sent-text {
+                margin-left: 0.5rem;
+            }
+        } 
+        .haveInvitation {
+            flex: 1;
+            display: grid;
+            grid-template-rows: 50% 50%;
+            background-color: #16151584;
+            overflow: hidden;
+            .title-invitation {
+                color: #fff;
+                text-align: center;
+                padding: 0.3rem 0;
+            }
+            .btn-response-invitation {
+                width: 100%;
+                display: grid;
+                grid-template-columns: 50% 50%;
+                .accept {
                     display: flex;
-                    height: 50px;
-                    gap: 0.5rem;
                     align-items: center;
                     justify-content: center;
-                    .icon-option {
-                        font-size: 1.2rem;
-                        color: #fff;
-                    }
+                    background-color: #5fb85f;
+                    padding: 0.3rem 0;
+                    cursor: pointer;
+                }
+                .deny {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background-color: #ccc;
+                    padding: 0.3rem 0;
+                    cursor: pointer;
                 }
             }
-            .content {
-                max-width: 50%;
-                overflow-wrap: break-word;
-                padding: 1rem;
-                font-size: 1.1rem;
-                border-radius: 1rem;
-                color: #d1d1d1;
-                .files {
-                  display: flex;
-                  width: 100%;
-                  justify-content: center;
-                  flex-direction: row;
-                  flex-wrap: wrap;
-                  gap: 0.5rem;
-                  .img-container {
-                      height: 40vh;
-                      flex-grow: 1;
-                      img {
-                        max-height: 100%;
-                        min-width: 100%;
-                        object-fit: contain;
-                        vertical-align: bottom;
+    
+        }
+        .chat-messages {
+            flex: 12;
+            padding: 1rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow: auto;
+            &::-webkit-scrollbar {
+                width: 0.2rem;
+                &-thumb {
+                    background-color: #ffffff39;
+                    width: 0.1rem;
+                    border-radius: 1rem;
+                }
+            }
+            .message {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                &:hover {
+                    .options {
+                        position: relative;
+                        display: flex;
+                        height: 50px;
+                        gap: 0.5rem;
+                        align-items: center;
+                        justify-content: center;
+                        .icon-option {
+                            font-size: 1.2rem;
+                            color: #fff;
+                        }
+                    }
+                }
+                .avatar-message {
+                    img {
+                        height: 2.5rem;
+                    }
+                }
+                .content {
+                    max-width: 50%;
+                    overflow-wrap: break-word;
+                    padding: 1rem;
+                    font-size: 1.1rem;
+                    border-radius: 1rem;
+                    color: #d1d1d1;
+                    .user-sender {
+                        font-weight: bold;
+                        color: #fff;
+                        padding-bottom: 0.5rem;
+                    }
+                    .files {
+                      display: flex;
+                      width: 100%;
+                      justify-content: center;
+                      flex-direction: row;
+                      flex-wrap: wrap;
+                      gap: 0.5rem;
+                      .img-container {
+                          height: 40vh;
+                          flex-grow: 1;
+                          img {
+                            max-height: 100%;
+                            min-width: 100%;
+                            object-fit: contain;
+                            vertical-align: bottom;
+                            &:hover {
+                                opacity: 0.5;
+                                cursor: pointer;
+                            }
+                        }
+                      }
+                      .file-container {
+                        width: 100%;
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        gap: 0.5rem;
+                        svg {
+                            width: 5vw;
+                            height: 8vh;
+                        }
+                        .file-info {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 0.5rem;
+                            .file-size {
+                                font-size: 0.8rem;
+                            }
+                        }
+                      }
+                    }
+                }
+                .options {
+                    display: none;
+                }
+                .more-option {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    position: absolute;
+                    top: -30px;
+                    left: 40px;
+                    width: 200px;
+                    background-color: #4f04ff21;
+                    z-index: 1;
+                    .option-item {
+                        color: #fff;
+                        font-size: 1.1rem;
+                        padding: 0.2rem;
                         &:hover {
-                            opacity: 0.5;
+                            opacity: 0.8;
                             cursor: pointer;
                         }
                     }
-                  }
-                  .file-container {
-                    width: 100%;
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    gap: 0.5rem;
-                    svg {
-                        width: 5vw;
-                        height: 8vh;
-                    }
-                    .file-info {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 0.5rem;
-                        .file-size {
-                            font-size: 0.8rem;
-                        }
-                    }
-                  }
                 }
             }
-            .options {
-                display: none;
+            .sended {
+                justify-content: flex-start;
+                flex-direction: row-reverse;
+                .content {
+                    background-color: #4f04ff21;
+                }
+                .more-option {
+                    left: -120px;
+                    top: -50px;
+                }
             }
-            .more-option {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                position: absolute;
-                top: -30px;
-                left: 40px;
-                width: 200px;
-                background-color: #4f04ff21;
-                z-index: 1;
-                .option-item {
-                    color: #fff;
-                    font-size: 1.1rem;
-                    padding: 0.2rem;
-                    &:hover {
-                        opacity: 0.8;
-                        cursor: pointer;
-                    }
+            .received {
+                justify-content: flex-start;
+                .content {
+                    background-color: #9900ff20;
                 }
             }
         }
-        .sended {
-            justify-content: flex-start;
-            flex-direction: row-reverse;
-            .content {
-                background-color: #4f04ff21;
-            }
-            .more-option {
-                left: -120px;
-                top: -50px;
-            }
+        .view-files-container {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
-        .received {
-            justify-content: flex-start;
-            .content {
-                background-color: #9900ff20;
-            }
+        .view-files-container-disable {
+            display: none;
         }
     }
-    .view-files-container {
-        position: absolute;
-        width: 100vw;
-        height: 100vh;
-        top: 0;
-        left: 0;
-        z-index: 1;
-    }
-    .view-files-container-disable {
-        display: none;
+    .chat-container-small {
+        width: 65%;
     }
 `;
 

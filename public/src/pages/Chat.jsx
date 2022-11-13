@@ -12,6 +12,8 @@ import SidebarNav from "../components/SidebarNav";
 import FriendsContainer from "../components/FriendsContainer";
 import ConversationList from "../components/ConversationList";
 import ViewFiles from "../components/ViewFiles";
+import ListView from "../components/ListView";
+import ListUserForAddMember from "../components/ListUserForAddMember";
 
 function Chat() {
     const socket = useRef();
@@ -29,7 +31,12 @@ function Chat() {
     const [currentImage, setCurrentImage] = useState(0);
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [messageEvict, setMessageEvict] = useState(undefined);
+    const [isOpenList, setIsOpenList] = useState(false);
+    const [listUsers, setListUsers] = useState([]);
+    const [isOpenListAddMember, setIsOpenListAddMember] = useState(false);
+    const [exceiptionUser, setExceiptionUser] = useState([]);
 
+    
     useEffect(() => {
         checkLogin();
     }, []);
@@ -87,7 +94,7 @@ function Chat() {
         if (socket.current) {
             socket.current.on("msg-receive", (dataSent) => {
                 if (currentChat.conversation._id === dataSent.from.conversationId) {
-                    setArrivalMessage({fromSelf: false, message: dataSent.message})
+                    setArrivalMessage({fromSelf: false, message: dataSent.message, senderUser: dataSent.from.user})
                 }
                 setHaveNewMessage(new Date());
             })
@@ -104,7 +111,32 @@ function Chat() {
                 console.log(data.messageId);
                 setMessageEvict(data.messageId);
             })
-            
+            socket.current.on("inform-create-group", (data) => {
+                setHaveNewMessage(new Date());
+            })
+            socket.current.on("inform-remove-member-group", (data) => {
+                if (data.userRemovedId === currentUser._id) {
+                    setCurrentChat(undefined);
+                    setHaveNewMessage(new Date());
+                } else {
+                    setCurrentChat(data.conversation);
+                }
+            })
+            socket.current.on("inform-add-members-group", (data) => {
+                setCurrentChat(data.conversation);
+                setHaveNewMessage(new Date());
+            })
+            socket.current.on("inform-change-leader", (data) => {
+                setCurrentChat(data.conversation);
+            })
+            socket.current.on("inform-leave-group", (data) => {
+                setCurrentChat(data.conversation);
+                setHaveNewMessage(new Date());
+            })
+            socket.current.on("inform-remove-group", () => {
+                setCurrentChat(undefined);
+                setHaveNewMessage(new Date());
+            })
         }
     });
 
@@ -130,17 +162,25 @@ function Chat() {
         setIsViewerOpen(false);
         setFiles([]);
     };
+    const closeList = () => {
+        setIsOpenList(false);
+    }
+    const closeListAdd = () => {
+        setIsOpenListAddMember(false);
+        setExceiptionUser([]);
+    }
+    
     return <Container>
         <div className="container">
             <SidebarNav changeNav={onHandleSelectNav} haveInvitation={haveInvitation} />
             {
                 openMessageContainer ? (
                     <>
-                        <ConversationList conversations={conversations} currentUser={currentUser} changeChat={handleChatChange} socket={socket}/>
+                        <ConversationList setIsOpenList={setIsOpenList} conversations={conversations} currentUser={currentUser} changeChat={handleChatChange} socket={socket}/>
                         {
                             isLoaded && currentChat === undefined ? 
                                 (<Welcome currentUser={currentUser} />) :
-                                (<ChatContainer messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
+                                (<ChatContainer setIsOpenListAddMember={setIsOpenListAddMember} setExceiptionUser={setExceiptionUser} messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
                                 
                         }
                     </>
@@ -150,7 +190,7 @@ function Chat() {
                         {
                             isLoaded && currentChat === undefined ? 
                                 (<Welcome currentUser={currentUser} />) :
-                                (<ChatContainer messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
+                                (<ChatContainer setIsOpenListAddMember={setIsOpenListAddMember} setExceiptionUser={setExceiptionUser} messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
                                 
                         }
                     </>
@@ -171,6 +211,9 @@ function Chat() {
             } */}
         </div>
         <ViewFiles closeImageViewer={closeImageViewer} files={files} currentImage={currentImage} isViewerOpen={isViewerOpen}/>
+        {isOpenList && <ListView setHaveNewMessage={setHaveNewMessage} setCurrentChat={setCurrentChat} closeList={closeList} currentUser={currentUser} listUsers={listUsers} socket={socket}/>}
+        {isOpenListAddMember && <ListUserForAddMember currentChat={currentChat} exceiptionUser={exceiptionUser} setHaveNewMessage={setHaveNewMessage} setCurrentChat={setCurrentChat} closeList={closeListAdd} currentUser={currentUser} listUsers={listUsers} socket={socket}/>}
+
     </Container> ;
 }
 

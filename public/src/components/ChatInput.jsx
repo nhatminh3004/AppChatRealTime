@@ -116,6 +116,7 @@ const Container = styled.div`
             cursor: pointer;
             .btn-addImage {
                 background-color: transparent;
+                border: none;
                 svg {
                     font-size: 1.5rem;
                     color: #ebe7ff;

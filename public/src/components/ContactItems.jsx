@@ -8,7 +8,7 @@ function ContactItems({conversations, changeCurrentChat, currentSelected}) {
             {
                 (conversations.map((conversation, index) => {
                     return  (
-                        !conversation.leaderId ? (
+                        !conversation.conversation.leaderId ? (
                             <div 
                             className={`contact ${conversation.conversation._id === currentSelected ? "selected" : ""}`} 
                             key={index}
@@ -31,7 +31,7 @@ function ContactItems({conversations, changeCurrentChat, currentSelected}) {
                             </div>
                         ):(
                             <div 
-                            className={`contact ${conversation._id === currentSelected ? "selected" : ""}`} 
+                            className={`contact ${conversation.conversation._id === currentSelected ? "selected" : ""}`} 
                             key={index}
                             onClick={() => changeCurrentChat(index, conversation)}
                                         >
@@ -43,10 +43,10 @@ function ContactItems({conversations, changeCurrentChat, currentSelected}) {
                                 </div>
                                 <div className='message'>
                                     <div className="username">
-                                        <h3>{conversation.name}</h3>
+                                        <h3>{conversation.conversation.name}</h3>
                                     </div>
                                     <div className="latestMessage">
-                                        <p>{conversation.lastMessage.message.text}</p>
+                                        {conversation.lastMessage.message ? <p>{conversation.lastMessage.message.message.text}</p> : <p>You are added to group</p>}
                                     </div>
                                 </div>
                             </div>

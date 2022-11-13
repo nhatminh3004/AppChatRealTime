@@ -102,6 +102,26 @@ module.exports.getAllUsers = async (req, res, next) => {
   }
 };
 
+module.exports.getUsersInfo = async (req, res, next) => {
+  try {
+    const usersId = req.body.usersId;
+    let result = [];
+    if (usersId) {
+      for (var i = 0; i < usersId.length; i++) {
+        const user = await User.findById(usersId[i]);
+
+        if (user) {
+          result = [...result, user];
+        }
+      }
+    }
+    console.log(result);
+    return res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports.searchUser = async (req, res, next) => {
   try {
     const { searchKey, id } = req.body;

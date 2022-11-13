@@ -54,7 +54,7 @@ function MessageScreen(props) {
   //Khi nhân tin nhắn cập nhật lại last mess
   useEffect(() => {
     addUserToSocket();
-  });
+  }, []);
 
   const addUserToSocket = async () => {
     let currentUser = await AsyncStorage.getItem("User");

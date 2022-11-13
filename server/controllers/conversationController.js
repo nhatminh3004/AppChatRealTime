@@ -46,11 +46,13 @@ module.exports.getAllMessage = async (req, res, next) => {
         const message = await messageModel.findOne({
           _id: conversation.messages[i],
         });
+        const senderUser = await userModel.findById(message.sender);
         projectMessages = [
           ...projectMessages,
           {
             fromSelf: message.sender.toString() === userId,
             message: message,
+            senderUser: senderUser,
           },
         ];
       }
@@ -90,7 +92,7 @@ module.exports.getMyConversations = async (req, res, next) => {
           _id: conversations[i].lastMessageId,
         });
         lastMessage = { ...lastMessage, message };
-        if (lastMessage.message) {
+        if (lastMessage.message || users_info.length > 1) {
           newConversations = [
             ...newConversations,
             { conversation: conversations[i], users_info, lastMessage },
@@ -159,6 +161,194 @@ module.exports.createConversation = async (req, res, next) => {
           msg: "Create conversation fail",
         });
       }
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.createGroup = async (req, res, next) => {
+  try {
+    const { members, leaderId, nameGroup } = req.body;
+    let tempMember = [{ userId: leaderId, lastView: Date.now() }];
+    for (var i = 0; i < members.length; i++) {
+      tempMember = [...tempMember, { userId: members[i]._id }];
+    }
+    let newConversation = await conversationModel.create({
+      members: tempMember,
+      leaderId: leaderId,
+      name: nameGroup,
+    });
+    if (newConversation) {
+      let users_info = [];
+      for (var j = 0; j < newConversation.members.length; j++) {
+        const user = await userModel.findOne({
+          _id: newConversation.members[j].userId,
+        });
+        users_info = [...users_info, user];
+      }
+      newConversation = {
+        conversation: newConversation,
+        users_info,
+      };
+      console.log(newConversation);
+      return res.json(newConversation);
+    } else {
+      return res.json({
+        msg: "Create conversation fail",
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.removeMember = async (req, res, next) => {
+  try {
+    const { user, conversation } = req.body;
+    let temp = await conversationModel.findByIdAndUpdate(conversation._id, {
+      $pull: { members: { userId: user._id } },
+    });
+    if (temp) {
+      let newConversation = await conversationModel.findById(conversation._id);
+      if (newConversation) {
+        let users_info = [];
+        for (var j = 0; j < newConversation.members.length; j++) {
+          const user = await userModel.findOne({
+            _id: newConversation.members[j].userId,
+          });
+          users_info = [...users_info, user];
+        }
+        newConversation = {
+          conversation: newConversation,
+          users_info,
+        };
+        console.log(newConversation);
+        return res.json(newConversation);
+      } else {
+        return res.json({
+          msg: "Remove member fail",
+        });
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.addMembers = async (req, res, next) => {
+  try {
+    const { members, conversation } = req.body;
+    let tempMember = [];
+    for (var i = 0; i < members.length; i++) {
+      tempMember = [...tempMember, { userId: members[i]._id }];
+    }
+    let temp = await conversationModel.findByIdAndUpdate(conversation._id, {
+      $push: { members: tempMember },
+    });
+    if (temp) {
+      let newConversation = await conversationModel.findById(conversation._id);
+      if (newConversation) {
+        let users_info = [];
+        for (var j = 0; j < newConversation.members.length; j++) {
+          const user = await userModel.findOne({
+            _id: newConversation.members[j].userId,
+          });
+          users_info = [...users_info, user];
+        }
+        newConversation = {
+          conversation: newConversation,
+          users_info,
+        };
+        console.log(newConversation);
+        return res.json(newConversation);
+      } else {
+        return res.json({
+          msg: "Remove member fail",
+        });
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.changeLeader = async (req, res, next) => {
+  try {
+    const { conversation, newLeader, currentUser } = req.body;
+    let temp = await conversationModel.findByIdAndUpdate(conversation._id, {
+      leaderId: newLeader._id,
+    });
+    let newConversation = await conversationModel.findById(conversation._id);
+    if (newConversation) {
+      let users_info = [];
+      for (var j = 0; j < newConversation.members.length; j++) {
+        const user = await userModel.findOne({
+          _id: newConversation.members[j].userId,
+        });
+        users_info = [...users_info, user];
+      }
+      newConversation = {
+        conversation: newConversation,
+        users_info,
+      };
+      console.log(newConversation);
+      return res.json(newConversation);
+    } else {
+      return res.json({
+        msg: "Remove member fail",
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.leaveGroup = async (req, res, next) => {
+  try {
+    const { conversation, currentUser } = req.body;
+    if (conversation.leaderId !== currentUser._id) {
+      let temp = await conversationModel.findByIdAndUpdate(conversation._id, {
+        $pull: { members: { userId: currentUser._id } },
+      });
+      let newConversation = await conversationModel.findById(conversation._id);
+      if (newConversation) {
+        let users_info = [];
+        for (var j = 0; j < newConversation.members.length; j++) {
+          const user = await userModel.findOne({
+            _id: newConversation.members[j].userId,
+          });
+          users_info = [...users_info, user];
+        }
+        newConversation = {
+          conversation: newConversation,
+          users_info,
+        };
+        console.log(newConversation);
+        return res.json(newConversation);
+      } else {
+        return res.json({
+          msg: "Remove member fail",
+        });
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports.removeGroup = async (req, res, next) => {
+  try {
+    const { conversation, currentUser } = req.body;
+    if (conversation.leaderId === currentUser._id) {
+      for (var i = 0; i < conversation.messages.length; i++) {
+        await messageModel.findByIdAndDelete(conversation.messages[i]);
+      }
+
+      let response = await conversationModel.findByIdAndDelete(
+        conversation._id
+      );
+      return res.json("Successful");
     }
   } catch (error) {
     next(error);

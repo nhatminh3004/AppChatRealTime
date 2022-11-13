@@ -45,8 +45,9 @@ io.on("connection", (socket) => {
     onlineUsers.set(userId, socket.id);
   });
   socket.on("send-msg", (data) => {
+    console.log(data);
     for (var i = 0; i < data.to.length; i++) {
-      if (data.to[i].userId !== data.from.userId) {
+      if (data.to[i].userId !== data.from.user._id) {
         const sendUserSocket = onlineUsers.get(data.to[i].userId);
         if (sendUserSocket) {
           // console.log(sendUserSocket);
@@ -86,6 +87,115 @@ io.on("connection", (socket) => {
     const sendUserSocket = onlineUsers.get(data.to._id);
     if (sendUserSocket) {
       io.to(`${sendUserSocket}`).emit("response-deny-invitation", data);
+    }
+  });
+  socket.on("create-group", (data) => {
+    for (var i = 0; i < data.conversation.members.length; i++) {
+      if (data.conversation.members[i].userId !== data.myId) {
+        const sendUserSocket = onlineUsers.get(
+          data.conversation.members[i].userId
+        );
+        if (sendUserSocket) {
+          // console.log(sendUserSocket);
+          const dataSent = {
+            conversation: data.conversation,
+          };
+          io.to(`${sendUserSocket}`).emit("inform-create-group", dataSent);
+        }
+      }
+    }
+  });
+  socket.on("add-members-group", (data) => {
+    for (var i = 0; i < data.conversation.conversation.members.length; i++) {
+      if (data.conversation.conversation.members[i].userId !== data.myId) {
+        const sendUserSocket = onlineUsers.get(
+          data.conversation.conversation.members[i].userId
+        );
+        if (sendUserSocket) {
+          // console.log(sendUserSocket);
+          const dataSent = {
+            conversation: data.conversation,
+          };
+          io.to(`${sendUserSocket}`).emit("inform-add-members-group", dataSent);
+        }
+      }
+    }
+  });
+
+  socket.on("remove-member-group", (data) => {
+    console.log(data);
+    for (var i = 0; i < data.conversation.conversation.members.length; i++) {
+      if (
+        data.conversation.conversation.members[i].userId !==
+        data.conversation.conversation.leaderId
+      ) {
+        const sendUserSocket = onlineUsers.get(
+          data.conversation.conversation.members[i].userId
+        );
+        if (sendUserSocket) {
+          // console.log(sendUserSocket);
+          const dataSent = {
+            conversation: data.conversation,
+            userRemovedId: data.userRemovedId,
+          };
+          console.log(sendUserSocket);
+          io.to(`${sendUserSocket}`).emit(
+            "inform-remove-member-group",
+            dataSent
+          );
+        }
+      }
+    }
+    const sendUserSocket = onlineUsers.get(data.userRemovedId);
+    if (sendUserSocket) {
+      const dataSent = {
+        conversation: data.conversation,
+        userRemovedId: data.userRemovedId,
+      };
+      io.to(`${sendUserSocket}`).emit("inform-remove-member-group", dataSent);
+    }
+  });
+  socket.on("change-leader", (data) => {
+    for (var i = 0; i < data.conversation.conversation.members.length; i++) {
+      if (data.conversation.conversation.members[i].userId !== data.myId) {
+        const sendUserSocket = onlineUsers.get(
+          data.conversation.conversation.members[i].userId
+        );
+        if (sendUserSocket) {
+          // console.log(sendUserSocket);
+          const dataSent = {
+            conversation: data.conversation,
+          };
+          io.to(`${sendUserSocket}`).emit("inform-change-leader", dataSent);
+        }
+      }
+    }
+  });
+  socket.on("leave-group", (data) => {
+    for (var i = 0; i < data.conversation.conversation.members.length; i++) {
+      if (data.conversation.conversation.members[i].userId !== data.myId) {
+        const sendUserSocket = onlineUsers.get(
+          data.conversation.conversation.members[i].userId
+        );
+        if (sendUserSocket) {
+          // console.log(sendUserSocket);
+          const dataSent = {
+            conversation: data.conversation,
+          };
+          io.to(`${sendUserSocket}`).emit("inform-leave-group", dataSent);
+        }
+      }
+    }
+  });
+  socket.on("remove-group", (data) => {
+    for (var i = 0; i < data.members.length; i++) {
+      if (data.members[i].userId !== data.myId) {
+        const sendUserSocket = onlineUsers.get(data.members[i].userId);
+        if (sendUserSocket) {
+          // console.log(sendUserSocket);
+          io.to(`${sendUserSocket}`).emit("inform-remove-group");
+        }
+      }
     }
   });
 });
