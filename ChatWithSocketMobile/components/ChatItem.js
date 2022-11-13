@@ -3,20 +3,20 @@ import {
   Text,
   StyleSheet,
   View,
-  TextInput,
   TouchableOpacity,
-  Dimensions,
-  ScrollView,
   Image,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+
 function ChatItem(props) {
   const { fromSelf, message } = props.item;
   const { onPress } = props;
+  const usernameBanThan =props.userNameBanThan
+  const usernameNguoiTa = props.userNameNguoiTa;
+  
   let url;
   let urlTypeFile;
 
-  console.log("Ảnh chuỗi",message);
+  // console.log("Ảnh chuỗi",message);
   if (message) {
     // console.log(message.message.text);
     return fromSelf ? (
@@ -38,9 +38,9 @@ function ChatItem(props) {
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               <Text style={styles.last_msg}></Text>
-              {/* <Text numberOfLines={1} style={styles.username_BanThan}>
-                  {username}
-                </Text> */}
+              <Text numberOfLines={1} style={styles.username_BanThan}>
+              {usernameBanThan}
+                </Text>
             </View>
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
@@ -90,9 +90,9 @@ function ChatItem(props) {
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
-              {/* <Text numberOfLines={1} style={styles.username}>
-                  {username}
-                </Text> */}
+              <Text numberOfLines={1} style={styles.username}>
+                      {usernameNguoiTa}
+                </Text>
               {/* <Text style={styles.time}>{timestamps}</Text> */}
             </View>
             <View
@@ -106,19 +106,19 @@ function ChatItem(props) {
               ) : (
                 <>
                 <View style={styles.last_msg}>
-                  {console.log("Ảnh:",message.message.files)}
+                  {/* {console.log("Ảnh:",message.message.files)} */}
                   
                   {message.message.files.map((file, index) => {
                      url=file.url
                      var part=url.split(".");
                      var typeFile=part[part.length-1];
                      urlTypeFile=typeFile;
-                     console.log("typeFile:",typeFile);
-                     console.log("file nhận được :",url);
+                    //  console.log("typeFile:",typeFile);
+                    //  console.log("file nhận được :",url);
                     
                      
                   })}
-                  {  console.log("urlTypeFile:",urlTypeFile)}
+                  {/* {  console.log("urlTypeFile:",urlTypeFile)} */}
                   {urlTypeFile== "jpg" || urlTypeFile=="jpeg" || urlTypeFile =="png" ? (
                <Image
                style={{width:90,height:90}}
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     color: "#000",
     width: 200,
     fontWeight: "bold",
-    marginHorizontal: 10,
+    marginHorizontal: 60,
   },
 });
 export default ChatItem;

@@ -45,7 +45,7 @@ io.on("connection", (socket) => {
     onlineUsers.set(userId, socket.id);
   });
   socket.on("send-msg", (data) => {
-    console.log(data);
+    console.log("send-msg socket :",data);
     for (var i = 0; i < data.to.length; i++) {
       if (data.to[i].userId !== data.from.user._id) {
         const sendUserSocket = onlineUsers.get(data.to[i].userId);

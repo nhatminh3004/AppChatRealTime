@@ -41,20 +41,27 @@ function ChatScreen(props) {
   const [messages, setMessages] = useState([]);
   const [arraivalMessage, setArrivalMessage] = useState({});
   const [text, setText] = useState("");
+  const [userNameBanThan,setuserNameBanThan] = useState("");
+  const [userNameNguoiTa,setuserNameNguoiTa] = useState('');
   const socket = useRef();
 
   useEffect(() => {
     addUserToSocket();
+    setuserNameNguoiTa(users_info[0].username)
   }, []);
 
   const addUserToSocket = async () => {
     let currentUser = await AsyncStorage.getItem("User");
     currentUser = JSON.parse(currentUser);
+    setuserNameBanThan(currentUser.username);
     socket.current = io(host);
     await socket.current.emit("add-user", currentUser._id);
 
     if (socket.current) {
       socket.current.on("msg-receive", (dataSent) => {
+        console.log("Data nhận :", dataSent.from.user.username);
+        // setuserNameNguoiTa(dataSent.from.user.username);
+       
         if (conversation._id === dataSent.from.conversationId) {
           setArrivalMessage({ fromSelf: false, message: dataSent.message });
         }
@@ -65,15 +72,7 @@ function ChatScreen(props) {
     getAllMyMessages();
   }, []);
   useEffect(() => {
-    // console.log(arraivalMessage);
-    // console.log(messages[0]);
-    // console.log(arraivalMessage);
-    // console.log([...messages].push(arraivalMessage));
-    // const msgs = [...messages];
-    //     msgs.push({fromSelf: true, message: arraivalMessage });
-    //     setMessages(msgs);
-    // console.log({ fromSelf: false, message: arraivalMessage });
-
+   
     if (arraivalMessage) setMessages([...messages, arraivalMessage]);
   }, [arraivalMessage]);
   const getAllMyMessages = async () => {
@@ -100,7 +99,7 @@ function ChatScreen(props) {
     });
     socket.current.emit("send-msg", {
       from: {
-        userId: currentUser._id,
+        user: currentUser,
         conversationId: conversation._id,
       },
       to: conversation.members,
@@ -127,6 +126,7 @@ function ChatScreen(props) {
           }}
         />
         <Text style={styles.headerTitle}>{users_info[0].username}</Text>
+        
       </View>
       {/* {console.log(messages[0])} */}
       {messages && (
@@ -134,7 +134,7 @@ function ChatScreen(props) {
           style={{ flex: 1 }}
           data={messages}
           renderItem={({ item }) => (
-            <ChatItem item={item} key={`${item._id}`} />
+            <ChatItem item={item} userNameBanThan={userNameBanThan} userNameNguoiTa={userNameNguoiTa}  key={`${item._id}`} />
           )}
         />
       )}
