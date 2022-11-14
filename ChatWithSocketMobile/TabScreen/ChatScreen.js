@@ -6,11 +6,14 @@ import {
   TouchableOpacity,
   Dimensions,
   LogBox,
+  Alert
 } from "react-native";
-
+import * as ImagePicker from 'expo-image-picker';
+import {firebase} from '../config';
 import React, { useEffect, useRef, useState } from "react";
 import Separator from "../ultis/Separator";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { MaterialIcons } from '@expo/vector-icons'; 
 import { StatusBar } from "expo-status-bar";
 import { NativeModules } from "react-native";
 import ChatItem from "../components/ChatItem";
@@ -24,7 +27,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import io from "socket.io-client";
-
+let uriFetch;
 
 
 
@@ -34,10 +37,11 @@ const heightCuaStatusBar = StatusBarManager.HEIGHT;
 const { height, width } = Dimensions.get("window");
 
 function ChatScreen(props) {
+  const [uriImage, seturiImage] = useState('');
   const { navigation, route } = props;
   const { navigate, goBack } = navigation;
   const { users_info, conversation, lastMessage } = props.route.params.user; // nhận từ bên MessageScreen
-  const setHaveNewMessage = props.route.params.setHaveNewMessage; // nhận từ bên MessageScreen
+  const setHaveNewMessage = props.route.params.setHaveNewMessage; 
   const [messages, setMessages] = useState([]);
   const [arraivalMessage, setArrivalMessage] = useState({});
   const [text, setText] = useState("");
@@ -111,7 +115,77 @@ function ChatScreen(props) {
     setHaveNewMessage(new Date());
     setText("");
   };
+  const handleSendImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    console.log("Result Pick Image:",result.uri);
+    uriFetch=result.uri;
+    seturiImage(result.uri);
+    if (result.cancelled)  {
+      Alert.alert("Bạn chưa chọn ảnh")
+      seturiImage('');
+      // setFileName('');
+      uriFetch='';
+  }
+  else {
+    seturiImage(result.uri);
+    // setFileName(result.uri);
+console.log("Tên Image Fetch:", uriFetch);
+  const response =await fetch(uriFetch);
+  const blob =await response.blob();
+  const nameFile=  uriFetch.substring(uriFetch.lastIndexOf('/')+1);
+  console.log("name file :",nameFile);
+  var ref =  firebase.storage().ref().child(nameFile).put(blob);
+  const imageUrl = await (await ref).ref.getDownloadURL();
+  console.log("Download URRL:",imageUrl);
+
+  let currentUser = await AsyncStorage.getItem("User");
+    currentUser = JSON.parse(currentUser);
+    let url=nameFile
+    let part=url.split(".");
+    let typeFile=part[part.length-1];
+   let urlTypeFile=typeFile;
+    console.log("urlType File : ",urlTypeFile);
+    const objectFile ={
+      fileName:nameFile,
+      size:123,
+      url:imageUrl+"."+urlTypeFile
+    }
+    const newMessageImage = await axios.post(sendMessageRoute, {
+      from: currentUser._id,
+      conversationId: conversation._id,
+      files: objectFile,
+    });
+    console.log("newMessageImage Data ",newMessageImage.data);
+    socket.current.emit("send-msg", {
+      from: {
+        user: currentUser,
+        conversationId: conversation._id,
+      },
+      to: conversation.members,
+      message: newMessageImage.data,
+    });
+    const msgs = [...messages];
+    msgs.push({ fromSelf: true, message: newMessageImage.data });
+    setMessages(msgs);
+    setHaveNewMessage(new Date());
+    setText("");
+  try {
+    await ref
+  } catch (e) {
+    console.log(e);
+  }
+  Alert.alert("Upload Success");
   
+  seturiImage('');
+  uriFetch='';
+}
+    /////////////////////
+  };
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#0091FF" style="light" translucent />
@@ -161,6 +235,9 @@ function ChatScreen(props) {
         />
         <TouchableOpacity onPress={handleSendChat}>
           <Ionicons name="send" size={24} color="#0091FF" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleSendImage}>
+        <MaterialIcons name="photo-library" size={24} color="#0091FF" />
         </TouchableOpacity>
       </View>
     </View>

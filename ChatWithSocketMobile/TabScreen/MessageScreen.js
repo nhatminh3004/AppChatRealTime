@@ -41,7 +41,7 @@ function MessageScreen(props) {
   }, [haveNewMessage]);
   useEffect(() => {
     getAllConversations();
-  }, []);
+  },[]);
   const getAllConversations = async () => {
     let currentUser = await AsyncStorage.getItem("User");
     currentUser = JSON.parse(currentUser);
@@ -54,7 +54,7 @@ function MessageScreen(props) {
   //Khi nhân tin nhắn cập nhật lại last mess
   useEffect(() => {
     addUserToSocket();
-  }, []);
+  },);
 
   const addUserToSocket = async () => {
     let currentUser = await AsyncStorage.getItem("User");

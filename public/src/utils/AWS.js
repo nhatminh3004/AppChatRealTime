@@ -17,6 +17,7 @@ const s3 = new AWS.S3({
 });
 
 export const uploadToS3 = async (files) => {
+  console.log("File nhận vào :",files);
   let response = {};
   let filesResults = [];
   if (files) {
@@ -62,6 +63,7 @@ export const uploadToS3 = async (files) => {
         })
         .promise();
     }
+    console.log("file Result : ",filesResults);
     response = {
       status: true,
       message: "Upload successfully",

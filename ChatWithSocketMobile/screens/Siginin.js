@@ -118,6 +118,7 @@ export default function Siginin({navigation}) {
         <View style={styles.signUpContainer}>
           <Text style={styles.banchuacoAccountText}>Bạn không có tài khoản ?</Text>
           <Text style={styles.dangkyNgayText} onPress={()=>{navigation.navigate("OtpTest")}}>Đăng ký ngay tại đây</Text>
+          <Text style={styles.dangkyNgayText} onPress={()=>{navigation.replace("UploadTest")}}>Upload Ảnh Test</Text>
         </View>
     </View>
     

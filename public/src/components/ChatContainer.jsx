@@ -84,16 +84,19 @@ function ChatContainer({setIsOpenListAddMember, setExceiptionUser, setCurrentCha
         if (files && files.length) {
             const response = await uploadToS3(files);
             if (response.status) {
+                console.log("reponse Files : ",response.files);
                 const newConversation = await axios.post(sendMessageRoute, {
                     from: currentUser._id,
                     conversationId: currentChat.conversation._id,
                     files: response.files
+                   
                 })
                 socket.current.emit("send-msg", {
                     from: {user: currentUser, conversationId: currentChat.conversation._id},
                     to: currentChat.conversation.members,
                     message: newConversation.data
                 })
+                console.log("Conservation Data :",newConversation.data);
 
                 const msgs = [...messages];
                 msgs.push({fromSelf: true, message: newConversation.data});
