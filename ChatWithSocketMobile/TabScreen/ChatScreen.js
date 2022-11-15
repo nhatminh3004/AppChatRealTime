@@ -149,7 +149,7 @@ console.log("Tên Image Fetch:", uriFetch);
     let part=url.split(".");
     let typeFile=part[part.length-1];
    let urlTypeFile=typeFile;
-    console.log("urlType File : ",urlTypeFile);
+    // console.log("urlType File : ",urlTypeFile);
     const objectFile ={
       fileName:nameFile,
       size:123,

@@ -52,13 +52,49 @@ function ChatItem(props) {
                 </Text>
               ) : (
                 <View style={styles.last_msg_BanThan}>
-                  {message.message.files.map((file, index) => {
-                    <Image
-                      key={index}
-                      style={styles.image}
-                      source={{ uri: `${file}` }}
-                    />;
+                 {message.message.files.map((file, index) => {
+                     url=file.url
+                     var part=url.split(".");
+                     var typeFile=part[part.length-1];
+                     urlTypeFile=typeFile;
+                    //  console.log("typeFile:",typeFile);
+                    //  console.log("file nhận được :",url);
+                    
+                     
                   })}
+                  {/* {  console.log("urlTypeFile:",urlTypeFile)} */}
+                  {urlTypeFile== "jpg" || urlTypeFile=="jpeg" || urlTypeFile =="png" ? (
+               <Image
+               style={{width:90,height:90}}
+               source={{
+                 uri: url,
+               }}
+             />
+              ) : (
+                  urlTypeFile=="docx" ?( <Image
+                    style={{width:90,height:90}}
+                    source={{
+                      uri: "https://thehanoichamomile.files.wordpress.com/2019/06/12-121390_new-microsoft-word-icon.jpg",
+                    }}
+                  />) :(
+                    urlTypeFile=="pdf" ?(
+                      <Image
+                      style={{width:90,height:90}}
+                      source={{
+                        uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/1667px-PDF_file_icon.svg.png",
+                      }}/>
+                    ) :(
+                      <Image
+                      style={{width:90,height:90}}
+                      source={{
+                        uri: "https://findicons.com/files/icons/2795/office_2013_hd/2000/excel.png",
+                      }}/>
+                    )
+                    
+                  )
+               
+               
+              )}
                 </View>
               )}
 
@@ -118,7 +154,7 @@ function ChatItem(props) {
                     
                      
                   })}
-                  {/* {  console.log("urlTypeFile:",urlTypeFile)} */}
+                  {  console.log("urlTypeFile:",urlTypeFile)}
                   {urlTypeFile== "jpg" || urlTypeFile=="jpeg" || urlTypeFile =="png" ? (
                <Image
                style={{width:90,height:90}}
