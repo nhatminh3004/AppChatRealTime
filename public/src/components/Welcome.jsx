@@ -19,12 +19,13 @@ const Container = styled.div`
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    color: white;
+    /* color: white; */
     img {
         height: 20rem;
     }
     span {
-        color: #4e00ff;
+        /* color: #4e00ff; */
+        /* font-weight: 1000; */
     }
 `;
 

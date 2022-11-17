@@ -73,7 +73,7 @@ const Container = styled.div`
         }
     }
     .contact {
-        background-color: #ffffff39;
+        /* background-color: #ffffff39; */
         min-height: 5rem;
         width: 90%;
         cursor: pointer;
@@ -83,6 +83,9 @@ const Container = styled.div`
         align-items: center;
         display: flex;
         transition: 0.5s ease-in-out;
+        &:hover {
+            background-color: #eeeff2;
+        }
         .avatar {
             img {
                 height: 3rem;
@@ -94,21 +97,21 @@ const Container = styled.div`
             grid-template-rows: 55% 45%;
             .username {
                 h3 {
-                    color: white;
+                    /* color: white; */
                 }
             }
             .latestMessage {
                 width: 100%;
                 overflow: hidden;
                 p {
-                    color: #ccc;
+                    /* color: #ccc; */
                 }
             }
         }
             
     }
     .selected {
-        background-color: #9186f3;
+        background-color: #eeeff2;
     }
 `;
 

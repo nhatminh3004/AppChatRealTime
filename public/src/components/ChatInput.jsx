@@ -64,7 +64,8 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background-color: #080420;
+    /* background-color: #080420; */
+    background-color: #fff;
     padding: 15px 2rem;
     padding-bottom: 0.3rem;
     gap: 0.5rem;
@@ -75,27 +76,31 @@ const Container = styled.div`
     }
     .button-container {
         display: flex;
-        color: white;
+        /* color: white; */
         gap: 1rem;
         .emoji {
             cursor: pointer;
             position: relative;
             svg {
                 font-size: 1.5rem;
-                color: #ebe7ff;
+                /* color: #ebe7ff; */
+                color: #000;
                 cursor: pointer;
             }
             .emoji-picker-react {
                 position: absolute;
                 top: -350px;
-                background-color: #080420;
-                box-shadow: 0 5px 10px #9a86f3;
-                border-color: #9a86f3;
+                /* background-color: #080420; */
+                background-color: #fff;
+                /* box-shadow: 0 5px 10px #9a86f3; */
+                box-shadow: 0 5px 10px #000;
+                /* border-color: #9a86f3; */
                 .emoji-scroll-wrapper::-webkit-scrollbar {
                     background-color: #080420;
                     width: 5px;
                     &-thumb {
-                        background-color: #9186f3;
+                        /* background-color: #9186f3; */
+                        background-color: #ccc;
                     }
                 } 
                 .emoji-categories {
@@ -105,10 +110,12 @@ const Container = styled.div`
                 }
                 .emoji-search {
                     background-color: transparent;
-                    border-color: #9186f3;
+                    /* border-color: #9186f3; */
+                    border-color: #ccc;
                 }
                 .emoji-group:before {
-                    background-color: #080420;
+                    /* background-color: #080420; */
+                    background-color: #fff;
                 }
             }
         }
@@ -119,7 +126,7 @@ const Container = styled.div`
                 border: none;
                 svg {
                     font-size: 1.5rem;
-                    color: #ebe7ff;
+                    /* color: #ebe7ff; */
                     cursor: pointer;
                 }
             }
@@ -131,15 +138,17 @@ const Container = styled.div`
         display: flex;
         align-content: center;
         gap: 2rem;
-        background-color: #ffffff43;
+        /* background-color: #ffffff43; */
         input {
             width: 90%;
             background-color: transparent;
-            color: white;
-            border:none;
+            /* color: white; */
+            /* border:none; */
+            border: 1px solid #ccc;
             padding-left: 1rem;
             padding-block: 0.5rem;
             font-size: 1.2rem;
+            border-radius: 0.5rem;
             &::selection {
                 background-color: #9186f3;
             }
@@ -153,11 +162,11 @@ const Container = styled.div`
             display:flex;
             justify-content: center;
             align-items: center;
-            background-color: #9a86f3;
+            background-color: #0091ff;
             border: none;
             cursor: pointer;
             svg {
-                font-size: 1rem;
+                font-size: 1.3rem;
                 color: white;
             }
         }

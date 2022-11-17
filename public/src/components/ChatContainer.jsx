@@ -426,6 +426,7 @@ const Container = styled.div`
     width: 100%;
     /* gap: 0.1rem; */
     overflow: hidden;
+    background-color: #f4f5f7;
     /* @media screen and (min-width: 720px) and (max-width: 1080px){
         grid-auto-rows: 15% 70% 15%;
     } */
@@ -441,7 +442,8 @@ const Container = styled.div`
             justify-content: space-between;
             align-items: center;
             padding: 1rem;
-            background-color: #0d0d30;
+            background-color: #fff;
+            border-bottom: 1px solid #ccc;
             .user-details {
                 display: flex;
                 align-items: center;
@@ -456,12 +458,12 @@ const Container = styled.div`
                     flex-direction: column;
                     gap: 0.5rem;
                     h3 {
-                        color: white;
+                        /* color: white; */
                         font-weight: bold;
                     }
                     p {
                         font-size: 1rem;
-                        color: white
+                        /* color: white */
                     }
                 }
             } 
@@ -475,12 +477,16 @@ const Container = styled.div`
                     padding: 0.4rem;
                     border-radius: 5px;
                     cursor: pointer;
-                    background-color: #9186f3;
-                    color: white;
+                    /* background-color: #9186f3; */
+                    &:hover {
+                        background-color: #eeeff2;
+                    }
+                    /* color: white; */
                     svg {
                         font-size: 1.2rem;
                         font-weight: 700;
                     }
+                    
                 }
             }   
         }
@@ -489,8 +495,10 @@ const Container = styled.div`
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            background-color: #9186f3;
+            /* color: white; */
+            color: #0091ff;
+            /* background-color: #9186f3; */
+            background-color: #fff;
             cursor: pointer;
             .add-text {
                 margin-left: 0.5rem;
@@ -572,7 +580,7 @@ const Container = styled.div`
                         justify-content: center;
                         .icon-option {
                             font-size: 1.2rem;
-                            color: #fff;
+                            /* color: #fff; */
                         }
                     }
                 }
@@ -587,10 +595,10 @@ const Container = styled.div`
                     padding: 1rem;
                     font-size: 1.1rem;
                     border-radius: 1rem;
-                    color: #d1d1d1;
+                    /* color: #d1d1d1; */
                     .user-sender {
                         font-weight: bold;
-                        color: #fff;
+                        /* color: #fff; */
                         padding-bottom: 0.5rem;
                     }
                     .files {
@@ -647,10 +655,10 @@ const Container = styled.div`
                     top: -30px;
                     left: 40px;
                     width: 200px;
-                    background-color: #4f04ff21;
+                    background-color: #fff;
                     z-index: 1;
                     .option-item {
-                        color: #fff;
+                        /* color: #fff; */
                         font-size: 1.1rem;
                         padding: 0.2rem;
                         &:hover {
@@ -664,7 +672,7 @@ const Container = styled.div`
                 justify-content: flex-start;
                 flex-direction: row-reverse;
                 .content {
-                    background-color: #4f04ff21;
+                    background-color: #e5efff;
                 }
                 .more-option {
                     left: -120px;
@@ -674,7 +682,7 @@ const Container = styled.div`
             .received {
                 justify-content: flex-start;
                 .content {
-                    background-color: #9900ff20;
+                    background-color: #fff;
                 }
             }
         }

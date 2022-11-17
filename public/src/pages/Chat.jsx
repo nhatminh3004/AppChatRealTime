@@ -224,11 +224,11 @@ const Container = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #131324;
+    /* background-color: #131324; */
     .container {
         height: 100%;
         width: 100%;
-        background-color: #00000076;
+        /* background-color: #00000076; */
         display: grid;
         grid-template-columns: 4% 25% 71%;
 

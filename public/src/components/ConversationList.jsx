@@ -84,8 +84,8 @@ const Container = styled.div`
     display: grid;
     grid-template-rows: 10% 10% 65% 15%;
     overflow: hidden;
-    background-color: #080420;
-
+    /* background-color: #080420; */
+    border-right: 1px solid #ccc;
 
     .brand {
         display: flex;
@@ -96,7 +96,7 @@ const Container = styled.div`
             height: 2rem;
         }
         h3 {
-            color: white;
+            /* color: white; */
             text-transform: uppercase;
         }
     }
@@ -119,15 +119,18 @@ const Container = styled.div`
                 width: 70%;
                 padding: 0.7rem;
                 border-radius: 1rem;
+                background-color: #eeeff2;
+                border: none;
             }
             .submit {
                 padding: 0.4rem;
                 font-size: 1rem;
-                border-radius: 1rem;
+                border-radius: 0.5rem;
                 cursor: pointer;
-                background-color: #9186f3;
-                color: white;
+                background-color: #eeeff2;
+                /* color: white; */
                 font-weight: 500;
+                border: none;
             }
         }
         .btn-group {
@@ -135,21 +138,24 @@ const Container = styled.div`
             width: 40px;
             /* width: 70%; */
             padding: 0.4rem;
-            border-radius: 1rem;
+            border-radius: 0.5rem;
             cursor: pointer;
-            background-color: #9186f3;
+            /* background-color: #9186f3; */
             display: flex;
             align-items: center;
             justify-content: center;
+            &:hover {
+                background-color: #eeeff2;
+            }
             svg {
-                color: white;
+                /* color: white; */
                 font-weight: 500;
                 font-size: 1.5rem;
             }
         }
     }
     .current-user {
-        background-color: #0d0d30;
+        /* background-color: #0d0d30; */
         display: flex;
         justify-content: center;
         align-items: center;
@@ -162,7 +168,7 @@ const Container = styled.div`
         }
         .username {
             h2 {
-                color: white;
+                /* color: white; */
                 max-width: 150px;
                 overflow: hidden;
             }

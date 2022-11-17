@@ -149,6 +149,7 @@ const Container = styled.div`
     flex-direction: column;
     height: 100%;
     padding: 0 0.5rem;
+    background-color: #fff;
     .header {
         display: flex;
         height: 10%;
@@ -157,7 +158,7 @@ const Container = styled.div`
         padding: 0.5rem;
         p {
             font-size: 1.3rem;
-            color: #fff;
+            /* color: #fff; */
         }
         
     }
@@ -185,7 +186,7 @@ const Container = styled.div`
             }
             p {
                 font-size: 1.3rem;
-                color: #fff;
+                /* color: #fff; */
             }
         }
         .list-members {
@@ -204,7 +205,7 @@ const Container = styled.div`
                 }
             }
             p {
-                color: #fff;
+                /* color: #fff; */
                 font-size: 1.2rem;
                 padding: 0.5rem 0;
             }
@@ -229,7 +230,7 @@ const Container = styled.div`
                         p {
                             font-size: 1.2rem;
                             font-weight: 500;
-                            color: #fff;
+                            /* color: #fff; */
                         }
                         .leader {
                             font-weight: 100;
@@ -238,7 +239,7 @@ const Container = styled.div`
                     }
                     p {
                         font-weight: 500;
-                        color: #fff;
+                        /* color: #fff; */
                         padding: 0
                     }
 
@@ -252,7 +253,7 @@ const Container = styled.div`
                         padding: 0.3rem;
                         background-color: #9186f3;
                         font-size: 1rem;
-                        color: #fff;
+                        /* color: #fff; */
                         display: flex;
                         align-items: center;
                         border-radius: 5px;

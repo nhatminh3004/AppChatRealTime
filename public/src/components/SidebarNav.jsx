@@ -21,6 +21,7 @@ const Container = styled.div`
     /* width: 5vw; */
     display: flex;
     flex-direction: column;
+    background-color: #0091ff;
     .button {
         display: flex;
         position: relative;
@@ -28,11 +29,13 @@ const Container = styled.div`
         align-items: center;
         width: 100%;
         padding: 0.8rem;
-        background-color: #ffffff39;
         border: none;
         cursor: pointer;
+        &:hover {
+            background-color: rgba(0,0,0,0.1);
+        }
         svg {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             color: #ebe7ff;
         }
         .notice {
@@ -46,7 +49,7 @@ const Container = styled.div`
         }
     }
     .selected {
-        background-color: #9186f3;
+        background-color: #006edc;
     }
 `;
 

@@ -64,10 +64,10 @@ const Container = styled.div`
         padding-inline: 0.5rem;
         border-bottom: 1px solid #ccc;
         .title {
-            color: white;
+            /* color: white; */
         }
         .close-btn {
-            color: white;
+            /* color: white; */
         }
     }
     .contact {
@@ -81,6 +81,9 @@ const Container = styled.div`
         align-items: center;
         display: flex;
         transition: 0.5s ease-in-out;
+        &:hover {
+            background-color: #eeeff2;
+        }
         .avatar {
             img {
                 height: 3rem;
@@ -88,13 +91,14 @@ const Container = styled.div`
         }
         .username {
             h3 {
-                color: white;
+                /* color: white; */
             }
         }
             
     }
     .selected {
-        background-color: #9186f3;
+        /* background-color: #9186f3; */
+        background-color: #eeeff2;
     }
 `;
 
