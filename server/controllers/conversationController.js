@@ -111,7 +111,10 @@ module.exports.createConversation = async (req, res, next) => {
   try {
     const { searchResultId, myId } = req.body;
     let conversation = await conversationModel
-      .findOne({ "members.userId": { $all: [searchResultId, myId] } })
+      .findOne({
+        "members.userId": { $all: [searchResultId, myId] },
+        leaderId: null,
+      })
       .sort({ updatedAt: -1 });
     if (conversation) {
       let users_info = [];
@@ -143,7 +146,7 @@ module.exports.createConversation = async (req, res, next) => {
       if (newConversation) {
         let users_info = [];
         for (var j = 0; j < newConversation.members.length; j++) {
-          if (!newConversation.members[j].equals(myId)) {
+          if (!newConversation.members[j].userId.equals(myId)) {
             const user = await userModel.findOne({
               _id: newConversation.members[j].userId,
             });

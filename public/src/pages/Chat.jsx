@@ -14,6 +14,8 @@ import ConversationList from "../components/ConversationList";
 import ViewFiles from "../components/ViewFiles";
 import ListView from "../components/ListView";
 import ListUserForAddMember from "../components/ListUserForAddMember";
+import ListInvitations from "../components/ListInvitations";
+import ListGroups from "../components/ListGroups";
 
 function Chat() {
     const socket = useRef();
@@ -35,6 +37,8 @@ function Chat() {
     const [listUsers, setListUsers] = useState([]);
     const [isOpenListAddMember, setIsOpenListAddMember] = useState(false);
     const [exceiptionUser, setExceiptionUser] = useState([]);
+    const [openListInvitation, setOpenListInvitation] = useState(false);
+    const [openListGroup, setOpenListGroup] = useState(false);
 
     
     useEffect(() => {
@@ -169,10 +173,20 @@ function Chat() {
         setIsOpenListAddMember(false);
         setExceiptionUser([]);
     }
-    
+    const openListInvitations = () => {
+        setOpenListInvitation(true);
+        setCurrentChat(undefined);
+    }
+
+    const openListGroups = () => {
+        setOpenListGroup(true);
+        setOpenListInvitation(false);
+        setCurrentChat(undefined);
+    }
+
     return <Container>
         <div className="container">
-            <SidebarNav changeNav={onHandleSelectNav} haveInvitation={haveInvitation} />
+            <SidebarNav changeNav={onHandleSelectNav} haveInvitation={haveInvitation} currentUser={currentUser}/>
             {
                 openMessageContainer ? (
                     <>
@@ -186,10 +200,12 @@ function Chat() {
                     </>
                 ) : (
                     <>
-                        <FriendsContainer contacts={contacts} currentUser={currentUser} changeChat={handleChatChange}/>
+                        <FriendsContainer openListGroups={openListGroups} openListInvitations={openListInvitations} setIsOpenList={setIsOpenList} contacts={contacts} currentUser={currentUser} changeChat={handleChatChange}/>
                         {
-                            isLoaded && currentChat === undefined ? 
-                                (<Welcome currentUser={currentUser} />) :
+                            currentChat === undefined ? 
+                                ( openListInvitation ? <ListInvitations /> : 
+                                    (openListGroup ? <ListGroups /> :
+                                        (isLoaded && (<Welcome currentUser={currentUser} />)))) :
                                 (<ChatContainer setIsOpenListAddMember={setIsOpenListAddMember} setExceiptionUser={setExceiptionUser} messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
                                 
                         }
@@ -230,7 +246,7 @@ const Container = styled.div`
         width: 100%;
         /* background-color: #00000076; */
         display: grid;
-        grid-template-columns: 4% 25% 71%;
+        grid-template-columns: 5% 25% 70%;
 
         @media screen and (min-width: 720px) and (max-width: 1080px){
             grid-template-columns: 5% 35% 60%;

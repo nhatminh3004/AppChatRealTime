@@ -181,8 +181,8 @@ const Container = styled.div`
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: #ccc;
-        opacity: 0.3;
+        background-color: #000;
+        opacity: 0.5;
     }
     .form-container {
         position: absolute;
@@ -240,6 +240,7 @@ const Container = styled.div`
                     padding: 0.4rem;
                     border-radius: 5px;
                     width: 70%;
+                    border: 1px solid #ccc;
                 }
                 .submit {
                     padding: 0.2rem;

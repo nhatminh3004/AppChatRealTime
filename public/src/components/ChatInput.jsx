@@ -158,7 +158,7 @@ const Container = styled.div`
         }
         button {
             padding: 0.3rem 2rem;
-            border-radius: 2rem;
+            border-radius: 0.5rem;
             display:flex;
             justify-content: center;
             align-items: center;

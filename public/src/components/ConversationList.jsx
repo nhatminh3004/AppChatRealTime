@@ -28,8 +28,6 @@ function ConversationList({ setIsOpenList, conversations, currentUser, changeCha
     }
     const onHandleSearch = async (e) => {
         e.preventDefault();
-        console.log("searchKey", searchKey);
-        console.log("id", currentUser._id);
         const data = await axios.post(`${searchUsers}`, {searchKey, id: currentUser._id});
         setSearchResults(data.data);
     }
@@ -61,7 +59,7 @@ function ConversationList({ setIsOpenList, conversations, currentUser, changeCha
                         : <ContactItems conversations={conversations} changeCurrentChat={changeCurrentChat} currentSelected={currentSelected}/>
                     
                     }
-                    <div className="current-user">
+                    {/* <div className="current-user">
                         <div className="avatar">
                             {currentUserImage && currentUserImage != "" ? 
                                 <img src={`data:image/png;base64,${currentUserImage}`} alt="avatar"/>
@@ -73,7 +71,7 @@ function ConversationList({ setIsOpenList, conversations, currentUser, changeCha
                         </div>
                         
                         <Logout/>
-                    </div>
+                    </div> */}
                 </Container>
             )
         }
@@ -82,7 +80,8 @@ function ConversationList({ setIsOpenList, conversations, currentUser, changeCha
 
 const Container = styled.div`
     display: grid;
-    grid-template-rows: 10% 10% 65% 15%;
+    /* grid-template-rows: 10% 10% 65% 15%; */
+    grid-template-rows: 10% 10% 80%;
     overflow: hidden;
     /* background-color: #080420; */
     border-right: 1px solid #ccc;
@@ -107,6 +106,7 @@ const Container = styled.div`
         justify-content: space-between;
         padding: 0 1rem;
         align-items: center;
+        border-bottom: 1px solid #ccc;
         .search {
             display: flex;
             align-items: center;
@@ -118,7 +118,7 @@ const Container = styled.div`
                 height: 70%;
                 width: 70%;
                 padding: 0.7rem;
-                border-radius: 1rem;
+                border-radius: 0.5rem;
                 background-color: #eeeff2;
                 border: none;
             }

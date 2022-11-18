@@ -63,7 +63,7 @@ const Container = styled.div`
     flex-direction: column;
     align-items: center;
     overflow: auto;
-    gap: 0.8rem;
+    /* gap: 0.8rem; */
     &::-webkit-scrollbar {
         width: 0.2rem;
         &-thumb {
@@ -75,10 +75,10 @@ const Container = styled.div`
     .contact {
         /* background-color: #ffffff39; */
         min-height: 5rem;
-        width: 90%;
+        width: 100%;
         cursor: pointer;
         border-radius: 0.2rem;
-        padding: 0.4rem;
+        padding: 0.4rem 0.5rem;
         gap:1rem;
         align-items: center;
         display: flex;
