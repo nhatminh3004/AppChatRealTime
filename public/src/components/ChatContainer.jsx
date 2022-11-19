@@ -17,10 +17,9 @@ import { deleteFromS3, uploadToS3 } from "../utils/AWS";
 import ViewFiles from "./ViewFiles";
 import InfoTab from "./InfoTab";
 
-function ChatContainer({setIsOpenListAddMember, setExceiptionUser, setCurrentChat, messageEvict, arrivalMessage, updateListConversation, currentChat, currentUser, setCurrentUser, socket, openImageViewer,files}) {
+function ChatContainer({haveInvitation, setHaveInvitation, setIsOpenListAddMember, setExceiptionUser, setCurrentChat, messageEvict, arrivalMessage, updateListConversation, currentChat, currentUser, setCurrentUser, socket, openImageViewer,files}) {
     const [messages, setMessages] = useState([]);
     const [sentInvitation, setSentInvitation] = useState(false);
-    const [haveInvitation, setHaveInvitation] = useState(false);
     const [isFriend, setIsFriend] = useState(false);
     const [isSingle, setIsSingle] = useState(true);
     const [showMoreOption, setShowMoreOption] = useState(false);
@@ -310,7 +309,7 @@ function ChatContainer({setIsOpenListAddMember, setExceiptionUser, setCurrentCha
                         </div>
                     </div>
                 </div>
-                {!currentChat.conversation.leaderId && (haveInvitation ? 
+                {!currentChat.conversation.leaderId && (haveInvitation && haveInvitation === currentChat.users_info[0]._id ? 
                     (
                         <div className="haveInvitation">
                             <div className="title-invitation">You have an invitation</div>
@@ -517,7 +516,7 @@ const Container = styled.div`
             }
         } 
         .haveInvitation {
-            flex: 1;
+            flex: 2;
             display: grid;
             grid-template-rows: 50% 50%;
             background-color: #16151584;

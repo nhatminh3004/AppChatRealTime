@@ -70,6 +70,11 @@ function Chat() {
     }
     useEffect(() => {
         getContactsFromDB();
+        if (currentUser.sentInvitations.length > 0) {
+            setHaveInvitation(true);
+        } else {
+            setHaveInvitation(false);
+        }
     }, [currentUser]);
 
     const getContactsFromDB = async () => {
@@ -194,7 +199,7 @@ function Chat() {
                         {
                             isLoaded && currentChat === undefined ? 
                                 (<Welcome currentUser={currentUser} />) :
-                                (<ChatContainer setIsOpenListAddMember={setIsOpenListAddMember} setExceiptionUser={setExceiptionUser} messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
+                                (<ChatContainer haveInvitation={haveInvitation} setHaveInvitation={setHaveInvitation} setIsOpenListAddMember={setIsOpenListAddMember} setExceiptionUser={setExceiptionUser} messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
                                 
                         }
                     </>
@@ -203,10 +208,10 @@ function Chat() {
                         <FriendsContainer openListGroups={openListGroups} openListInvitations={openListInvitations} setIsOpenList={setIsOpenList} contacts={contacts} currentUser={currentUser} changeChat={handleChatChange}/>
                         {
                             currentChat === undefined ? 
-                                ( openListInvitation ? <ListInvitations /> : 
+                                ( openListInvitation ? <ListInvitations setHaveInvitation={setHaveInvitation} setCurrentUser={setCurrentUser} currentUser={currentUser} socket={socket}/> : 
                                     (openListGroup ? <ListGroups /> :
                                         (isLoaded && (<Welcome currentUser={currentUser} />)))) :
-                                (<ChatContainer setIsOpenListAddMember={setIsOpenListAddMember} setExceiptionUser={setExceiptionUser} messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
+                                (<ChatContainer haveInvitation={haveInvitation} setHaveInvitation={setHaveInvitation} setIsOpenListAddMember={setIsOpenListAddMember} setExceiptionUser={setExceiptionUser} messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
                                 
                         }
                     </>

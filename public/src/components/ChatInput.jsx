@@ -137,7 +137,7 @@ const Container = styled.div`
         border-radius: 2rem;
         display: flex;
         align-content: center;
-        gap: 2rem;
+        gap: 1rem;
         /* background-color: #ffffff43; */
         input {
             width: 90%;
