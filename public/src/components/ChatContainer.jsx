@@ -120,6 +120,8 @@ function ChatContainer({haveInvitation, setHaveInvitation, setIsOpenListAddMembe
     useEffect(() => {
         if (socket.current) {
             socket.current.on("response-deny-invitation", (data) => {
+                console.log(data.from._id);
+                console.log(currentChat.users_info[0]._id);
                 if (data.from._id === currentChat.users_info[0]._id) {
                     // setCurrentChat(data.from);
                     setSentInvitation(false)
@@ -132,12 +134,11 @@ function ChatContainer({haveInvitation, setHaveInvitation, setIsOpenListAddMembe
                     currentUser.listFriends = [currentUser.listFriends, data.from]
                     if (currentUser && currentUser.sentInvitations) {
                         currentUser.sentInvitations.map((invitation, index) => {
-                            if (invitation === currentChat.users_info._id) {
+                            if (invitation === currentChat.users_info[0]._id) {
                                 currentUser.sentInvitations.splice(index, 1);
                             }
                         })
                     }
-                    console.log("currentUser", currentUser);
                     localStorage.setItem("chat-app-user", JSON.stringify(currentUser));
                     setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
                 }
@@ -283,6 +284,7 @@ function ChatContainer({haveInvitation, setHaveInvitation, setIsOpenListAddMembe
         setMessages(msg);
         updateListConversation(new Date())
     }
+    console.log(sentInvitation);
     return (
     <>
         {currentChat && currentUser && (<Container>

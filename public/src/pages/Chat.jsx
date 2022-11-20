@@ -70,7 +70,7 @@ function Chat() {
     }
     useEffect(() => {
         getContactsFromDB();
-        if (currentUser.sentInvitations.length > 0) {
+        if (currentUser && currentUser.sentInvitations && currentUser.sentInvitations.length > 0) {
             setHaveInvitation(true);
         } else {
             setHaveInvitation(false);
