@@ -361,7 +361,8 @@ module.exports.removeGroup = async (req, res, next) => {
 module.exports.evictMessage = async (req, res, next) => {
   try {
     const { messageId, conversationId } = req.body;
-
+    console.log("MessageID nhận bên sever  :",messageId);
+    console.log("conservationID nhận bên sever :",conversationId);
     await conversationModel.findByIdAndUpdate(conversationId, {
       $pull: { messages: messageId },
     });

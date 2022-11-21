@@ -10,13 +10,13 @@ import { Ionicons } from '@expo/vector-icons';
 
 function ChatItem(props) {
   const { fromSelf, message,senderUser } = props.item;
-  const { onPress } = props;
+  const { onPresss } = props;
   const usernameBanThan =props.userNameBanThan
   // const usernameNguoiTa = props.userNameNguoiTa;
   
   let url;
   let urlTypeFile;
-  console.log("Message Test : ",senderUser);
+  // console.log("Message Test : ",senderUser);
 
   // console.log("Ảnh chuỗi",message);
   if (message) {
@@ -100,7 +100,7 @@ function ChatItem(props) {
               <Text style={styles.last_msg}></Text>
             </View>
           </View>
-           <TouchableOpacity style={styles.imageContainer} onPress={onPress}>
+           <TouchableOpacity style={styles.imageContainer} onPress={()=>{onPresss(message)}}>
            <Ionicons name="md-repeat-outline" size={40} color="black" />
             </TouchableOpacity> 
         </TouchableOpacity>

@@ -49,7 +49,7 @@ function MessageScreen(props) {
       `${myConversationsRoute}/${currentUser._id}`
     );
     setConversations(myConversations.data);
-    console.log("myConversations Data", myConversations.data);
+    // console.log("myConversations Data", myConversations.data);
   };
   //Khi nhân tin nhắn cập nhật lại last mess
   useEffect(() => {

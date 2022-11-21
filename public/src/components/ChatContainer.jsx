@@ -151,6 +151,7 @@ function ChatContainer({haveInvitation, setHaveInvitation, setIsOpenListAddMembe
         arrivalMessage && setMessages(prev => [...prev, arrivalMessage])
     }, [arrivalMessage])
     useEffect(() => { 
+        console.log("Message Evic :",messageEvict);
         if (messageEvict) {
             let msg = [...messages];
             for(var i = 0; i < msg.length; i++) {
