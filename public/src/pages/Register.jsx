@@ -7,7 +7,7 @@ import Logo from '../assets/logo.svg'
 import {ToastContainer, toast} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import axios from 'axios'
-import { registerRoute } from "../utils/APIRoutes";
+import { checkPhoneExistRoute, registerRoute } from "../utils/APIRoutes";
 
 function Register() {
     const navigate = useNavigate();
@@ -39,23 +39,29 @@ function Register() {
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    const signin = (event) => {
+    const signin = async (event) => {
         event.preventDefault();
         const {phone} = values;
 		if (phone === "") {
             toast.error('Phone number is required', toastOptions);
-        }
-        else {
-            let verify = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-                  'size': 'invisible'
-              });
-            auth.signInWithPhoneNumber("+84" + phone, verify).then((result) => {
-                setResult(result);
-                setStep('VERIFY_OTP');
-            })
-            .catch((err) => {
-              alert(err);
+        } else {
+            const res = await axios.post(`${checkPhoneExistRoute}`, {
+                phone: '+84' + phone
             });
+            if (res.data.status) {
+                let verify = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                      'size': 'invisible'
+                  });
+                auth.signInWithPhoneNumber("+84" + phone, verify).then((result) => {
+                    setResult(result);
+                    setStep('VERIFY_OTP');
+                })
+                .catch((err) => {
+                  alert(err);
+                });
+            } else {
+                toast.error('This phone number already exist', toastOptions);
+            }
         }
 	}
 
@@ -145,7 +151,7 @@ function Register() {
                 <form onSubmit={(e) => signin(e)}>
                     <div className="brand">
                         <img src={Logo} alt="Logo" />
-                        <h1>snappy</h1>
+                        <h1>valiu</h1>
                     </div>
                     <div className="phone-input">
                         <p>+84</p>
@@ -160,7 +166,7 @@ function Register() {
                 <form onSubmit={(e) => ValidateOtp(e)}>
                     <div className="brand">
                         <img src={Logo} alt="Logo" />
-                        <h1>snappy</h1>
+                        <h1>valiu</h1>
                     </div>
                     <input type="text" placeholder={"Enter your OTP"} onChange={(e) => { setOtp(e.target.value) }} />
                     <div id="recaptcha-container"></div>
@@ -172,7 +178,7 @@ function Register() {
                 <form onSubmit={(event) => handleSubmit(event)}>
                     <div className="brand">
                         <img src={Logo} alt="Logo" />
-                        <h1>snappy</h1>
+                        <h1>valiu</h1>
                     </div>
                     <input type="text" placeholder="Username" name="username" onChange={(e) => handleOnChange(e)} />
                     <input type="email" placeholder="Email" name="email" onChange={(e) => handleOnChange(e)} />
@@ -200,7 +206,7 @@ const FormContainer = styled.div`
     justify-content: center;
     align-items: center;
     gap: 1rem;
-    background-color: #131324;
+    background-color: #e8f3ff;
     .brand {
         display: flex;
         align-items: center;
@@ -210,7 +216,7 @@ const FormContainer = styled.div`
             height: 5rem;
         }
         h1 {
-            color: white;
+            /* color: white; */
             text-transform: uppercase
         }
     }
@@ -232,52 +238,53 @@ const FormContainer = styled.div`
         display: flex;
         flex-direction: column;
         gap: 2rem;
-        background-color: #00000076;
+        background-color: #fff;
         border-radius: 2rem;
         padding: 3rem 5rem; 
+        box-shadow: 0 8px 24px rgb(21 48 142 / 14%);
     }
     input {
         background-color: transparent;
         padding: 1rem;
-        border: 0.1rem solid #4e0eff;
+        border: 0.1rem solid #ccc;
         border-radius: 0.4rem;
-        color: white;
+        /* color: white; */
         width: 100%;
         font-size: 1rem;
         &:focus {
-            border: 0.1rem solid #997af0;
+            /* border: 0.1rem solid #997af0; */
             outline: none;
         }
     }
     select {
         background-color: transparent;
         padding: 1rem;
-        border: 0.1rem solid #4e0eff;
+        border: 0.1rem solid #ccc;
         border-radius: 0.4rem;
-        color: white;
+        /* color: white; */
         width: 100%;
         font-size: 1rem;
         &:focus {
-            border: 0.1rem solid #997af0;
+            /* border: 0.1rem solid #997af0; */
             outline: none;
         }
 
         option {
             background-color: transparent;
             padding: 1rem;
-            border: 0.1rem solid #4e0eff;
+            border: 0.1rem solid #ccc;
             border-radius: 0.4rem;
             color: black;
             width: 100%;
             font-size: 1rem;
             &:focus {
-                border: 0.1rem solid #997af0;
+                /* border: 0.1rem solid #997af0; */
                 outline: none;
             }
         }
     }
     button {
-        background-color: #997af0;
+        background-color: #0068ff;
         padding: 1rem 2rem;
         color: white;
         cursor: pointer;
@@ -288,16 +295,16 @@ const FormContainer = styled.div`
         text-transform: uppercase;
         transition: 0.5s ease-in-out;
         &:hover {
-            background-color: #4e0eff;
+            background-color: #0184e0;
         }
     }
     span {
-        color: white;
+        /* color: white; */
         text-transform: uppercase;
         a {
             text-decoration: none;
             font-weight: bold;
-            color: #4e0eff;
+            color: #0068ff;
         }
     }
 `;

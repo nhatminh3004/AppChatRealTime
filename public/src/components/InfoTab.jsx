@@ -96,7 +96,13 @@ function InfoTab({updateListConversation, setCurrentChat, currentChat, currentUs
             </div>
             <div className="content">
                 <div className="content-header">
-                    <img src={AvatarDefault} alt="avatar" />
+                    {currentChat.conversation.leaderId && currentChat.conversation.leaderId !== "" ? 
+                        <img src={AvatarDefault} alt="avatar" /> : 
+                        (currentChat.users_info[0].avatarImage && currentChat.users_info[0].avatarImage !== "" ?
+                            <img src={currentChat.users_info[0].avatarImage} alt="avatar" /> :
+                            <img src={AvatarDefault} alt="avatar" />
+                        )
+                    }
                     <p>{currentChat.conversation.name ? `${currentChat.conversation.name}` : `${currentChat.users_info[0].username}`}</p>
                 </div>
                 {currentChat.conversation.members.length > 2 && <div className="list-members">
@@ -183,6 +189,9 @@ const Container = styled.div`
             padding: 0.5rem 0;
             img {
                 height: 3rem;
+                width: 3rem;
+                border-radius: 50%;
+
             }
             p {
                 font-size: 1.3rem;
@@ -221,6 +230,8 @@ const Container = styled.div`
                     align-items: center;
                     img {
                         height: 2rem;
+                        width: 2rem;
+                        border-radius: 50%;
                     }
                     .member-name {
                         display: flex;

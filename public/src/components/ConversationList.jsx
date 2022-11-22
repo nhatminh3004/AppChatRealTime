@@ -40,7 +40,7 @@ function ConversationList({ setIsOpenList, conversations, currentUser, changeCha
                 <Container>
                     <div className="brand">
                         <img src={Logo} alt='logo'/>
-                        <h3>snappy</h3>
+                        <h3>valiu</h3>
                     </div>
                     <div className='options'>
                         <form onSubmit={(e) => onHandleSearch(e)} className="search">

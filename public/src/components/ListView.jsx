@@ -293,6 +293,8 @@ const Container = styled.div`
                     }
                     img {
                         height: 2.1rem;
+                        width: 2.1rem;
+                        border-radius: 50%;
                     }   
                     p {
                         font-size: 1.2rem;
@@ -340,6 +342,8 @@ const Container = styled.div`
                     cursor: pointer;
                     img {
                         height: 1rem;
+                        width: 1rem;
+                        border-radius: 50%;
                     }   
                     p {
                         font-size: 1rem;

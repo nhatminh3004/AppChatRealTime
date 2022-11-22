@@ -9,6 +9,8 @@ const {
   checkPhoneTonTai,
   doiMatKhau,
   getUsersInfo,
+  unfriend,
+  updateUserInfo,
 } = require("../controllers/userController");
 const { login } = require("../controllers/userController");
 
@@ -28,5 +30,7 @@ router.post("/denyAddFriend", denyAddFriend);
 router.get("/allusers/:id", getAllUsers);
 router.post("/search", searchUser);
 router.post("/getUsersInfo", getUsersInfo);
+router.post("/unfriend", unfriend);
+router.post("/updateUserInfo", updateUserInfo);
 
 module.exports = router;

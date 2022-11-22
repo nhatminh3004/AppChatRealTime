@@ -17,7 +17,7 @@ import { deleteFromS3, uploadToS3 } from "../utils/AWS";
 import ViewFiles from "./ViewFiles";
 import InfoTab from "./InfoTab";
 
-function ChatContainer({haveInvitation, setHaveInvitation, setIsOpenListAddMember, setExceiptionUser, setCurrentChat, messageEvict, arrivalMessage, updateListConversation, currentChat, currentUser, setCurrentUser, socket, openImageViewer,files}) {
+function ChatContainer({onHandleForward, haveInvitation, setHaveInvitation, setIsOpenListAddMember, setExceiptionUser, setCurrentChat, messageEvict, arrivalMessage, updateListConversation, currentChat, currentUser, setCurrentUser, socket, openImageViewer,files}) {
     const [messages, setMessages] = useState([]);
     const [sentInvitation, setSentInvitation] = useState(false);
     const [isFriend, setIsFriend] = useState(false);
@@ -120,7 +120,7 @@ function ChatContainer({haveInvitation, setHaveInvitation, setIsOpenListAddMembe
     useEffect(() => {
         if (socket.current) {
             socket.current.on("response-deny-invitation", (data) => {
-                console.log(data.from._id);
+                // console.log(data.from._id);
                 console.log(currentChat.users_info[0]._id);
                 if (data.from._id === currentChat.users_info[0]._id) {
                     // setCurrentChat(data.from);
@@ -129,9 +129,23 @@ function ChatContainer({haveInvitation, setHaveInvitation, setIsOpenListAddMembe
             })
             socket.current.on("response-accept-friend", async (data) => {
                 // console.log(data);
+                console.log(currentUser);
+                console.log(data.to);
+                console.log(data.from);
                 if (data.to === currentUser._id) {
-                    setIsFriend(true);
-                    currentUser.listFriends = [currentUser.listFriends, data.from]
+                    // setIsFriend(true);
+                    if (currentUser.listFriends && currentUser.listFriends.length > 0) {
+                        for (var i = 0; i < currentUser.listFriends.length; i++) {
+                            if (currentUser.listFriends[i] === data.from) {
+                                break;
+                            }
+                            if (i === currentUser.listFriends.length - 1 && currentUser.listFriends[i] !== data.from) {
+                                currentUser.listFriends = [...currentUser.listFriends, data.from];
+                            }
+                        }
+                    } else if (currentUser.listFriends) {
+                        currentUser.listFriends = [data.from];
+                    }
                     if (currentUser && currentUser.sentInvitations) {
                         currentUser.sentInvitations.map((invitation, index) => {
                             if (invitation === currentChat.users_info[0]._id) {
@@ -203,12 +217,45 @@ function ChatContainer({haveInvitation, setHaveInvitation, setIsOpenListAddMembe
         }
     });
     useEffect(() => {
-        if (currentUser && currentChat && currentUser.sentInvitations) {
-            currentUser.sentInvitations.map((invitation) => {
-                if ( currentChat.users_info.length === 1  && currentChat.users_info[0]._id === invitation) {
-                    setHaveInvitation(true);
-                }
+        // if (currentUser && currentChat && currentUser.sentInvitations) {
+        //     currentUser.sentInvitations.map((invitation) => {
+        //         if ( currentChat.users_info.length === 1  && currentChat.users_info[0]._id === invitation) {
+        //             setHaveInvitation(invitation);
+        //         }
+        //     })
+        // } else {
+        //     setHaveInvitation(undefined);
+        // }
+        console.log("Changed currentUser");
+        if (currentUser && currentChat) {
+            let checkFriends = false;
+            let checkSentInvitation = false;
+            let checkHaveInvitation = undefined;
+            console.log("checkFriend");
+            currentUser.listFriends.map((friend, index) => {
+                if ( currentChat.users_info.length === 1  && currentChat.users_info[0]._id === friend) {
+                    checkFriends = true;
+                } 
             })
+            if (!checkFriends) {
+                console.log("checkSentInvitation");
+                currentChat.users_info[0].sentInvitations.map((sentInvitation, index2) => {
+                    if ( currentUser._id === sentInvitation) {
+                        checkSentInvitation = true;
+                    }
+                })
+                if (!checkSentInvitation) {
+                    console.log("checkHaveInvitation");
+                    currentUser.sentInvitations.map((haveInvitation, index3) => {
+                        if ( currentChat.users_info[0]._id === haveInvitation) {
+                            checkHaveInvitation = haveInvitation;
+                        } 
+                    })
+                }
+            }
+            setIsFriend(checkFriends);
+            setHaveInvitation(checkHaveInvitation);
+            setSentInvitation(checkSentInvitation);
         }
     }, [currentUser]);
     const onHandAcceptFriend = async () => {
@@ -230,8 +277,8 @@ function ChatContainer({haveInvitation, setHaveInvitation, setIsOpenListAddMembe
         }
         localStorage.setItem("chat-app-user", JSON.stringify(currentUser));
         setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
-        setIsFriend(true);
-        setHaveInvitation(false);
+        // setIsFriend(true);
+        // setHaveInvitation(false);
     }
 
     const onHandleDeny = async () => {
@@ -252,7 +299,7 @@ function ChatContainer({haveInvitation, setHaveInvitation, setIsOpenListAddMembe
         });
         localStorage.setItem("chat-app-user", JSON.stringify(currentUser));
         setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
-        setHaveInvitation(false);
+        // setHaveInvitation(false);
     }
 
     const onHandleEvict = async (message) => {
@@ -284,7 +331,6 @@ function ChatContainer({haveInvitation, setHaveInvitation, setIsOpenListAddMembe
         setMessages(msg);
         updateListConversation(new Date())
     }
-    console.log(sentInvitation);
     return (
     <>
         {currentChat && currentUser && (<Container>
@@ -292,8 +338,9 @@ function ChatContainer({haveInvitation, setHaveInvitation, setIsOpenListAddMembe
                 <div className="chat-header">
                     <div className="user-details">
                         <div className="avatar">
-                            {currentChat.avatarImage && currentChat.avatarImage != "" ? 
-                                <img src={`data:image/svg+xml;base64,${currentChat.avatarImage}`} alt="avatar"/>
+                            {(!currentChat.conversation.leaderId || currentChat.conversation.leaderId === "") 
+                                && currentChat.users_info[0].avatarImage && currentChat.users_info[0].avatarImage != "" ? 
+                                <img src={currentChat.users_info[0].avatarImage} alt="avatar"/>
                                 : <img src={AvatarDefault} alt="avatar"/>
                             }
                         </div>
@@ -391,15 +438,15 @@ function ChatContainer({haveInvitation, setHaveInvitation, setIsOpenListAddMembe
                                     </div>
                                     <div className="options">
                                         <div className="icon-option icon-react"><BsEmojiSmile /></div>
-                                        <div className="icon-option icon-reply"><BsReplyFill /></div>
+                                        <div className="icon-option icon-reply" onClick={() => onHandleForward(message.message.message.text)}><BsReplyFill /></div>
                                         <div className="icon-option icon-more" onClick={() => setShowMoreOption(!showMoreOption)}><BsThreeDotsVertical /></div>
                                         {showMoreOption && 
                                         <div className="more-option">
                                             <div className="option-item">
-                                                Xóa tin nhắn ở phía bạn
+                                                Delete message for me only
                                             </div>
                                             {message.fromSelf && <div className="option-item" onClick={() => onHandleEvict(message.message)}>
-                                                Thu hồi tin nhắn
+                                                Recall
                                             </div>}
                                         </div>
                                         }
@@ -452,6 +499,8 @@ const Container = styled.div`
                 .avatar {
                     img {
                         height: 3rem;
+                        width: 3rem;
+                        border-radius: 50%;
                     }
                 }
                 .username {
@@ -588,6 +637,8 @@ const Container = styled.div`
                 .avatar-message {
                     img {
                         height: 2.5rem;
+                        width: 2.5rem;
+                        border-radius: 50%;
                     }
                 }
                 .content {
@@ -650,20 +701,24 @@ const Container = styled.div`
                 .more-option {
                     display: flex;
                     flex-direction: column;
-                    align-items: center;
+                    /* align-items: fle; */
                     justify-content: center;
                     position: absolute;
                     top: -30px;
                     left: 40px;
-                    width: 200px;
+                    width: 250px;
                     background-color: #fff;
+                    border-radius: 5px;
+                    padding: 0.2rem 0;
+
                     z-index: 1;
                     .option-item {
                         /* color: #fff; */
                         font-size: 1.1rem;
-                        padding: 0.2rem;
+                        /* padding: 0.2rem; */
+                        padding: 0.5rem;
                         &:hover {
-                            opacity: 0.8;
+                            background-color: #ccc;
                             cursor: pointer;
                         }
                     }
@@ -676,8 +731,8 @@ const Container = styled.div`
                     background-color: #e5efff;
                 }
                 .more-option {
-                    left: -120px;
-                    top: -50px;
+                    left: -180px;
+                    top: -80px;
                 }
             }
             .received {

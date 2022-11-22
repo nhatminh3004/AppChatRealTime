@@ -137,7 +137,7 @@ function ForgotPassword() {
                 <form onSubmit={(e) => signin(e)}>
                     <div className="brand">
                         <img src={Logo} alt="Logo" />
-                        <h1>snappy</h1>
+                        <h1>valiu</h1>
                     </div>
                     <div className="phone-input">
                         <p>+84</p>
@@ -152,7 +152,7 @@ function ForgotPassword() {
                 <form onSubmit={(e) => ValidateOtp(e)}>
                     <div className="brand">
                         <img src={Logo} alt="Logo" />
-                        <h1>snappy</h1>
+                        <h1>valiu</h1>
                     </div>
                     <input type="text" placeholder={"Enter your OTP"} onChange={(e) => { setOtp(e.target.value) }} />
                     <div id="recaptcha-container"></div>
@@ -164,7 +164,7 @@ function ForgotPassword() {
                 <form onSubmit={(event) => handleSubmit(event)}>
                     <div className="brand">
                         <img src={Logo} alt="Logo" />
-                        <h1>snappy</h1>
+                        <h1>valiu</h1>
                     </div>
                     <input type="password" placeholder="Password" name="password" onChange={(e) => handleOnChange(e)} />
                     <input type="password" placeholder="Confirm Password" name="confirmPassword" onChange={(e) => handleOnChange(e)} />
@@ -185,7 +185,7 @@ const FormContainer = styled.div`
     justify-content: center;
     align-items: center;
     gap: 1rem;
-    background-color: #131324;
+    background-color: #e8f3ff;
     .brand {
         display: flex;
         align-items: center;
@@ -195,7 +195,7 @@ const FormContainer = styled.div`
             height: 5rem;
         }
         h1 {
-            color: white;
+            /* color: white; */
             text-transform: uppercase
         }
     }
@@ -217,20 +217,21 @@ const FormContainer = styled.div`
         display: flex;
         flex-direction: column;
         gap: 2rem;
-        background-color: #00000076;
+        background-color: #fff;
+        box-shadow: 0 8px 24px rgb(21 48 142 / 14%);
         border-radius: 2rem;
         padding: 3rem 5rem; 
     }
     input {
         background-color: transparent;
         padding: 1rem;
-        border: 0.1rem solid #4e0eff;
+        border: 0.1rem solid #ccc;
         border-radius: 0.4rem;
-        color: white;
+        /* color: white; */
         width: 100%;
         font-size: 1rem;
         &:focus {
-            border: 0.1rem solid #997af0;
+            /* border: 0.1rem solid #997af0; */
             outline: none;
         }
     }
@@ -262,7 +263,7 @@ const FormContainer = styled.div`
         }
     }
     button {
-        background-color: #997af0;
+        background-color: #0068ff;
         padding: 1rem 2rem;
         color: white;
         cursor: pointer;
@@ -273,16 +274,16 @@ const FormContainer = styled.div`
         text-transform: uppercase;
         transition: 0.5s ease-in-out;
         &:hover {
-            background-color: #4e0eff;
+            background-color: #0184e0;
         }
     }
     span {
-        color: white;
+        /* color: white; */
         text-transform: uppercase;
         a {
             text-decoration: none;
             font-weight: bold;
-            color: #4e0eff;
+            color: #0068ff;
         }
     }
 `;

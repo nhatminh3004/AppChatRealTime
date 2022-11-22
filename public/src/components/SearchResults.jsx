@@ -12,6 +12,7 @@ function SearchResults({searchResults, changeCurrentChat, currentSelected, onHan
         const conversation = await axios.post(createConversation, {searchResultId: searchResult._id, myId: currentUser._id})
         changeCurrentChat(index, conversation.data);
     }
+    console.log(searchResults);
     return ( 
         <Container>
             <div className='header'>
@@ -27,8 +28,8 @@ function SearchResults({searchResults, changeCurrentChat, currentSelected, onHan
                         onClick={() => onHandleSelect(index, searchResult)}
                                     >
                             <div className="avatar">
-                                {searchResult.user_info && searchResult.user_info.avatarImage != "" ? 
-                                    <img src={`data:image/svg+xml;base64,${searchResult.user_info.avatarImage}`} alt="avatar"/>
+                                {searchResult.avatarImage && searchResult.avatarImage !== "" ? 
+                                    <img src={searchResult.avatarImage} alt="avatar"/>
                                     : <img src={AvatarDefault} alt="avatar"/>
                                 }
                             </div>
@@ -87,6 +88,8 @@ const Container = styled.div`
         .avatar {
             img {
                 height: 3rem;
+                width: 3rem;
+                border-radius: 50%;
             }   
         }
         .username {

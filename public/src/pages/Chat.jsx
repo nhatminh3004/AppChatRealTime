@@ -5,7 +5,7 @@ import {useNavigate} from 'react-router-dom'
 import {io} from 'socket.io-client'
 import { useRef } from "react";
 
-import { allUsersRoute, host, myConversationsRoute } from "../utils/APIRoutes";
+import { allUsersRoute, getUsersInfo, host, myConversationsRoute } from "../utils/APIRoutes";
 import Welcome from "../components/Welcome";
 import ChatContainer from "../components/ChatContainer";
 import SidebarNav from "../components/SidebarNav";
@@ -16,6 +16,8 @@ import ListView from "../components/ListView";
 import ListUserForAddMember from "../components/ListUserForAddMember";
 import ListInvitations from "../components/ListInvitations";
 import ListGroups from "../components/ListGroups";
+import UserInfo from "../components/UserInfo";
+import ForwardForm from "../components/ForwardForm";
 
 function Chat() {
     const socket = useRef();
@@ -39,6 +41,9 @@ function Chat() {
     const [exceiptionUser, setExceiptionUser] = useState([]);
     const [openListInvitation, setOpenListInvitation] = useState(false);
     const [openListGroup, setOpenListGroup] = useState(false);
+    const [openUserInfo, setOpenUserInfo] = useState(false);
+    const [openForward, setOpenForward] = useState(false);
+    const [messageForward, setMessageForward] = useState("");
 
     
     useEffect(() => {
@@ -79,8 +84,13 @@ function Chat() {
 
     const getContactsFromDB = async () => {
         if (currentUser) {
-            const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
-            setContacts(data.data); 
+            // const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
+            const res = await axios.post(`${getUsersInfo}`, {usersId: currentUser.listFriends});
+            if (res.data)
+                setContacts(res.data);
+            else {
+                setContacts([]);
+            } 
         }
     }
     useEffect(() => {
@@ -109,11 +119,23 @@ function Chat() {
             })
             
             socket.current.on("invitation-receive", async (data) => {
-                setHaveInvitation(data);
+                // setHaveInvitation(data);
                 currentUser.sentInvitations = [...currentUser.sentInvitations, data];
                 localStorage.setItem("chat-app-user", JSON.stringify(currentUser));
                 setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
 
+            })
+            socket.current.on("response-unfriend", async (data) => {
+                // if (currentChat && currentUser && currentChat.users_info[0].sentInvitations && ) {
+                //     currentChat.users_info[0].sentInvitations.map((invitation, index) => {
+                //         if (invitation === currentUser._id) {
+                //             currentChat.users_info[0].sentInvitations.splice(index, 1);
+                //         }
+                //     })
+                //     setCurrentChat(currentChat);
+                // }
+                localStorage.setItem("chat-app-user", JSON.stringify(data));
+                setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
             })
             socket.current.on("reply-evict-message", async (data) => {
                 setHaveNewMessage(new Date());
@@ -180,6 +202,7 @@ function Chat() {
     }
     const openListInvitations = () => {
         setOpenListInvitation(true);
+        setOpenListGroup(false);
         setCurrentChat(undefined);
     }
 
@@ -188,10 +211,21 @@ function Chat() {
         setOpenListInvitation(false);
         setCurrentChat(undefined);
     }
+    const closeUserInfo = () => {
+        setOpenUserInfo(false);
+    }
+    const closeForward = () => {
+        setOpenForward(false);
+    }
+
+    const onHandleForward = (msg) => {
+        setOpenForward(true);
+        setMessageForward(msg);
+    }
 
     return <Container>
         <div className="container">
-            <SidebarNav changeNav={onHandleSelectNav} haveInvitation={haveInvitation} currentUser={currentUser}/>
+            <SidebarNav setOpenUserInfo={setOpenUserInfo} changeNav={onHandleSelectNav} haveInvitation={haveInvitation} currentUser={currentUser}/>
             {
                 openMessageContainer ? (
                     <>
@@ -199,19 +233,19 @@ function Chat() {
                         {
                             isLoaded && currentChat === undefined ? 
                                 (<Welcome currentUser={currentUser} />) :
-                                (<ChatContainer haveInvitation={haveInvitation} setHaveInvitation={setHaveInvitation} setIsOpenListAddMember={setIsOpenListAddMember} setExceiptionUser={setExceiptionUser} messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
+                                (<ChatContainer onHandleForward={onHandleForward} haveInvitation={haveInvitation} setHaveInvitation={setHaveInvitation} setIsOpenListAddMember={setIsOpenListAddMember} setExceiptionUser={setExceiptionUser} messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
                                 
                         }
                     </>
                 ) : (
                     <>
-                        <FriendsContainer openListGroups={openListGroups} openListInvitations={openListInvitations} setIsOpenList={setIsOpenList} contacts={contacts} currentUser={currentUser} changeChat={handleChatChange}/>
+                        <FriendsContainer currentChat={currentChat} setCurrentUser={setCurrentUser} openListGroups={openListGroups} openListInvitations={openListInvitations} setIsOpenList={setIsOpenList} contacts={contacts} currentUser={currentUser} changeChat={handleChatChange} socket={socket}/>
                         {
                             currentChat === undefined ? 
                                 ( openListInvitation ? <ListInvitations setHaveInvitation={setHaveInvitation} setCurrentUser={setCurrentUser} currentUser={currentUser} socket={socket}/> : 
-                                    (openListGroup ? <ListGroups /> :
+                                    (openListGroup ? <ListGroups setCurrentChat={setCurrentChat} conversations={conversations} /> :
                                         (isLoaded && (<Welcome currentUser={currentUser} />)))) :
-                                (<ChatContainer haveInvitation={haveInvitation} setHaveInvitation={setHaveInvitation} setIsOpenListAddMember={setIsOpenListAddMember} setExceiptionUser={setExceiptionUser} messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
+                                (<ChatContainer onHandleForward={onHandleForward} haveInvitation={haveInvitation} setHaveInvitation={setHaveInvitation} setIsOpenListAddMember={setIsOpenListAddMember} setExceiptionUser={setExceiptionUser} messageEvict={messageEvict} openImageViewer={openImageViewer} files={files} arrivalMessage={arrivalMessage} onHandleReloadLatestMsg={onHandleReloadLatestMsg} setArrivalMessage={setArrivalMessage} setCurrentChat={setCurrentChat} setCurrentUser={setCurrentUser} updateListConversation={setHaveNewMessage} currentChat={currentChat} currentUser={currentUser} socket={socket}/>)
                                 
                         }
                     </>
@@ -234,7 +268,8 @@ function Chat() {
         <ViewFiles closeImageViewer={closeImageViewer} files={files} currentImage={currentImage} isViewerOpen={isViewerOpen}/>
         {isOpenList && <ListView setHaveNewMessage={setHaveNewMessage} setCurrentChat={setCurrentChat} closeList={closeList} currentUser={currentUser} listUsers={listUsers} socket={socket}/>}
         {isOpenListAddMember && <ListUserForAddMember currentChat={currentChat} exceiptionUser={exceiptionUser} setHaveNewMessage={setHaveNewMessage} setCurrentChat={setCurrentChat} closeList={closeListAdd} currentUser={currentUser} listUsers={listUsers} socket={socket}/>}
-
+        {openUserInfo && <UserInfo setCurrentUser={setCurrentUser} currentChat={currentChat} exceiptionUser={exceiptionUser} setHaveNewMessage={setHaveNewMessage} setCurrentChat={setCurrentChat} closeList={closeUserInfo} currentUser={currentUser} listUsers={listUsers} socket={socket}/>}
+        {openForward && <ForwardForm updateListConversation={setHaveNewMessage} messageForward={messageForward} conversations={conversations} setHaveNewMessage={setHaveNewMessage} setCurrentChat={setCurrentChat} closeList={closeForward} currentUser={currentUser} socket={socket} />}
     </Container> ;
 }
 

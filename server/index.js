@@ -45,7 +45,7 @@ io.on("connection", (socket) => {
     onlineUsers.set(userId, socket.id);
   });
   socket.on("send-msg", (data) => {
-    console.log("send-msg socket :",data);
+    console.log("send-msg socket :", data);
     for (var i = 0; i < data.to.length; i++) {
       if (data.to[i].userId !== data.from.user._id) {
         const sendUserSocket = onlineUsers.get(data.to[i].userId);
@@ -81,6 +81,12 @@ io.on("connection", (socket) => {
     const sendUserSocket = onlineUsers.get(data.to);
     if (sendUserSocket) {
       io.to(`${sendUserSocket}`).emit("response-accept-friend", data);
+    }
+  });
+  socket.on("unfriend", (data) => {
+    const sendUserSocket = onlineUsers.get(data._id);
+    if (sendUserSocket) {
+      io.to(`${sendUserSocket}`).emit("response-unfriend", data);
     }
   });
   socket.on("denyAddFriend", (data) => {

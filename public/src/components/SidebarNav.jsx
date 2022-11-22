@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 import Avatar from "../assets/avatar_default.png"
 
-function SidebarNav({changeNav, haveInvitation, currentUser}) {
+function SidebarNav({setOpenUserInfo, changeNav, haveInvitation, currentUser}) {
     const [isSelectMessage, setIsSelectMessage] = useState(true);
     const [showTabOption, setShowTabOption] = useState(false);
     const navigate = useNavigate();
@@ -32,7 +32,7 @@ function SidebarNav({changeNav, haveInvitation, currentUser}) {
                 {currentUser.username}
             </p>
             <div className="options">
-                <div className="option-item">Your profile</div>
+                <div className="option-item" onClick={() => setOpenUserInfo(true)}>Your profile</div>
                 <div className="option-item btn-out" onClick={onHandleLogout}>Logout</div>
             </div>
         </div>}
@@ -50,9 +50,15 @@ const Container = styled.div`
     background-color: #0091ff;
     .avatar-container {
         padding: 1.5rem 0.5rem;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         img {
-            width: 100%;
+            width: 3.5rem;
+            height: 3.5rem;
             cursor: pointer;
+            border-radius: 50%;
         }
     }
     .tab-option {

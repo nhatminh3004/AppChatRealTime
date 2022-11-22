@@ -181,3 +181,37 @@ module.exports.denyAddFriend = async (req, res, next) => {
     next(error);
   }
 };
+
+module.exports.unfriend = async (req, res, next) => {
+  try {
+    const user = req.body.user;
+    const currentUser = req.body.currentUser;
+    await User.findByIdAndUpdate(user._id, {
+      $pull: { listFriends: currentUser._id },
+    });
+    await User.findByIdAndUpdate(currentUser._id, {
+      $pull: { listFriends: user._id },
+    });
+    const result = await User.findById(user._id);
+    return res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+module.exports.updateUserInfo = async (req, res, next) => {
+  try {
+    const id = req.body.id;
+    const username = req.body.username;
+    const gender = req.body.gender;
+    const avatarImage = req.body.avatarImage;
+    await User.findByIdAndUpdate(id, {
+      username: username,
+      gender: gender,
+      avatarImage: avatarImage,
+    });
+    const result = await User.findById(id);
+    return res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};

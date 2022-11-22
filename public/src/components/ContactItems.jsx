@@ -16,7 +16,7 @@ function ContactItems({conversations, changeCurrentChat, currentSelected}) {
                                         >
                                 <div className="avatar">
                                     {conversation.users_info && conversation.users_info[0].avatarImage != "" ? 
-                                        <img src={`data:image/svg+xml;base64,${conversation.users_info[0].avatarImage}`} alt="avatar"/>
+                                        <img src={conversation.users_info[0].avatarImage} alt="avatar"/>
                                         : <img src={AvatarDefault} alt="avatar"/>
                                     }
                                 </div>
@@ -89,6 +89,8 @@ const Container = styled.div`
         .avatar {
             img {
                 height: 3rem;
+                width: 3rem;
+                border-radius: 50%;
             }   
         }
         .message {

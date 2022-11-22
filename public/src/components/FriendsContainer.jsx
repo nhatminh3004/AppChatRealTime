@@ -8,12 +8,12 @@ import Logo from "../assets/logo.svg"
 import AvatarDefault from "../assets/avatar_default.png"
 // import ContactItems from './ContactItems';
 import SearchResults from './SearchResults';
-import { createConversation, searchUsers } from '../utils/APIRoutes';
+import { createConversation, searchUsers, unfriendRoute } from '../utils/APIRoutes';
 import GroupAvatar from "../assets/group.png"
 import InvitationAvatar from "../assets/invitations.png"
 
 
-function FriendsContainer({openListGroups, openListInvitations, setIsOpenList, contacts, currentUser, changeChat}) {
+function FriendsContainer({currentChat, setCurrentUser, openListGroups, openListInvitations, setIsOpenList, contacts, currentUser, changeChat, socket}) {
     const [currentUserName, setCurrentUserName] = useState(undefined);
     const [currentUserImage, setCurrentUserImage] = useState(undefined);
     const [currentSelected, setCurrentSelected] = useState(undefined);
@@ -34,6 +34,7 @@ function FriendsContainer({openListGroups, openListInvitations, setIsOpenList, c
     const onHandleSearch = async (e) => {
         e.preventDefault();
         const data = await axios.post(`${searchUsers}`, {searchKey, id: currentUser._id});
+        console.log(data.data);
         setSearchResults(data.data);
     }
     const onHandleClearSearchResults = () => {
@@ -44,13 +45,26 @@ function FriendsContainer({openListGroups, openListInvitations, setIsOpenList, c
         const conversation = await axios.post(createConversation, {searchResultId: contact._id, myId: currentUser._id})
         changeCurrentChat(index, conversation.data);
     }
+
+    const onHandleUnfriend = async (user) => {
+        const res = await axios.post(`${unfriendRoute}`, {user: user, currentUser: currentUser});
+        socket.current.emit("unfriend", res.data);
+        if (currentUser && currentUser.listFriends) {
+            currentUser.listFriends.map((friend, index) => {
+                if (friend === user._id)
+                    currentUser.listFriends.splice(index, 1);
+            })
+        }
+        localStorage.setItem("chat-app-user", JSON.stringify(currentUser));
+        setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
+    }
     return <>
         {
             currentUserName && (
                 <Container>
                     <div className="brand">
                         <img src={Logo} alt='logo'/>
-                        <h3>snappy</h3>
+                        <h3>valiu</h3>
                     </div>
                     <div className='options'>
                         <form onSubmit={(e) => onHandleSearch(e)} className="search">
@@ -68,33 +82,37 @@ function FriendsContainer({openListGroups, openListInvitations, setIsOpenList, c
                         <SearchResults searchResults={searchResults} changeCurrentChat={changeCurrentChat} currentSelected={currentSelected} onHandleClearSearchResults={onHandleClearSearchResults}/>
                         : <div className="contacts">
                             <div className="option">
-                                <div className="list-invitation" onClick={openListInvitations}>
+                                <div className={`list-invitation ${currentChat === undefined && !openListGroups && openListInvitations ? "list-selected" : ""}`} onClick={openListInvitations}>
                                     <img src={InvitationAvatar}/>
                                     <p>List invitations</p>
                                 </div>
-                                <div className="list-group" onClick={openListGroups}>
+                                <div className={`list-group ${currentChat === undefined && openListGroups && !openListInvitations ? "list-selected" : ""}`} onClick={openListGroups}>
                                     <img src={GroupAvatar}/>
                                     <p>List groups</p>
                                 </div>
                             </div>
                             <div className="title">Friends ({contacts.length})</div>
                             {
-                                (contacts.map((contact, index) => {
+                                (contacts && contacts.length > 0 && contacts.map((contact, index) => {
                                     return (
                                         <div 
-                                        className={`contact ${index === currentSelected ? "selected" : ""}`} 
+                                        className={`contact ${currentChat && contact._id === currentChat.users_info[0]._id ? "selected" : ""}`} 
                                         key={index}
-                                        onClick={() => onHandleSelect(index, contact)}
+                                        
                                         >
-                                            <div className="avatar">
-                                                {contact.avatarImage ? 
-                                                    <img src={`data:image/svg+xml;base64,${contact.avatarImage}`} alt="avatar"/>
-                                                    : <img src={AvatarDefault} alt="avatar"/>
-                                                }
+                                            <div className="background" onClick={() => onHandleSelect(index, contact)}></div>
+                                            <div className='contact-info'>
+                                                <div className="avatar">
+                                                    {contact.avatarImage ? 
+                                                        <img src={contact.avatarImage} alt="avatar"/>
+                                                        : <img src={AvatarDefault} alt="avatar"/>
+                                                    }
+                                                </div>
+                                                <div className="username">
+                                                    <h3>{contact.username}</h3>
+                                                </div>
                                             </div>
-                                            <div className="username">
-                                                <h3>{contact.username}</h3>
-                                            </div>
+                                            <div className="btn-unfriend" onClick={ () => onHandleUnfriend(contact) }>Unfriend</div>
                                         </div>
                                     )
                                 }))
@@ -235,6 +253,9 @@ const Container = styled.div`
                     font-size: 1.1rem;
                 }
             }
+            .list-selected {
+                background-color: #eeeff2;
+            }
         }
         .title {
             width: 100%;
@@ -243,29 +264,59 @@ const Container = styled.div`
         .contact {
             /* background-color: #ffffff39; */
             min-height: 5rem;
+            position: relative;
             width: 100%;
             cursor: pointer;
             border-radius: 0.2rem;
             padding: 0.4rem 0.5rem;
-            gap:1rem;
             align-items: center;
+            justify-content: space-between;
             display: flex;
             transition: 0.5s ease-in-out;
             &:hover {
-                background-color: #eeeff2;
+            background-color: #eeeff2;
             }   
-            .avatar {
-                img {
-                    height: 3rem;
-                }   
+            
+            .background {
+                position: absolute;
+                top: 0;
+                right: 0;
+                left: 0;
+                bottom: 0;
+                /* background-color: #ccc; */
+                z-index: 1;
             }
-            .username {
-                h3 {
-                    /* color: white; */
-                    font-weight: normal;
+            .contact-info {
+                position: relative;
+                gap:1rem;
+                display: flex;
+                align-items: center;
+                .avatar {
+                    img {
+                        height: 3rem;
+                        width: 3rem;
+                        border-radius: 50%;
+                    }   
+                }
+                .username {
+                    h3 {
+                        /* color: white; */
+                        font-weight: normal;
+                    }
+                }
+
+            }
+            .btn-unfriend {
+                position: relative;
+                background-color: red;
+                color: #fff;
+                padding: 0.5rem;
+                border-radius: 5px;
+                z-index: 1;
+                &:hover {
+                    opacity: 0.3;
                 }
             }
-            
         }
         .selected {
             background-color: #eeeff2;

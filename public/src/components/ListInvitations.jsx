@@ -142,6 +142,8 @@ const Container = styled.div`
                 align-items: center;
                 img {
                     height: 3rem;
+                    width: 3rem;
+                    border-radius: 50%;
                 }
                 p {
                     font-weight: bold;
