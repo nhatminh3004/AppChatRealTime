@@ -61,6 +61,7 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("evict-message", (data) => {
+    console.log("Data nhan ben sever evic message :",data);
     for (var i = 0; i < data.to.length; i++) {
       if (data.to[i].userId !== data.from) {
         const sendUserSocket = onlineUsers.get(data.to[i].userId);

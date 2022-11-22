@@ -23,6 +23,7 @@ import {
   host,
   myConversationsRoute,
   sendMessageRoute,
+  evictMessageRoute
 } from "../ultis/ApiRoute";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -41,18 +42,32 @@ function ChatScreen(props) {
   const { navigation, route } = props;
   const { navigate, goBack } = navigation;
   const { users_info, conversation, lastMessage } = props.route.params.user; // nhận từ bên MessageScreen
+  // console.log("Conservation Room : ",conversation);
   const setHaveNewMessage = props.route.params.setHaveNewMessage; 
   const [messages, setMessages] = useState([]);
   const [arraivalMessage, setArrivalMessage] = useState({});
   const [text, setText] = useState("");
   const [userNameBanThan,setuserNameBanThan] = useState("");
-  const [userNameNguoiTa,setuserNameNguoiTa] = useState('');
+  const [messageEvict, setMessageEvict] = useState(undefined);
+  // const [userNameNguoiTa,setuserNameNguoiTa] = useState('');
   const socket = useRef();
-
+  
   useEffect(() => {
     addUserToSocket();
-    setuserNameNguoiTa(users_info[0].username)
+    // setuserNameNguoiTa(users_info[0].username)
   }, []);
+  useEffect(() => { 
+    if (messageEvict) {
+        let msgs = [...messages];
+        for(var i = 0; i < msgs.length; i++) {
+            if (messageEvict === msgs[i].message._id) {
+                msgs.splice(i, 1);
+            }
+        }
+        setMessages(msgs);
+    }
+}, [messageEvict])
+  
 
   const addUserToSocket = async () => {
     let currentUser = await AsyncStorage.getItem("User");
@@ -63,20 +78,25 @@ function ChatScreen(props) {
 
     if (socket.current) {
       socket.current.on("msg-receive", (dataSent) => {
-        console.log("Data nhận :", dataSent.from.user.username);
+        // console.log("Data nhận :", dataSent.from.user.username);
         // setuserNameNguoiTa(dataSent.from.user.username);
-       
+        
         if (conversation._id === dataSent.from.conversationId) {
-          setArrivalMessage({ fromSelf: false, message: dataSent.message });
+          setArrivalMessage({ fromSelf: false, message: dataSent.message,senderUser:dataSent.from.user.username });
         }
       });
+      socket.current.on("reply-evict-message", async (data) => {
+        setHaveNewMessage(new Date());
+        console.log("Reply Evict message :",data.messageId);
+        setMessageEvict(data.messageId);
+    })
     }
   };
   useEffect(() => {
     getAllMyMessages();
-  }, []);
+  },[arraivalMessage]);
+
   useEffect(() => {
-   
     if (arraivalMessage) setMessages([...messages, arraivalMessage]);
   }, [arraivalMessage]);
   const getAllMyMessages = async () => {
@@ -110,7 +130,7 @@ function ChatScreen(props) {
       message: newMessage.data,
     });
     const msgs = [...messages];
-    msgs.push({ fromSelf: true, message: newMessage.data });
+    msgs.push({ fromSelf: true, message: newMessage.data,senderUser:currentUser});
     setMessages(msgs);
     setHaveNewMessage(new Date());
     setText("");
@@ -160,7 +180,7 @@ console.log("Tên Image Fetch:", uriFetch);
       conversationId: conversation._id,
       files: objectFile,
     });
-    console.log("newMessageImage Data ",newMessageImage.data);
+    // console.log("newMessageImage Data ",newMessageImage.data);
     socket.current.emit("send-msg", {
       from: {
         user: currentUser,
@@ -184,8 +204,38 @@ console.log("Tên Image Fetch:", uriFetch);
   seturiImage('');
   uriFetch='';
 }
+
     /////////////////////
   };
+  const handleEvicMesssage= async (message) =>{
+    let currentUser = await AsyncStorage.getItem("User");
+    currentUser = JSON.parse(currentUser);
+    await axios.post(`${evictMessageRoute}`,{
+      messageId:message._id,
+      conversationId: conversation._id,
+    });
+    socket.current.emit("evict-message",{
+      from:currentUser._id,
+      to:conversation.members,
+      messageId:message._id
+    })
+    if (message.message.files && message.message.files.length > 0) {
+      let url = [];
+      for(var i = 0; i < message.message.files.length; i++) {
+          url = [...url, message.message.files[i].url];
+      }
+  }
+  const msgs = [...messages];
+  for(var i = 0; i < msgs.length; i++) {
+    if (message._id === msgs[i].message._id) {
+      msgs.splice(i, 1);
+    }
+}
+  setMessages(msgs);
+  setHaveNewMessage(new Date());
+  console.log("Thu Hồi :",message._id);
+  }
+  // console.log("Mảng Tin nhắn: ",messages);
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#0091FF" style="light" translucent />
@@ -199,7 +249,9 @@ console.log("Tên Image Fetch:", uriFetch);
             goBack();
           }}
         />
-        <Text style={styles.headerTitle}>{users_info[0].username}</Text>
+        <Text style={styles.headerTitle}>
+          {conversation.members.length >2 ? conversation.name : users_info[0].username }
+        </Text>
         
       </View>
       {/* {console.log(messages[0])} */}
@@ -208,7 +260,7 @@ console.log("Tên Image Fetch:", uriFetch);
           style={{ flex: 1 }}
           data={messages}
           renderItem={({ item }) => (
-            <ChatItem item={item} userNameBanThan={userNameBanThan} userNameNguoiTa={userNameNguoiTa}  key={`${item._id}`} />
+            <ChatItem item={item}  userNameBanThan={userNameBanThan}   key={`${item._id}`} onPresss={handleEvicMesssage} />
           )}
         />
       )}

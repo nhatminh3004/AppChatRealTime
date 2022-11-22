@@ -139,7 +139,7 @@ function Chat() {
             })
             socket.current.on("reply-evict-message", async (data) => {
                 setHaveNewMessage(new Date());
-                console.log(data.messageId);
+                console.log("Messsage Evic ID :",data.messageId);
                 setMessageEvict(data.messageId);
             })
             socket.current.on("inform-create-group", (data) => {

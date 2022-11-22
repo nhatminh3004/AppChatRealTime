@@ -23,7 +23,7 @@ function ConservisionItem(props) {
       setIsSingle(false);
     }
   }, [props]);
-  console.log("lagmessage Info: ",lastMessage.message.message);
+  // console.log("lagmessage Info: ",lastMessage.message.message);
   return (
     <View style={styles.container}>
       {isSearchResult && (
@@ -117,7 +117,7 @@ function ConservisionItem(props) {
                 }}
               >
                 <Text numberOfLines={1} style={styles.username}>
-                  {users_info[0].username}
+                  {conversation.name}
                 </Text>
                 {/* <Text  style={styles.time}>{time}</Text> */}
               </View>
