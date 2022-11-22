@@ -3,7 +3,7 @@ import React, { useState, useCallback } from "react";
 import { useRef } from "react";
 import { useEffect } from "react";
 import { AiOutlineCheck, AiOutlineUsergroupAdd } from "react-icons/ai";
-import { FiUserPlus } from 'react-icons/fi';
+import { FiDownload, FiUserPlus } from 'react-icons/fi';
 import styled from "styled-components";
 import ChatInput from "./ChatInput";
 import AvatarDefault from "../assets/avatar_default.png"
@@ -405,30 +405,39 @@ function ChatContainer({onHandleForward, haveInvitation, setHaveInvitation, setI
                                                         </div>
                                                 }
                                                 else if (fileType === "docx") {
-                                                    return <div className="file-container" onClick={ () => openImageViewer(index, message.message.message.files) }>
+                                                    return <div className="file-container" >
                                                         <FileIcon extension={`${fileType}`}  {...defaultStyles.docx}  />
                                                         <div className="file-info">
                                                             <p>{file.fileName}</p>
-                                                            <p className="file-size">{formatBytes(file.size,2)}</p>
+                                                            <div className="file-sub">
+                                                                <p className="file-size">{formatBytes(file.size,2)}</p>
+                                                                <a className="btn-download"href={file.url} download={true}><FiDownload/></a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     // return <FileIcon extension="asv" {...defaultStyles}  />
                                                 }
                                                 else if (fileType === "pdf") {
-                                                    return <div className="file-container" onClick={ () => openImageViewer(index, message.message.message.files) }>
-                                                        <FileIcon extension={`${fileType}`}  {...defaultStyles.pdf}  />
+                                                    return <div className="file-container">
+                                                        <div className="file-icon-container" onClick={ () => openImageViewer(index, message.message.message.files) }><FileIcon extension={`${fileType}`}  {...defaultStyles.pdf} /></div>
                                                         <div className="file-info">
                                                             <p>{file.fileName}</p>
-                                                            <p className="file-size">{formatBytes(file.size,2)}</p>
+                                                            <div className="file-sub">
+                                                                <p className="file-size">{formatBytes(file.size,2)}</p>
+                                                                <a className="btn-download" href={file.url} download={true}><FiDownload/></a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     // return <FileIcon extension="asv" {...defaultStyles}  />
                                                 } else {
-                                                    return <div className="file-container" onClick={ () => openImageViewer(index, message.message.message.files) }>
+                                                    return <div className="file-container">
                                                         <FileIcon extension={`${fileType}`}  {...defaultStyles}  />
                                                         <div className="file-info">
                                                             <p>{file.fileName}</p>
-                                                            <p className="file-size">{formatBytes(file.size,2)}</p>
+                                                            <div className="file-sub">
+                                                                <p className="file-size">{formatBytes(file.size,2)}</p>
+                                                                <a className="btn-download" href={file.url} download={true}><FiDownload/></a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 }
@@ -685,12 +694,36 @@ const Container = styled.div`
                             width: 5vw;
                             height: 8vh;
                         }
+                        .file-icon-container {
+                            cursor: pointer;
+                        }
                         .file-info {
                             display: flex;
                             flex-direction: column;
                             gap: 0.5rem;
-                            .file-size {
-                                font-size: 0.8rem;
+                            p {cursor: default;}
+                            .file-sub {
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                .file-size {
+                                    font-size: 0.8rem;
+                                }
+                                .btn-download {
+                                    display: flex;
+                                    align-items: center;
+                                    color: #000;
+                                    padding: 0.2rem;
+                                    svg {
+                                        font-size: 0.8rem;
+                                        width: 20px;
+                                        height: 20px;
+                                    }
+                                    &:hover {
+                                        background-color: #ccc;
+                                        border-radius: 3px;
+                                    }
+                                }
                             }
                         }
                       }
