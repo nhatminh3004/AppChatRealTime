@@ -11,6 +11,7 @@ const {
   getUsersInfo,
   unfriend,
   updateUserInfo,
+  updateImageMobile
 } = require("../controllers/userController");
 const { login } = require("../controllers/userController");
 
@@ -32,5 +33,6 @@ router.post("/search", searchUser);
 router.post("/getUsersInfo", getUsersInfo);
 router.post("/unfriend", unfriend);
 router.post("/updateUserInfo", updateUserInfo);
+router.post("/updateImageMobile",   updateImageMobile);
 
 module.exports = router;

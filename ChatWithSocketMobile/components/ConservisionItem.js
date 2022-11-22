@@ -86,7 +86,9 @@ function ConservisionItem(props) {
                 lastMessage.message.message.files.length > 0 ? (
                   <Text style={styles.last_msg}>[files]</Text>
                 ) : (
-                  lastMessage && (
+                  lastMessage &&
+                  lastMessage.message &&
+                lastMessage.message.message && (
                     <Text style={styles.last_msg}>
                     {lastMessage.message.message.text}
                     </Text>
@@ -134,7 +136,9 @@ function ConservisionItem(props) {
                 lastMessage.message.message.files.length > 0 ? (
                   <Text style={styles.last_msg}>[files]</Text>
                 ) : (
-                  lastMessage && (
+                  lastMessage &&
+                  lastMessage.message &&
+                lastMessage.message.message &&(
                     <Text style={styles.last_msg}>
                       {lastMessage.message.message.text}
                     </Text>

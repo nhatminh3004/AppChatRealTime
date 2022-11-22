@@ -215,3 +215,18 @@ module.exports.updateUserInfo = async (req, res, next) => {
     next(error);
   }
 };
+module.exports.updateImageMobile = async (req, res, next) => {
+  try {
+    const id = req.body.id;
+    const avatarImage = req.body.avatarImage;
+    console.log("id update image nhan dc",id);
+    console.log("url update image nhan dc :",avatarImage);
+    await User.findByIdAndUpdate(id, {
+      avatarImage: avatarImage,
+    });
+    const result = await User.findById(id);
+    return res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};

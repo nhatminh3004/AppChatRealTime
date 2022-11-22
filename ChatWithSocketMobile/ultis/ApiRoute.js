@@ -6,6 +6,7 @@ export const checkPhoneTonTaiRoute = `${host}/api/auth/checkPhoneTonTai`;
 export const setAvatarRoute = `${host}/api/auth/setAvatar`;
 export const allUsersRoute = `${host}/api/auth/allusers`;
 export const searchUsers = `${host}/api/auth/search`;
+export const updateImageMobile = `${host}/api/auth/updateImageMobile`;
 export const addSentInvitation = `${host}/api/auth/invite`;
 export const acceptAddFriend = `${host}/api/auth/acceptFriend`;
 export const denyAddFriend = `${host}/api/auth/denyAddFriend`;
@@ -15,3 +16,4 @@ export const sendMessageRoute = `${host}/api/conversations/sendMessage`;
 export const sendImagesRoute = `${host}/api/conversations/sendImages`;
 export const getAllMessagesRoute = `${host}/api/conversations/getmsg`;
 export const evictMessageRoute = `${host}/api/conversations/evictMessage`;
+
