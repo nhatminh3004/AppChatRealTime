@@ -14,7 +14,7 @@ import { FontAwesome } from '@expo/vector-icons';
 
 const {StatusBarManager} = NativeModules;
 const heightCuaStatusBar = StatusBarManager.HEIGHT;
-let uriFetch;
+
 const { height, width } = Dimensions.get("window");
 function ProfileScreen({navigation}) {
   const [username,setUsername]= useState('');
@@ -43,62 +43,7 @@ function ProfileScreen({navigation}) {
        }
   };
   getItemFromStorage();
-  const handleUpdateImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-    console.log("Result Pick Image:",result.uri);
-    uriFetch=result.uri;
-    if (result.cancelled)  {
-      Alert.alert("Bạn chưa chọn ảnh")
-      uriFetch='';
-  }
-  else {
-console.log("Tên Image Fetch:", uriFetch);
-  const response =await fetch(uriFetch);
-  const blob =await response.blob();
-  const nameFile=  uriFetch.substring(uriFetch.lastIndexOf('/')+1);
-  console.log("name file :",nameFile);
-  var ref =  firebase.storage().ref().child(nameFile).put(blob);
-  const imageUrl = await (await ref).ref.getDownloadURL();
-  console.log("Download URRL:",imageUrl);
-    let url=nameFile
-    let part=url.split(".");
-    let typeFile=part[part.length-1];
-   let urlTypeFile=typeFile;
-   
-    const res = await axios.post(updateImageMobile, {
-      id: id,
-      avatarImage: imageUrl+"."+urlTypeFile
-     
-    });
-    await AsyncStorage.removeItem("User");
-    const userJson =  JSON.stringify(res.data);
-       await AsyncStorage.setItem("User",userJson);
-       try {
-        await AsyncStorage.getItem('User', (error, result) => {
-          if (result) {
-           setavatImage(JSON.parse(result).avatarImage)
-          }else{
-            console.log(JSON.stringfy(error));
-          }
-        });
-      } catch (error) {
-        console.log(error);
-      }
-   
-  try {
-    await ref
-  } catch (e) {
-    console.log(e);
-  }
-  Alert.alert("Upload Success");
-  uriFetch='';
-}
-  };
+ 
  
   return (
     
@@ -130,9 +75,7 @@ console.log("Tên Image Fetch:", uriFetch);
 
         </View>
         <Separator height={15}/>
-        <TouchableOpacity style={styles.signInButtonImage} onPress={handleUpdateImage}>
-      <Text style={styles.signInButtonText}>Đổi Ảnh</Text>
-      </TouchableOpacity>
+      
       <TouchableOpacity style={styles.signInButtonImage} onPress={()=>{navigation.replace('UpdateInfo')}}>
       <Text style={styles.signInButtonText}>Cập nhật thông tin</Text>
       </TouchableOpacity>  

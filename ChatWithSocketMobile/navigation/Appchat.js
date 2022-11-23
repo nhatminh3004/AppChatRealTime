@@ -26,6 +26,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons'; 
 import { SimpleLineIcons } from '@expo/vector-icons'; 
 import UploadImage from '../screens/UploadImage';
+import UpdateInfo from '../screens/UpdateInfo';
 
 
 const Stack = createStackNavigator();
@@ -94,7 +95,7 @@ function StackNavigator() {
      <Stack.Screen name="Message" component={MessageScreen}  />
      <Stack.Screen name="Chat" component={ChatScreen}  />
      <Stack.Screen name="UploadTest" component={UploadImage}  />
-    
+     <Stack.Screen name="UpdateInfo" component={UpdateInfo}  />
      
      
     
@@ -116,6 +117,7 @@ function StackNavigator() {
      <Stack.Screen name="Message" component={MessageScreen}  />
      <Stack.Screen name="Chat" component={ChatScreen}  />
      <Stack.Screen name="UploadTest" component={UploadImage}  />
+     <Stack.Screen name="UpdateInfo" component={UpdateInfo}  />
     
      
    </Stack.Navigator>

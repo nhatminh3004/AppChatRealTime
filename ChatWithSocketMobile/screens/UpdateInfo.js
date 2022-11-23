@@ -1,5 +1,5 @@
 //phiên bản mới nhất
-import { Text, StyleSheet, View,TextInput,TouchableOpacity, Dimensions } from 'react-native'
+import { Text, StyleSheet, View,TextInput,TouchableOpacity, Dimensions, Alert,Image } from 'react-native'
 
 
 import React, { useState } from 'react'
@@ -13,74 +13,141 @@ import { StatusBar } from 'expo-status-bar';
 import {NativeModules} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import KeyboardAvoidingView from 'react-native/Libraries/Components/Keyboard/KeyboardAvoidingView';
-import axios from 'axios';
+
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {registerRoute} from '../ultis/ApiRoute';
+import { CheckBox } from '@rneui/themed';
 const {StatusBarManager} = NativeModules;
+import {
+  updateImageMobile,
+  updateUserInfo
+} from "../ultis/ApiRoute";
+import * as ImagePicker from 'expo-image-picker';
+import {firebase} from '../config';
+import axios from "axios";
 
 const heightCuaStatusBar = StatusBarManager.HEIGHT;
 const {height,width} = Dimensions.get('window');
-
+let currentGenderr;
+let uriFetch;
 export default function UpdateInfo({navigation}) {
+  const [usernamee,setUsername]= useState('');
+  const [currentGender,setCurrentGender]=useState(currentGenderr);
+  const [id,setID]=useState('');
+  const [male,setMale]=useState(false);
+  const [female,setFemale]=useState(false);
+  const [resultGender,setresultGender]=useState(currentGender);
+  const [text,setText]=useState('');
+  const [avatarImage,setavatImage]= useState('');
  
-  const [error,setError]=useState('');
-
-  
-
-  
-
-  
-  //Xử lý đăng ký backend
-    const [userInfo,setUserInfo] = useState({
-      username:'',
-      phone:phoneNumber,
-      email:'',
-      password:'',
-      confirmpasswordconfirm:'',
+  const getItemFromStorage = async () => {
+    try {
+         await AsyncStorage.getItem('User', (error, result) => {
+           if (result) {
+            setID(JSON.parse(result)._id)
+            setUsername(JSON.parse(result).username)
+            setCurrentGender(JSON.parse(result).gender)
+            setavatImage(JSON.parse(result).avatarImage)
+            currentGenderr=(JSON.parse(result).gender);
+           }else{
+             console.log(JSON.stringfy(error));
+           }
+         });
+       } catch (error) {
+         console.log(error);
+       }
+  };
+  getItemFromStorage();
+  const handleUpdateImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
-    const {username,phone,email,password,confirmpasswordconfirm} = userInfo
-  //
-    const handleOnChangeText= (value,fieldName) =>{
-      console.log(value,fieldName);
-      setUserInfo({...userInfo,[fieldName]: value})
-    }
-    const isValidObject = (obj) =>{
-      return Object.values(obj).every(value => value.trim())//convert to array
-     }
-     const isValidEmail = (value) =>{
-      const regx = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
-      return regx.test(value);
-     }
-     const updateError= (error,stateUpdate) =>{
-          stateUpdate(error);
-          setTimeout(() =>{
-            stateUpdate('');
-          },2500);
-     }
-   const isValidForm = () =>{
-    //Kiểm tra tất cả các filed đã nhập hay chưa
-      if(!isValidObject(userInfo)) return updateError('Tất cả nội dung phải điền đầy đủ ',setError);
-      //Kiểm tra username từ 3 đến 20 ký tự
-      if(!username.trim()|| username.length < 3|| username.length>20) return updateError('username phải từ 3 đến 20 ký tự ',setError);
-      //kiểm tra email bằng regex
-      if(!isValidEmail(email)) return updateError('Email không hợp lệ ',setError);
-      //Kiểm tra password
-      if(!password.trim() || password.length<3 || password.length>20) return updateError('Mật khẩu phải từ 3 đến 20 ký tự ',setError);
-      //Kiểm tra ConfirmPassword
-      if(password!=confirmpasswordconfirm) return updateError('Mật khẩu nhập lại không khớp',setError);
-      return true;
-   }
+    console.log("Result Pick Image:",result.uri);
+    uriFetch=result.uri;
+    if (result.cancelled)  {
+      Alert.alert("Bạn chưa chọn ảnh")
+      uriFetch='';
+  }
+  else {
+console.log("Tên Image Fetch:", uriFetch);
+  const response =await fetch(uriFetch);
+  const blob =await response.blob();
+  const nameFile=  uriFetch.substring(uriFetch.lastIndexOf('/')+1);
+  console.log("name file :",nameFile);
+  var ref =  firebase.storage().ref().child(nameFile).put(blob);
+  const imageUrl = await (await ref).ref.getDownloadURL();
+  console.log("Download URRL:",imageUrl);
+    let url=nameFile
+    let part=url.split(".");
+    let typeFile=part[part.length-1];
+   let urlTypeFile=typeFile;
+   
+    const res = await axios.post(updateUserInfo, {
+      id: id,
+      username:text,
+      gender:resultGender,
+      avatarImage: imageUrl+"."+urlTypeFile
+     
+    });
+    await AsyncStorage.removeItem("User");
+    const userJson =  JSON.stringify(res.data);
+       await AsyncStorage.setItem("User",userJson);
+       try {
+        await AsyncStorage.getItem('User', (error, result) => {
+          if (result) {
+           setavatImage(JSON.parse(result).avatarImage)
+          }else{
+            console.log(JSON.stringfy(error));
+          }
+        });
+      } catch (error) {
+        console.log(error);
+      }
+   
+  try {
+    await ref
+  } catch (e) {
+    console.log(e);
+  }
+  Alert.alert("Cập nhật thành công");
+  uriFetch='';
+  navigation.replace('BottomScreen');
+}
+  };
+  
+  
+  
+
+  
+
+  
+ 
+ console.log("userNamee:",usernamee);
+ console.log("userInput:",text);
+ console.log("Gia tri Male :",male);
+ console.log("Giá trị Female:",female);
+ console.log("Giá trị resultGeder:",resultGender);
+//  console.log("state :",currentGenderr);
+ 
     
     const submitForm =  async () => {
-      if(isValidForm()){
-        console.log('Thong tin User : ',userInfo);
-        const res = await axios.post(`${registerRoute}`, userInfo);
-    console.log(res.data);
-    const userJson = JSON.stringify(res.data.user);
-    AsyncStorage.setItem("User",userJson);
-    navigation.replace("BottomScreen")
-      }
       
+    
+      // Alert.alert('Thong tin: '+text);
+      
+    }
+    const genderMale  =() =>{
+      setMale(true);
+      setFemale(false);
+      setresultGender(true)
+    }
+    const genderFemale  =() =>{
+      setMale(false);
+      setFemale(true);
+      setresultGender(false)
     }
 
     
@@ -91,64 +158,37 @@ export default function UpdateInfo({navigation}) {
       <Separator height={heightCuaStatusBar}/>
      
       <View style={styles.headerContainer}>
-        <Ionicons name='chevron-back-outline' size={30} onPress={() =>{navigation.replace("Signin")}}/>
-        <Text style={styles.headerTitle}>Đăng Ký</Text>
+        <Ionicons name='chevron-back-outline' size={30} onPress={() =>{navigation.replace("BottomScreen")}}/>
+        <Text style={styles.headerTitle}>Cập nhật thông tin</Text>
       </View>
+     
+     
       <Separator height={10}/>
-      <Text style={styles.title}>Bằng việc đăng ký tài khoản cho số điện thoại<Text style={styles.phoneNumBerText}>{phoneNumber}</Text> của bạn</Text>
-      <Text style={styles.content}>sẽ giúp bạn bảo mật an toàn hơn</Text>
-      <Separator height={10}/>
-      {/* Nếu error tồn tại thì xuất hiện lỗi ngược lại ko xuất hiện */}
-      {error ? <View style={styles.thongbaoContainer}>
-          <AntDesign name="notification" size={30} color="#A9A9A9" style={{marginRight:10}}/>
-          <Text style={styles.thongBaoLoi}>{error}</Text>
-        </View> : null}
-      <Separator height={50}/>
+      <View style={styles.mainbody}>
+      {avatarImage == '' ?  <Image style={styles.imgprofile} source={{ uri: "https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000" }} /> :(
+            <Image style={styles.imgprofile} source={{ uri: avatarImage }} />
+        )}
+        
+      </View>
+      
       <View style={styles.inputContainer}>
         <View style={styles.inputSubContainer}>
           <Feather name='user' size={30} color='#A9A9A9' style={{marginRight:10}}/>
-          <TextInput value={phoneNumber} autoCapitalize='none' placeholder='Số điện thoại' editable={false} placeholderTextColor='#A9A9A9' style={styles.inputText} />
+          <TextInput defaultValue={usernamee}  autoCapitalize='none'  keyboardType='default'  placeholderTextColor='#A9A9A9' style={styles.inputText}  onChangeText={text => setText(text)}/>
         </View>
       </View>
-      <Separator height={10}/>
+      <Separator height={15}/>
       <View style={styles.inputContainer}>
-        <View style={styles.inputSubContainer}>
-          <Feather name='user' size={30} color='#A9A9A9' style={{marginRight:10}}/>
-          <TextInput value={username} autoCapitalize='none' placeholder='Nhập tên đăng nhập' keyboardType='default' maxLength={30} placeholderTextColor='#A9A9A9' style={styles.inputText}  onChangeText={value => handleOnChangeText(value,'username')}/>
-        </View>
+     <Text>Giới tính: {!resultGender ? 'Nữ' : 'Nam'}</Text>
       </View>
+      <View style={styles.inputContainer}>
+      <CheckBox style={{width:100,height:100}} title='Male' center checked={male} checkedIcon="dot-circle-o" uncheckedIcon="circle-o" onPress={genderMale}/>
+      <CheckBox style={{width:100,height:100}} title='Female' center checked={female} checkedIcon="dot-circle-o" uncheckedIcon="circle-o" onPress={genderFemale} />
+      </View>
+     
+     
       
      
-      <Separator height={15}/>
-      <View style={styles.inputContainer}>
-        <View style={styles.inputSubContainer}>
-        <MaterialCommunityIcons name="email" size={30} color="#A9A9A9" style={{marginRight:10}} />
-          <TextInput value={email} autoCapitalize='none' placeholder='Nhập Email' keyboardType='email-address' maxLength={30} placeholderTextColor='#A9A9A9' style={styles.inputText}  onChangeText={value => handleOnChangeText(value,'email')}/>
-        </View>
-      </View>
-      <Separator height={15}/>
-      <View style={styles.inputContainer}>
-        <View style={styles.inputSubContainer}>
-        <Feather  name='lock' size={30} color='#A9A9A9' style={{marginRight:10}}/>
-          <TextInput value={password} placeholder='Nhập mật khẩu' placeholderTextColor='#A9A9A9' style={styles.inputText} secureTextEntry={isMatKhau}  onChangeText={value => handleOnChangeText(value,'password')}/>
-         
-          <Feather  name={trangThaiIconEye} size={30} color='#A9A9A9' style={{marginRight:10}} onPress={()=>{setMatKhau(!isMatKhau,setEye(!isEye))} 
-        }/>
-      
-        </View>
-      </View>
-      <Separator height={15}/>
-      
-      <View style={styles.inputContainer}>
-        <View style={styles.inputSubContainer}>
-        <Entypo name="ccw" size={30} color="#A9A9A9" style={{marginRight:10}} />
-          <TextInput value={confirmpasswordconfirm} placeholder='Nhập lại mật khẩu' placeholderTextColor='#A9A9A9' style={styles.inputText} secureTextEntry={isMatKhau1}  onChangeText={value => handleOnChangeText(value,'confirmpasswordconfirm')}/>
-         
-          <Feather  name={trangThaiIconEye1} size={30} color='#A9A9A9' style={{marginRight:10}} onPress={()=>{setMatKhau1(!isMatKhau1,setEye1(!isEye1))} 
-        }/>
-      
-        </View>
-      </View>
      
      
       
@@ -160,15 +200,12 @@ export default function UpdateInfo({navigation}) {
        
       </View>
     
-      <TouchableOpacity style={styles.signInButton} onPress={() => submitForm()} >
-         <Text style={styles.signInButtonText}>Đăng Ký</Text>
+      <TouchableOpacity style={styles.signInButton} onPress={handleUpdateImage} >
+         <Text style={styles.signInButtonText}>Đổi ảnh và cập nhật thông tin</Text>
       </TouchableOpacity>
       
      
-        <View style={styles.signUpContainer}>
-          <Text style={styles.banchuacoAccountText}>Bạn đã có tài khoản ?</Text>
-          <Text style={styles.dangkyNgayText} onPress={()=>{navigation.replace("Signin")}}>Trở về đăng nhập</Text>
-        </View>
+       
     </View>
     
   )
@@ -271,6 +308,16 @@ const styles = StyleSheet.create({
     marginTop:20,
 
   },
+  signInButtonDoiAnh:{
+    backgroundColor:'#0184e0',
+    borderRadius:8,
+    marginHorizontal:20,
+    height:(height/100)*5,
+    justifyContent:'center',
+    alignItems:'center',
+    marginTop:1,
+
+  },
   signInButtonText:{
     fontSize:20,
     lineHeight:20*1.4,
@@ -308,6 +355,20 @@ const styles = StyleSheet.create({
     fontSize:18,
     textAlign:'center',
 
-  }
+  },
+  mainbody:{
+    marginTop:30,
+    marginLeft:24,
+    marginRight:24,
+    marginBottom:70
+  },
+  imgprofile:{
+      width:200,
+      height:200,
+      marginLeft:100,
+      marginTop:50,
+      
+     borderRadius:120
+  },
   
 })

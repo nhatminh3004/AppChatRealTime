@@ -204,6 +204,10 @@ module.exports.updateUserInfo = async (req, res, next) => {
     const username = req.body.username;
     const gender = req.body.gender;
     const avatarImage = req.body.avatarImage;
+    console.log("Id update user nhan:",id);
+    console.log("username update user nhan:",username);
+    console.log("gender update user nhan:",gender);
+    console.log("avatarURL update user nhan:",avatarImage);
     await User.findByIdAndUpdate(id, {
       username: username,
       gender: gender,

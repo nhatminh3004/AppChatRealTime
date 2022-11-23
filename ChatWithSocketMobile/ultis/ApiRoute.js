@@ -7,6 +7,7 @@ export const setAvatarRoute = `${host}/api/auth/setAvatar`;
 export const allUsersRoute = `${host}/api/auth/allusers`;
 export const searchUsers = `${host}/api/auth/search`;
 export const updateImageMobile = `${host}/api/auth/updateImageMobile`;
+export const updateUserInfo = `${host}/api/auth/updateUserInfo`;
 export const addSentInvitation = `${host}/api/auth/invite`;
 export const acceptAddFriend = `${host}/api/auth/acceptFriend`;
 export const denyAddFriend = `${host}/api/auth/denyAddFriend`;
