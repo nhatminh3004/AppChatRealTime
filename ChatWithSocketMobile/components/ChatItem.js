@@ -41,7 +41,7 @@ function ChatItem(props) {
             >
               <Text style={styles.last_msg}></Text>
               <Text numberOfLines={1} style={styles.username_BanThan}>
-              {usernameBanThan}
+              {/* {usernameBanThan} */}
                 </Text>
             </View>
             <View
@@ -63,8 +63,8 @@ function ChatItem(props) {
                  
                   {urlTypeFile== "jpg" || urlTypeFile=="jpeg" || urlTypeFile =="png" ? (
                <Image
-               resizeMode="stretch"
-               style={{width:300,height:300}}
+               resizeMode="cover"
+               style={{width:200,height:200}}
                source={{
                  uri: url,
                }}
@@ -100,7 +100,7 @@ function ChatItem(props) {
               <Text style={styles.last_msg}></Text>
             </View>
           </View>
-           <TouchableOpacity style={styles.imageContainer} onPress={()=>{onPresss(message)}}>
+           <TouchableOpacity style={styles.iconEvicMessage} onPress={()=>{onPresss(message)}}>
            <Ionicons name="md-repeat-outline" size={40} color="black" />
             </TouchableOpacity> 
         </TouchableOpacity>
@@ -231,6 +231,17 @@ const styles = StyleSheet.create({
     height: 50,
     width: 55,
     overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    // backgroundColor:'red'
+  },
+  iconEvicMessage: {
+    marginRight: 10,
+    borderRadius: 40,
+    height: 50,
+    width: 40,
+    // overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",

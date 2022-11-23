@@ -21,40 +21,15 @@ const {StatusBarManager} = NativeModules;
 const heightCuaStatusBar = StatusBarManager.HEIGHT;
 const {height,width} = Dimensions.get('window');
 
-export default function Signupp({route: {params:{phoneNumber}},navigation}) {
-  const [isMatKhau,setMatKhau]=useState(true);//true là mật khẩu ẩn
-  const [isEye,setEye]=useState(true);//eye là mắt đóng và true là đóng
-  console.log(phoneNumber);
-  const [isMatKhau1,setMatKhau1]=useState(true);//true là mật khẩu ẩn
-  const [isEye1,setEye1]=useState(true);//eye là mắt đóng và true là đóng
+export default function UpdateInfo({navigation}) {
+ 
   const [error,setError]=useState('');
-  let trangThaiIconEye;
-  let trangThaiIconEye1;
-  const EyeFunction = (isEye) =>{
-      if(isEye===true){
-       
-        trangThaiIconEye='eye-off'
-      }
-      else {
-       
-        trangThaiIconEye='eye'
-      }
-  }
-  const EyeFunction1 = (isEye1) =>{
-    if(isEye1===true){
-     
-      trangThaiIconEye1='eye-off'
-    }
-    else {
-     
-      trangThaiIconEye1='eye'
-    }
-}
-  
+
   
 
-  EyeFunction(isEye);
-  EyeFunction1(isEye1);
+  
+
+  
   //Xử lý đăng ký backend
     const [userInfo,setUserInfo] = useState({
       username:'',

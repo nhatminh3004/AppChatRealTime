@@ -31,17 +31,18 @@ export default function OnboardScreen({navigation}) {
         title: 'Bước 2',
         subtitle: 'Điền đủ thông tin tài khoản mà bạn đăng ký',
       },
-      {
-        backgroundColor: '#fff',
-        image: <Image style={{height:(height/100) *50,width:(width/100) *100}} source={require('../assets/uploadAvatar.png')} resizeMode='contain' />,
-        title: 'Bước 3 ',
-        subtitle: 'Cập nhật ảnh đại diện',
-      },
+     
       {
         backgroundColor: '#fff',
         image: <Image style={{height:(height/100) *50,width:(width/100) *100}} source={require('../assets/signIn.png')} resizeMode='contain' />,
-        title: 'Bước 4',
+        title: 'Bước 3',
         subtitle: 'Tiến hành đăng nhập',
+      },
+      {
+        backgroundColor: '#fff',
+        image: <Image style={{height:(height/100) *50,width:(width/100) *100}} source={require('../assets/uploadAvatar.png')} resizeMode='contain' />,
+        title: 'Bước 4 ',
+        subtitle: 'Cập nhật ảnh đại diện',
       },
       {
         backgroundColor: '#fff',

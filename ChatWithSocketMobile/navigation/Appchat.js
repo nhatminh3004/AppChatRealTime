@@ -44,7 +44,7 @@ function BottomTabs() {
 
         )
       },tabBarActiveTintColor:'red',tabBarInactiveTintColor:'black'}} />
-      <Tab.Screen name="Danh bạ" component={DanhBaScreen} options={{tabBarIcon:({focused})=>{
+      {/* <Tab.Screen name="Danh bạ" component={DanhBaScreen} options={{tabBarIcon:({focused})=>{
         return (
           <AntDesign name="contacts" size={24} color="#0091FF" />
         )
@@ -54,7 +54,7 @@ function BottomTabs() {
           <SimpleLineIcons name="settings" size={24} color="#0091FF" />
 
         )
-      },tabBarActiveTintColor:'red',tabBarInactiveTintColor:'black'}} />
+      },tabBarActiveTintColor:'red',tabBarInactiveTintColor:'black'}} /> */}
     </Tab.Navigator>
   );
 }
