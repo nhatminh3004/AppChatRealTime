@@ -46,6 +46,7 @@ export default function UpdateInfo({navigation}) {
            if (result) {
             setID(JSON.parse(result)._id)
             setUsername(JSON.parse(result).username)
+           
             setCurrentGender(JSON.parse(result).gender)
             setavatImage(JSON.parse(result).avatarImage)
             currentGenderr=(JSON.parse(result).gender);
@@ -58,64 +59,77 @@ export default function UpdateInfo({navigation}) {
        }
   };
   getItemFromStorage();
+  
+ 
   const handleUpdateImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-    console.log("Result Pick Image:",result.uri);
-    uriFetch=result.uri;
-    if (result.cancelled)  {
-      Alert.alert("Bạn chưa chọn ảnh")
-      uriFetch='';
-  }
-  else {
-console.log("Tên Image Fetch:", uriFetch);
-  const response =await fetch(uriFetch);
-  const blob =await response.blob();
-  const nameFile=  uriFetch.substring(uriFetch.lastIndexOf('/')+1);
-  console.log("name file :",nameFile);
-  var ref =  firebase.storage().ref().child(nameFile).put(blob);
-  const imageUrl = await (await ref).ref.getDownloadURL();
-  console.log("Download URRL:",imageUrl);
-    let url=nameFile
-    let part=url.split(".");
-    let typeFile=part[part.length-1];
-   let urlTypeFile=typeFile;
-   
-    const res = await axios.post(updateUserInfo, {
-      id: id,
-      username:text,
-      gender:resultGender,
-      avatarImage: imageUrl+"."+urlTypeFile
+    if(!text.trim()|| text.length < 3|| text.length>20){
+      Alert.alert("Username phải từ 3 đến 20 ký tự")
+      
+    }
+    else {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+      console.log("Result Pick Image:",result.uri);
+      uriFetch=result.uri;
+      if (result.cancelled)  {
+        Alert.alert("Bạn chưa chọn ảnh")
+        uriFetch='';
+    }
+    else {
+  console.log("Tên Image Fetch:", uriFetch);
+    const response =await fetch(uriFetch);
+    const blob =await response.blob();
+    const nameFile=  uriFetch.substring(uriFetch.lastIndexOf('/')+1);
+    console.log("name file :",nameFile);
+    var ref =  firebase.storage().ref().child(nameFile).put(blob);
+    const imageUrl = await (await ref).ref.getDownloadURL();
+    console.log("Download URRL:",imageUrl);
+      let url=nameFile
+      let part=url.split(".");
+      let typeFile=part[part.length-1];
+     let urlTypeFile=typeFile;
+    
+      const res = await axios.post(updateUserInfo, {
+        id: id,
+        username:text,
+        gender:resultGender,
+        avatarImage: imageUrl+"."+urlTypeFile
+       
+      });
+      await AsyncStorage.removeItem("User");
+      const userJson =  JSON.stringify(res.data);
+         await AsyncStorage.setItem("User",userJson);
+         try {
+          await AsyncStorage.getItem('User', (error, result) => {
+            if (result) {
+             setavatImage(JSON.parse(result).avatarImage)
+            }else{
+              console.log(JSON.stringfy(error));
+            }
+          });
+        } catch (error) {
+          console.log(error);
+        }
      
-    });
-    await AsyncStorage.removeItem("User");
-    const userJson =  JSON.stringify(res.data);
-       await AsyncStorage.setItem("User",userJson);
-       try {
-        await AsyncStorage.getItem('User', (error, result) => {
-          if (result) {
-           setavatImage(JSON.parse(result).avatarImage)
-          }else{
-            console.log(JSON.stringfy(error));
-          }
-        });
-      } catch (error) {
-        console.log(error);
-      }
-   
-  try {
-    await ref
-  } catch (e) {
-    console.log(e);
-  }
-  Alert.alert("Cập nhật thành công");
-  uriFetch='';
-  navigation.replace('BottomScreen');
-}
+    try {
+      await ref
+    } catch (e) {
+      console.log(e);
+    }
+    Alert.alert("Cập nhật thành công");
+    uriFetch='';
+    navigation.replace('BottomScreen');
+    }
+    }
+      
+    
+    
+    
+
   };
   
   
