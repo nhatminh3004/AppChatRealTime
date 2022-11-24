@@ -26,15 +26,8 @@ function ChatItem(props) {
         {/*Nếu là Bản thân */}
 
         <TouchableOpacity style={styles.conservation_BanThan} >
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "flex-end",
-              backgroundColor: "#33CCFF",
-              borderRadius: 30,
-              marginEnd: 30,
-              marginLeft: 40,
-            }}
+        {message.message.files.length === 0 ? <View
+            style={styles.backgroundChat}
           >
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
@@ -53,6 +46,7 @@ function ChatItem(props) {
            
                 </Text>
               ) : (
+                
                 <View style={styles.last_msg_BanThan}>
                  {message.message.files.map((file, index) => {
                      url=file.url
@@ -99,7 +93,75 @@ function ChatItem(props) {
 
               <Text style={styles.last_msg}></Text>
             </View>
-          </View>
+          </View> : <View
+            style={styles.backgroundChatImage}
+          >
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <Text style={styles.last_msg}></Text>
+              <Text numberOfLines={1} style={styles.username_BanThan}>
+              {/* {usernameBanThan} */}
+                </Text>
+            </View>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              {message.message.files.length === 0 ? (
+                <Text style={styles.last_msg_BanThan}>
+                  {message.message.text}
+           
+                </Text>
+              ) : (
+                
+                <View style={styles.last_msg_BanThan}>
+                 {message.message.files.map((file, index) => {
+                     url=file.url
+                     var part=url.split(".");
+                     var typeFile=part[part.length-1];
+                     urlTypeFile=typeFile;
+                  })}
+                 
+                  {urlTypeFile== "jpg" || urlTypeFile=="jpeg" || urlTypeFile =="png" ? (
+               <Image
+               resizeMode="cover"
+               style={{width:200,height:200}}
+               source={{
+                 uri: url,
+               }}
+             />
+              ) : (
+                  urlTypeFile=="docx" ?( <Image
+                    style={{width:90,height:90}}
+                    source={{
+                      uri: "https://thehanoichamomile.files.wordpress.com/2019/06/12-121390_new-microsoft-word-icon.jpg",
+                    }}
+                  />) :(
+                    urlTypeFile=="pdf" ?(
+                      <Image
+                      style={{width:90,height:90}}
+                      source={{
+                        uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/1667px-PDF_file_icon.svg.png",
+                      }}/>
+                    ) :(
+                      <Image
+                      style={{width:90,height:90}}
+                      source={{
+                        uri: "https://findicons.com/files/icons/2795/office_2013_hd/2000/excel.png",
+                      }}/>
+                    )
+                    
+                  )
+               
+               
+              )}
+                </View>
+              )}
+
+              <Text style={styles.last_msg}></Text>
+            </View>
+          </View>}
+          
            <TouchableOpacity style={styles.iconEvicMessage} onPress={()=>{onPresss(message)}}>
            <Ionicons name="md-repeat-outline" size={40} color="black" />
             </TouchableOpacity> 
@@ -237,10 +299,10 @@ const styles = StyleSheet.create({
     // backgroundColor:'red'
   },
   iconEvicMessage: {
-    marginRight: 10,
-    borderRadius: 40,
+    marginRight: 40,
+    borderRadius: 20,
     height: 50,
-    width: 40,
+    width: 30,
     // overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
@@ -274,5 +336,21 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginHorizontal: 10,
   },
+  backgroundChat:{
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "#33CCFF",
+    borderRadius: 30,
+    marginEnd: 30,
+    marginLeft: 40,
+  },
+  backgroundChatImage:{
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    marginEnd: 50,
+    marginLeft: 10,
+  }
 });
 export default ChatItem;

@@ -9,6 +9,8 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { AntDesign } from '@expo/vector-icons'; 
+
 function ConservisionItem(props) {
   const [isSingle, setIsSingle] = useState(true);
 
@@ -34,7 +36,11 @@ function ConservisionItem(props) {
             setSearchResult([]);
           }}
         >
-          <Text>Out</Text>
+         <View style={{flex:1,padding:10}}>
+         <AntDesign style={{marginLeft:5}} name="closecircle" size={24} color="black" />
+         <Text style={{}}>Close</Text>
+         </View>
+         
         </TouchableOpacity>
       )}
 

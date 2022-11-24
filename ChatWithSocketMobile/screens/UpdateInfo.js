@@ -179,7 +179,9 @@ export default function UpdateInfo({navigation}) {
      
       <Separator height={10}/>
       <View style={styles.mainbody}>
-      {avatarImage == '' ?  <Image style={styles.imgprofile} source={{ uri: "https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000" }} /> :(
+      {avatarImage == '' ?   <View style={styles.imgprofileText}>
+          <Text style={{textAlign:'center',fontSize:12}}>Upload  image</Text>
+        </View>  :(
             <Image style={styles.imgprofile} source={{ uri: avatarImage }} />
         )}
         
@@ -377,12 +379,25 @@ const styles = StyleSheet.create({
     marginBottom:70
   },
   imgprofile:{
-      width:200,
-      height:200,
-      marginLeft:100,
-      marginTop:50,
-      
-     borderRadius:120
+    maxWidth:110,
+    height:110,
+    marginLeft:100,
+    marginTop:50,
+    // backgroundColor:'red',
+   borderRadius:110/2,
+  },
+  imgprofileText:{
+    maxWidth:110,
+    height:110,
+    marginLeft:100,
+    marginTop:50,
+    backgroundColor:'#C0C0C0',
+   borderRadius:110/2,
+   borderStyle:'dashed',
+   borderWidth:1,
+   alignItems:'center',
+   justifyContent:'center'
+   
   },
   
 })

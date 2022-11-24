@@ -50,7 +50,11 @@ function ProfileScreen({navigation}) {
     <View style={styles.container}>
        <Separator height={heightCuaStatusBar}/>
       <View style={styles.mainbody}>
-        {avatarImage == '' ?  <Image style={styles.imgprofile} source={{ uri: "https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000" }} /> :(
+        {avatarImage == '' ? <View style={styles.imgprofileText}>
+          <Text style={{textAlign:'center',fontSize:12}}>Upload  image</Text>
+        </View> 
+        
+         :(
             <Image style={styles.imgprofile} source={{ uri: avatarImage }} />
         )}
        
@@ -106,15 +110,17 @@ const styles = StyleSheet.create({
       marginTop:30,
       marginLeft:24,
       marginRight:24,
-      marginBottom:70
+      marginBottom:70,
+      // backgroundColor:'red'
     },
     imgprofile:{
-        width:120,
-        height:120,
+        maxWidth:110,
+        height:110,
         marginLeft:100,
         marginTop:50,
-        backgroundColor:'red',
-       borderRadius:50
+        // backgroundColor:'red',
+       borderRadius:110/2,
+      
     },
     username:{
       color:'black',
@@ -143,8 +149,18 @@ const styles = StyleSheet.create({
         fontSize:16,
         color:'#50D9EA'
     },
-    itemprofile:{
-
+    imgprofileText:{
+      maxWidth:110,
+      height:110,
+      marginLeft:100,
+      marginTop:50,
+      backgroundColor:'#C0C0C0',
+     borderRadius:110/2,
+     borderStyle:'dashed',
+     borderWidth:1,
+     alignItems:'center',
+     justifyContent:'center'
+     
     },
     signInButtonOut:{
       backgroundColor:'#FF0000',

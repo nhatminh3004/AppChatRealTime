@@ -11,6 +11,7 @@ import {
   Button,
   FlatList,
   LogBox,
+  Alert,
 } from "react-native";
 import { ScrollView } from "react-native-virtualized-view";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -20,6 +21,7 @@ import {
   myConversationsRoute,
   searchUsers,
   createConversation,
+  checkPhoneTonTaiRoute
 } from "../ultis/ApiRoute";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -69,30 +71,48 @@ function MessageScreen(props) {
     }
   };
   const handleSearch = async () => {
-    let currentUser = await AsyncStorage.getItem("User");
-    currentUser = JSON.parse(currentUser);
-    const search_result = await axios.post(searchUsers, {
-      searchKey: searchText,
-      id: currentUser._id,
-    });
-    const result_CreateConversation = await axios.post(createConversation, {
-      searchResultId: search_result.data[0]._id,
-      myId: currentUser._id,
-    });
-    // console.log("Kết quả search : ", search_result.data[0]._id);
-    // console.log("Kết quả tạo Conversation : ", result_CreateConversation.data);
-    // setConversations(...conversations,result_CreateConversation.data.conversation)
-    // console.log("Sau khi search :", conversations[0]);
-    // console.log(result_CreateConversation.data.lastMessage);
-    let resultConversation = result_CreateConversation.data;
-    let newLastMessage = {
-      message: result_CreateConversation.data.lastMessage,
-    };
-    resultConversation.lastMessage = newLastMessage;
-    setSearchResult([resultConversation]);
-    setIsSearchResult(true);
+    if(searchText==''){
+      Alert.alert('Không được để trống');
+    }
+    else {
+      try {
+        const res = await axios.post(`${checkPhoneTonTaiRoute}`,{phone:searchText});
+        // console.log("phone Request",{phoneNumber});
+        // console.log(res.data);
+        if(res.data.status===true){
+         Alert.alert("người dùng không tồn tại !");
+        }
+        let currentUser = await AsyncStorage.getItem("User");
+      currentUser = JSON.parse(currentUser);
+      const search_result = await axios.post(searchUsers, {
+        searchKey: searchText,
+        id: currentUser._id,
+      });
+      const result_CreateConversation = await axios.post(createConversation, {
+        searchResultId: search_result.data[0]._id,
+        myId: currentUser._id,
+      });
+      // console.log("Kết quả search : ", search_result.data[0]._id);
+      // console.log("Kết quả tạo Conversation : ", result_CreateConversation.data);
+      // setConversations(...conversations,result_CreateConversation.data.conversation)
+      // console.log("Sau khi search :", conversations[0]);
+      // console.log(result_CreateConversation.data.lastMessage);
+      let resultConversation = result_CreateConversation.data;
+      let newLastMessage = {
+        message: result_CreateConversation.data.lastMessage,
+      };
+      resultConversation.lastMessage = newLastMessage;
+      setSearchResult([resultConversation]);
+      setIsSearchResult(true);
+      
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    
+    
   };
-  // console.log("search", searchResult);
+  console.log("search", searchText);
   return (
     <View style={styles.container}>
       {/* giao diện search người dùng */}
