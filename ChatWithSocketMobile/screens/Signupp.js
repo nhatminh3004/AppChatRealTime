@@ -128,7 +128,7 @@ export default function Signupp({route: {params:{phoneNumber}},navigation}) {
           <AntDesign name="notification" size={30} color="#A9A9A9" style={{marginRight:10}}/>
           <Text style={styles.thongBaoLoi}>{error}</Text>
         </View> : null}
-      <Separator height={50}/>
+      <Separator height={20}/>
       <View style={styles.inputContainer}>
         <View style={styles.inputSubContainer}>
           <Feather name='user' size={30} color='#A9A9A9' style={{marginRight:10}}/>
@@ -174,17 +174,6 @@ export default function Signupp({route: {params:{phoneNumber}},navigation}) {
       
         </View>
       </View>
-     
-     
-      
-        <Text></Text>
-        <View style={styles.fogotPasswordContainer}>
-        <View>
-          {/* <Text>Nhớ đăng nhập</Text> */}
-        </View> 
-       
-      </View>
-    
       <TouchableOpacity style={styles.signInButton} onPress={() => submitForm()} >
          <Text style={styles.signInButtonText}>Đăng Ký</Text>
       </TouchableOpacity>

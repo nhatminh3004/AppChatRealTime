@@ -79,7 +79,7 @@ export default function VerifyOtpScreen({
           alert("Sai Code");
           // navigation.goBack();
         } else {
-          alert("vui lòng thử lại");
+          // alert("vui lòng thử lại");
           // alert('Đăng nhập thành công');
         }
       });

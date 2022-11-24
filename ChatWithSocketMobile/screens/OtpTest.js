@@ -278,7 +278,10 @@ const styles = StyleSheet.create({
   thongbaoContainer:{
     flexDirection:'row',
     alignItems:'center',
-    justifyContent:'center'
+    justifyContent:'center',
+    fontSize:15,
+    maxWidth:350,
+    marginHorizontal:12
     // backgroundColor:'red',
   },
 

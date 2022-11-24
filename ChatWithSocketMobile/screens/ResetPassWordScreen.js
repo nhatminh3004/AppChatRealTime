@@ -92,7 +92,7 @@ export default function ResetPassWordScreen({route: {params:{phoneNumber}},navig
      
       <View style={styles.headerContainer}>
         <Ionicons name='chevron-back-outline' size={30} onPress={() =>{navigation.replace("Signin")}}/>
-        <Text style={styles.headerTitle}>Đăng Ký</Text>
+        <Text style={styles.headerTitle}>Đổi mật khẩu</Text>
       </View>
       <Separator height={10}/>
       <Text style={styles.title}>Bằng việc cập nhật lại mật khẩu của bạn</Text>
