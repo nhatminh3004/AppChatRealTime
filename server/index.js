@@ -39,10 +39,26 @@ const io = socket(server, {
 
 global.onlineUsers = new Map();
 io.on("connection", (socket) => {
+// socket.on("send-color",(data)=>{
+//   console.log("sever vua nhan dc :"+data);
+//   onlineUsers.forEach((value, key) => {
+//     console.log(`${key}: ${value}`)
+//     const sendUserSocket = onlineUsers.get(key);
+//     if(sendUserSocket){
+//       io.to(`${sendUserSocket}`).emit("sever-send-color", data);
+//   }
+//   })
+// })
   global.chatSocket = socket;
+ 
   socket.on("add-user", (userId) => {
     // console.log("user added", userId);
     onlineUsers.set(userId, socket.id);
+    console.log('Online User :',onlineUsers);
+    // onlineUsers.forEach((value, key) => {
+    //   console.log(`${key}: ${value}`)
+    // })
+   
   });
   socket.on("send-msg", (data) => {
     console.log("send-msg socket :", data);

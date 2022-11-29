@@ -14,6 +14,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Separator from "../ultis/Separator";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { MaterialIcons } from '@expo/vector-icons'; 
+import { FontAwesome } from '@expo/vector-icons'; 
 import { StatusBar } from "expo-status-bar";
 import { NativeModules } from "react-native";
 import ChatItem from "../components/ChatItem";
@@ -49,6 +50,7 @@ function ChatScreen(props) {
   const [text, setText] = useState("");
   const [userNameBanThan,setuserNameBanThan] = useState("");
   const [messageEvict, setMessageEvict] = useState(undefined);
+ 
   // const [userNameNguoiTa,setuserNameNguoiTa] = useState('');
   const socket = useRef();
   
@@ -135,14 +137,95 @@ function ChatScreen(props) {
     setHaveNewMessage(new Date());
     setText("");
   };
-  const handleSendImage = async () => {
+  const handleSendImageByCamera = async () =>{
+   let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+   if(permissionResult.granted ===false){
+    alert('Bạn chưa cho quyền truy cập máy ảnh, thử lại sau....');
+    return;
+   } 
+  
+      let result = await ImagePicker.launchCameraAsync(
+        {
+          mediaTypes:ImagePicker.MediaTypeOptions.Images,
+          allowsEditing:true,
+          aspect:[1,1],
+          quality:0.5
+        }
+      )
+      console.log("Result Pick Image Camera:",result.uri);
+      uriFetch=result.uri;
+      seturiImage(result.uri);
+      if (result.cancelled)  {
+        Alert.alert("Bạn đã huỷ chụp ảnh")
+        seturiImage('');
+        // setFileName('');
+        uriFetch='';
+    }
+    else {
+      seturiImage(result.uri);
+      // setFileName(result.uri);
+  console.log("Tên Image Fetch:", uriFetch);
+    const response =await fetch(uriFetch);
+    const blob =await response.blob();
+    const nameFile=  uriFetch.substring(uriFetch.lastIndexOf('/')+1);
+    console.log("name file :",nameFile);
+    var ref =  firebase.storage().ref().child(nameFile).put(blob);
+    const imageUrl = await (await ref).ref.getDownloadURL();
+    console.log("Download URRL:",imageUrl);
+  
+    let currentUser = await AsyncStorage.getItem("User");
+      currentUser = JSON.parse(currentUser);
+      let url=nameFile
+      let part=url.split(".");
+      let typeFile=part[part.length-1];
+     let urlTypeFile=typeFile;
+      // console.log("urlType File : ",urlTypeFile);
+      const objectFile ={
+        fileName:nameFile,
+        size:123,
+        url:imageUrl+"."+urlTypeFile
+      }
+      const newMessageImage = await axios.post(sendMessageRoute, {
+        from: currentUser._id,
+        conversationId: conversation._id,
+        files: objectFile,
+      });
+      // console.log("newMessageImage Data ",newMessageImage.data);
+      socket.current.emit("send-msg", {
+        from: {
+          user: currentUser,
+          conversationId: conversation._id,
+        },
+        to: conversation.members,
+        message: newMessageImage.data,
+      });
+      const msgs = [...messages];
+      msgs.push({ fromSelf: true, message: newMessageImage.data });
+      setMessages(msgs);
+      setHaveNewMessage(new Date());
+      setText("");
+    try {
+      await ref
+    } catch (e) {
+      console.log(e);
+    }
+    Alert.alert("Tải ảnh từ camera thành công");
+    
+    seturiImage('');
+    uriFetch='';
+  }
+   
+
+  };
+  const handleSendImageByLib = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-    console.log("Result Pick Image:",result.uri);
+   
+    console.log("Result Pick Image Lib:",result.uri);
     uriFetch=result.uri;
     seturiImage(result.uri);
     if (result.cancelled)  {
@@ -199,7 +282,7 @@ console.log("Tên Image Fetch:", uriFetch);
   } catch (e) {
     console.log(e);
   }
-  Alert.alert("Upload Success");
+  Alert.alert("Tải ảnh từ thư viện thành công");
   
   seturiImage('');
   uriFetch='';
@@ -266,10 +349,12 @@ console.log("Tên Image Fetch:", uriFetch);
       )}
       <View
         style={{
-          height: "7%",
+          width:'80%',
+          height: "8%",
           flexDirection: "row",
-          paddingHorizontal: 20,
-          justifyContent: "space-between",
+          paddingHorizontal: 10,
+          marginHorizontal:30,
+         justifyContent:'center',
           alignItems: "center",
         }}
       >
@@ -277,10 +362,10 @@ console.log("Tên Image Fetch:", uriFetch);
           defaultValue={text}
           style={{
             backgroundColor: "silver",
-            width: "90%",
-            height: "80%",
+            width: "100%",
+            height: "70%",
             color: "black",
-            paddingHorizontal: 30,
+            paddingHorizontal: 15,
             borderRadius: 20,
           }}
           onChangeText={(newText) => setText(newText)}
@@ -288,8 +373,11 @@ console.log("Tên Image Fetch:", uriFetch);
         <TouchableOpacity onPress={handleSendChat}>
           <Ionicons name="send" size={24} color="#0091FF" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleSendImage}>
+        <TouchableOpacity onPress={handleSendImageByLib}>
         <MaterialIcons name="photo-library" size={24} color="#0091FF" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleSendImageByCamera}>
+        <FontAwesome name="camera" size={24} color="#0091FF" />
         </TouchableOpacity>
       </View>
     </View>

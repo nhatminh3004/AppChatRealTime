@@ -42,6 +42,7 @@ const handleOnChangeText= (value,fieldName) =>{
   console.log(value,fieldName);
   setuserPhone({...userPhone,[fieldName]: value})
 }
+//hàm check số điện thoại trong chức năng đăng ký
 const checkPhoneTonTai= async () =>{
   try {
     const res = await axios.post(`${checkPhoneTonTaiRoute}`,{...userPhone});

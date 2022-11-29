@@ -34,6 +34,8 @@ function MessageScreen(props) {
   const [conversations, setConversations] = useState([]);
   const [haveNewMessage, setHaveNewMessage] = useState();
   const [searchText, setsearchText] = useState("");
+  // const [color, setColor] = useState("");
+  // const [valueSever,setVALUESEVER]=useState('');
   const [searchResult, setSearchResult] = useState([]);
   const [isSearchResult, setIsSearchResult] = useState(false);
   const socket = useRef();
@@ -68,6 +70,9 @@ function MessageScreen(props) {
       socket.current.on("msg-receive", (dataSent) => {
         setHaveNewMessage(new Date());
       });
+      // socket.current.on("sever-send-color",(data)=>{
+      //   setVALUESEVER(data);
+      // })
     }
   };
   const handleSearch = async () => {
@@ -113,6 +118,11 @@ function MessageScreen(props) {
     
   };
   console.log("search", searchText);
+  // console.log("color", color);
+  // const handleColor =()=>{
+  //   socket.current=io(host);
+  //   socket.current.emit("send-color",color);
+  // }
   return (
     <View style={styles.container}>
       {/* giao diện search người dùng */}
@@ -135,6 +145,20 @@ function MessageScreen(props) {
           <Ionicons name="ios-reload" size={24} color="black" />
         </TouchableOpacity>
       </View>
+      {/* <View style={styles.rowSeachInput}>
+        <TextInput
+          
+          style={styles.inputSearhInput}
+          placeholder="Nhập color"
+          maxLength={13}
+          onChangeText={(color) => setColor(color)}
+        />
+        <TouchableOpacity style={styles.iconSearchInput} onPress={handleColor}>
+          <FontAwesome5 name="search" size={24} color="black" />
+          <Text>Value Sever : {valueSever}</Text>
+        </TouchableOpacity>
+      
+      </View> */}
       {/* giao diện List Tin nhắn người dùng*/}
       {searchResult.length > 0 ? (
         <ScrollView>

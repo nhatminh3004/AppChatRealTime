@@ -1,5 +1,4 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import { Image, View } from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import Siginin from '../screens/Siginin';
 import { NavigationContainer } from '@react-navigation/native';
@@ -11,7 +10,6 @@ import SplashScreenLanHai from '../screens/SplashScreenLanHai';
 import VerifyOtpScreen from '../screens/VerifyOtpScreen';
 import OtpTest from '../screens/OtpTest';
 import Signupp from '../screens/Signupp';
-import  Ionicons  from '@expo/vector-icons/Ionicons'; 
 import OtpTestDoiMatKhau from '../screens/OtpTestDoiMatKhau';
 import VerifyOtpDoiMatKhauScreen from '../screens/VerifyOtpDoiMatKhauScreen';
 import ResetPassWordScreen from '../screens/ResetPassWordScreen';
@@ -19,12 +17,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ChatScreen from '../TabScreen/ChatScreen';
 import ProfileScreen from '../TabScreen/ProfileScreen';
 import MessageScreen from '../TabScreen/MessageScreen';
-import DanhBaScreen from '../TabScreen/DanhBaScreen';
-import SettingScreen from '../TabScreen/SettingScreen';
 import { FontAwesome5 } from '@expo/vector-icons'; 
 import { FontAwesome } from '@expo/vector-icons'; 
-import { AntDesign } from '@expo/vector-icons'; 
-import { SimpleLineIcons } from '@expo/vector-icons'; 
 import UploadImage from '../screens/UploadImage';
 import UpdateInfo from '../screens/UpdateInfo';
 
@@ -130,7 +124,6 @@ const Mainnavigator = () => {
   return(
             <NavigationContainer>
                 <StackNavigator>
-
                  </StackNavigator>
             </NavigationContainer>
   )
