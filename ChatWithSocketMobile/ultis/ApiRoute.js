@@ -1,4 +1,5 @@
-export const host = "http://192.168.1.31:5000";
+// export const host = "http://192.168.1.31:5000";
+export const host = "https://chat-realtime-socket-server.herokuapp.com";
 export const registerRoute = `${host}/api/auth/register`;
 export const loginRoute = `${host}/api/auth/login`;
 export const doimatkhauRoute = `${host}/api/auth/doiMatKhau`;

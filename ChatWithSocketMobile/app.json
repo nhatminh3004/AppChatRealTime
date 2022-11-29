@@ -8,11 +8,11 @@
         }
       ]
     ],
-    "name": "ChatWithSocketMobile",
+    "name": "Valiu",
     "slug": "ChatWithSocketMobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/valiu_icon.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/valiu_splash.png",
@@ -30,7 +30,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/valiu_icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.minhdeptrai211.ChatWithSocketMobile"
