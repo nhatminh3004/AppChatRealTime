@@ -43,8 +43,9 @@ function ChatScreen(props) {
   const { navigation, route } = props;
   const { navigate, goBack } = navigation;
   const { users_info, conversation, lastMessage } = props.route.params.user; // nhận từ bên MessageScreen
-  // console.log("Conservation Room : ",conversation);
-  const setHaveNewMessage = props.route.params.setHaveNewMessage; 
+  console.log("ConservationMessScreen  : ",conversation);
+  // console.log("UserInfo MesssScreen  : ",users_info);
+  const setHaveNewMessage = props.route.params.setHaveNewMessage; // nhận từ bên MessageScreen
   const [messages, setMessages] = useState([]);
   const [arraivalMessage, setArrivalMessage] = useState({});
   const [text, setText] = useState("");
@@ -56,8 +57,9 @@ function ChatScreen(props) {
   
   useEffect(() => {
     addUserToSocket();
-    // setuserNameNguoiTa(users_info[0].username)
+    
   }, []);
+
   useEffect(() => { 
     if (messageEvict) {
         let msgs = [...messages];
@@ -69,48 +71,53 @@ function ChatScreen(props) {
         setMessages(msgs);
     }
 }, [messageEvict])
+
+
   
 
-  const addUserToSocket = async () => {
-    let currentUser = await AsyncStorage.getItem("User");
-    currentUser = JSON.parse(currentUser);
-    setuserNameBanThan(currentUser.username);
-    socket.current = io(host);
-    await socket.current.emit("add-user", currentUser._id);
+const addUserToSocket = async () => {
+  let currentUser = await AsyncStorage.getItem("User");
+  currentUser = JSON.parse(currentUser);
+  setuserNameBanThan(currentUser.username);
+  socket.current = io(host);
+  await socket.current.emit("add-user", currentUser._id);
 
-    if (socket.current) {
-      socket.current.on("msg-receive", (dataSent) => {
-        // console.log("Data nhận :", dataSent.from.user.username);
-        // setuserNameNguoiTa(dataSent.from.user.username);
-        
-        if (conversation._id === dataSent.from.conversationId) {
-          setArrivalMessage({ fromSelf: false, message: dataSent.message,senderUser:dataSent.from.user.username });
-        }
-      });
-      socket.current.on("reply-evict-message", async (data) => {
-        setHaveNewMessage(new Date());
-        console.log("Reply Evict message :",data.messageId);
-        setMessageEvict(data.messageId);
-    })
-    }
-  };
-  useEffect(() => {
-    getAllMyMessages();
-  },[arraivalMessage]);
-
-  useEffect(() => {
-    if (arraivalMessage) setMessages([...messages, arraivalMessage]);
-  }, [arraivalMessage]);
-  const getAllMyMessages = async () => {
-    let currentUser = await AsyncStorage.getItem("User");
-    currentUser = JSON.parse(currentUser);
-
-    const res = await axios.post(`${getAllMessagesRoute}`, {
-      conversationId: conversation._id,
-      userId: currentUser._id,
+  if (socket.current) {
+    socket.current.on("msg-receive", (dataSent) => {
+      // console.log("Data nhận :", dataSent.from.user.username);
+      // setuserNameNguoiTa(dataSent.from.user.username);
+      
+      if (conversation._id === dataSent.from.conversationId) {
+        setArrivalMessage({ fromSelf: false, message: dataSent.message,senderUser:dataSent.from.user.username });
+      }
     });
-    setMessages(res.data);
-  };
+    socket.current.on("reply-evict-message", async (data) => {
+      setHaveNewMessage(new Date());
+      console.log("Reply Evict message :",data.messageId);
+      setMessageEvict(data.messageId);
+  })
+  }
+};
+useEffect(() => {
+  getAllMyMessages();
+},[arraivalMessage]);
+
+
+useEffect(() => {
+  if (arraivalMessage) setMessages([...messages, arraivalMessage]);
+}, [arraivalMessage]);
+
+const getAllMyMessages = async () => {
+  let currentUser = await AsyncStorage.getItem("User");
+  currentUser = JSON.parse(currentUser);
+
+  const res = await axios.post(`${getAllMessagesRoute}`, {
+    conversationId: conversation._id,
+    userId: currentUser._id,
+  });
+  setMessages(res.data);
+};
+
   const handleSendChat = async () => {
     if (text.trim().length == 0) {
       alert("không được rỗng");
@@ -123,6 +130,7 @@ function ChatScreen(props) {
       conversationId: conversation._id,
       message: text,
     });
+    // console.log("newMesssageData:",newMessage.data);
     socket.current.emit("send-msg", {
       from: {
         user: currentUser,
@@ -137,6 +145,7 @@ function ChatScreen(props) {
     setHaveNewMessage(new Date());
     setText("");
   };
+
   const handleSendImageByCamera = async () =>{
    let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
    if(permissionResult.granted ===false){
@@ -385,6 +394,12 @@ console.log("Tên Image Fetch:", uriFetch);
 }
 
 export default ChatScreen;
+
+
+
+
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

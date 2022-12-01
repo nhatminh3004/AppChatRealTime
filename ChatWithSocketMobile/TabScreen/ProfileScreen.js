@@ -1,12 +1,6 @@
 import React, { useState } from 'react'
 import { Text, StyleSheet, View,TextInput,TouchableOpacity, Dimensions, Button,Image,Alert } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  updateImageMobile
-} from "../ultis/ApiRoute";
-import * as ImagePicker from 'expo-image-picker';
-import {firebase} from '../config';
-import axios from "axios";
 import Separator from '../ultis/Separator'
 import {NativeModules} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons'; 

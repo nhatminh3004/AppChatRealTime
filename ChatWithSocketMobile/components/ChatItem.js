@@ -171,9 +171,12 @@ function ChatItem(props) {
       // nếu là người ta
       <View style={styles.container}>
         <TouchableOpacity style={styles.conservation} >
-          {/* <TouchableOpacity style={styles.imageContainer}>
-              <Image style={styles.image} source={{ uri: avatarImage }} />
-            </TouchableOpacity> */}
+          <TouchableOpacity style={styles.imageContainer}>
+            {senderUser.avatarImage===''? <Image style={styles.image} source={{ uri: "https://img.freepik.com/premium-vector/man-avatar-profile-round-icon_24640-14044.jpg?w=2000" }} /> : (
+               <Image style={styles.image} source={{ uri: senderUser.avatarImage }} />
+            )}
+             
+            </TouchableOpacity>
           <View
             style={{
               flex: 1,

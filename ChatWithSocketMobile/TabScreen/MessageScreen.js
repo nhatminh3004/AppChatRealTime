@@ -42,10 +42,13 @@ function MessageScreen(props) {
   //khi nhân tin nhắn từ người lạ sẽ hiện ra list conservation
   useEffect(() => {
     getAllConversations();
+    // console.log("chạy useEffect getAllconverSation khi có newMesss");
   }, [haveNewMessage]);
   useEffect(() => {
     getAllConversations();
+    // console.log("chạy useEffect getAllconverSation lần 1");
   },[]);
+  
   const getAllConversations = async () => {
     let currentUser = await AsyncStorage.getItem("User");
     currentUser = JSON.parse(currentUser);
@@ -58,7 +61,12 @@ function MessageScreen(props) {
   //Khi nhân tin nhắn cập nhật lại last mess
   useEffect(() => {
     addUserToSocket();
-  },);
+    // console.log("useEffect add User to Socket lan 1");
+  },[]);
+  useEffect(() => {
+    addUserToSocket();
+    console.log("useEffect add User to Socket khi newMesss");
+  },[haveNewMessage]);
 
   const addUserToSocket = async () => {
     let currentUser = await AsyncStorage.getItem("User");
@@ -67,8 +75,10 @@ function MessageScreen(props) {
     await socket.current.emit("add-user", currentUser._id);
 
     if (socket.current) {
-      socket.current.on("msg-receive", (dataSent) => {
-        setHaveNewMessage(new Date());
+      socket.current.on("msg-receive", (data) => {
+        // console.log("Data:",data);
+        setHaveNewMessage(data);
+        
       });
       // socket.current.on("sever-send-color",(data)=>{
       //   setVALUESEVER(data);
@@ -93,6 +103,7 @@ function MessageScreen(props) {
         searchKey: searchText,
         id: currentUser._id,
       });
+    
       const result_CreateConversation = await axios.post(createConversation, {
         searchResultId: search_result.data[0]._id,
         myId: currentUser._id,
@@ -117,12 +128,13 @@ function MessageScreen(props) {
     
     
   };
-  console.log("search", searchText);
+  // console.log("search", searchText);
   // console.log("color", color);
   // const handleColor =()=>{
   //   socket.current=io(host);
   //   socket.current.emit("send-color",color);
   // }
+  // console.log("converDataAAA:",conversations[0].conversation._id);
   return (
     <View style={styles.container}>
       {/* giao diện search người dùng */}
@@ -160,6 +172,7 @@ function MessageScreen(props) {
       
       </View> */}
       {/* giao diện List Tin nhắn người dùng*/}
+      {/* {console.log("Search Result MessegeScreen :",searchResult.length)} */}
       {searchResult.length > 0 ? (
         <ScrollView>
           <FlatList
@@ -177,6 +190,7 @@ function MessageScreen(props) {
                 setIsSearchResult={setIsSearchResult}
                 setSearchResult={setSearchResult}
                 key={item.conversation._id}
+               
               />
             )}
           />
@@ -188,10 +202,10 @@ function MessageScreen(props) {
             renderItem={({ item }) => (
               <ConservisionItem
                 onPress={() => {
-                  navigate("Chat", {
-                    user: item,
+                  navigate("Chat",{ 
+                    user:item,
                     setHaveNewMessage: setHaveNewMessage,
-                  });
+                });
                 }}
                 user={item}
                 key={item.conversation._id}

@@ -117,7 +117,8 @@ const checkPhoneTonTai= async () =>{
               />
             </View>)
         }
-     
+   
+    
       
       <Separator height={100}/>
      

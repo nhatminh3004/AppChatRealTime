@@ -45,7 +45,7 @@ const handleOnChangeText= (value,fieldName) =>{
 const checkPhoneTonTai= async () =>{
   try {
     const res = await axios.post(`${checkPhoneTonTaiRoute}`,{...userPhone});
-    console.log("phone Request",{phoneNumber});
+    // console.log("Request",{phoneNumber});
     console.log(res.data);
     if(res.data.status===true || phoneNumber.length<=11){
       return updateError('Số điện thoại Không tồn tại trong hệ thống ',setError);

@@ -48,10 +48,11 @@ export default function Siginin({navigation}) {
     console.log(value,fieldName);
     setUserInfo({...userInfo,[fieldName]: value})
   }
+  
   const submitFormSignIn= async () =>{
     try {
       const res = await axios.post(`${loginRoute}`,{...userInfo});
-      console.log(res.data);
+      // console.log(res.data);
       if(res.data.status===false){
         return updateError('Sai tài khoản hoặc mật khẩu ',setError);
       }

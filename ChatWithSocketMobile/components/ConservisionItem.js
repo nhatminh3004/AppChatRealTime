@@ -20,6 +20,7 @@ function ConservisionItem(props) {
   let setSearchResult = props.setSearchResult;
   const { onPress } = props;
 // console.log("User info user :",users_info[0]);
+// console.log("isSearchResult : True or False :",isSearchResult);
   useEffect(() => {
     if (conversation.members.length > 2) {
       setIsSingle(false);
@@ -28,11 +29,12 @@ function ConservisionItem(props) {
   // console.log("lagmessage Info: ",lastMessage.message.message);
   return (
     <View style={styles.container}>
-      {isSearchResult && (
+      {isSearchResult === true && (
         <TouchableOpacity
           style={styles.conservation}
           onPress={() => {
             setIsSearchResult(!isSearchResult);
+            // console.log("Hello :",isSearchResult);
             setSearchResult([]);
           }}
         >
