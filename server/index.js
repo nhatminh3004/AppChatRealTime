@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const socket = require("socket.io");
 const userRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const conversationRoutes = require("./routes/conversationRoutes");
 
 const app = express();
 require("dotenv").config();
@@ -13,18 +14,17 @@ app.use(express.json());
 
 app.use("/api/auth", userRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/conversations", conversationRoutes);
 
 mongoose
-  .connect(process.env.MONGO_URL, {
+  .connect(process.env.MONGO_CONNECT_LINK, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log("DB Connection Successful");
+    console.log("database is connected");
   })
-  .catch((err) => {
-    console.log(err.message);
-  });
+  .catch((err) => console.log(err.message));
 
 const server = app.listen(process.env.PORT, () => {
   console.log("Server started on port:", process.env.PORT);
@@ -39,16 +39,53 @@ const io = socket(server, {
 
 global.onlineUsers = new Map();
 io.on("connection", (socket) => {
+// socket.on("send-color",(data)=>{
+//   console.log("sever vua nhan dc :"+data);
+//   onlineUsers.forEach((value, key) => {
+//     console.log(`${key}: ${value}`)
+//     const sendUserSocket = onlineUsers.get(key);
+//     if(sendUserSocket){
+//       io.to(`${sendUserSocket}`).emit("sever-send-color", data);
+//   }
+//   })
+// })
   global.chatSocket = socket;
+ 
   socket.on("add-user", (userId) => {
+    // console.log("user added", userId);
     onlineUsers.set(userId, socket.id);
+    console.log('Online User :',onlineUsers);
+    // onlineUsers.forEach((value, key) => {
+    //   console.log(`${key}: ${value}`)
+    // })
+   
   });
   socket.on("send-msg", (data) => {
-    const sendUserSocket = onlineUsers.get(data.to);
-    console.log(onlineUsers);
-    if (sendUserSocket) {
-      const dataSent = { message: data.message, from: data.from };
-      io.to(`${sendUserSocket}`).emit("msg-receive", dataSent);
+    console.log("send-msg socket :", data);
+    for (var i = 0; i < data.to.length; i++) {
+      if (data.to[i].userId !== data.from.user._id) {
+        const sendUserSocket = onlineUsers.get(data.to[i].userId);
+        if (sendUserSocket) {
+          // console.log(sendUserSocket);
+          const dataSent = {
+            message: data.message,
+            from: data.from,
+          };
+          io.to(`${sendUserSocket}`).emit("msg-receive", dataSent);
+        }
+      }
+    }
+  });
+  socket.on("evict-message", (data) => {
+    console.log("Data nhan ben sever evic message :",data);
+    for (var i = 0; i < data.to.length; i++) {
+      if (data.to[i].userId !== data.from) {
+        const sendUserSocket = onlineUsers.get(data.to[i].userId);
+        if (sendUserSocket) {
+          const dataSent = { messageId: data.messageId };
+          io.to(`${sendUserSocket}`).emit("reply-evict-message", dataSent);
+        }
+      }
     }
   });
   socket.on("send-invitation", (data) => {
@@ -63,10 +100,125 @@ io.on("connection", (socket) => {
       io.to(`${sendUserSocket}`).emit("response-accept-friend", data);
     }
   });
+  socket.on("unfriend", (data) => {
+    const sendUserSocket = onlineUsers.get(data._id);
+    if (sendUserSocket) {
+      io.to(`${sendUserSocket}`).emit("response-unfriend", data);
+    }
+  });
   socket.on("denyAddFriend", (data) => {
     const sendUserSocket = onlineUsers.get(data.to._id);
     if (sendUserSocket) {
       io.to(`${sendUserSocket}`).emit("response-deny-invitation", data);
+    }
+  });
+  socket.on("create-group", (data) => {
+    for (var i = 0; i < data.conversation.members.length; i++) {
+      if (data.conversation.members[i].userId !== data.myId) {
+        const sendUserSocket = onlineUsers.get(
+          data.conversation.members[i].userId
+        );
+        if (sendUserSocket) {
+          // console.log(sendUserSocket);
+          const dataSent = {
+            conversation: data.conversation,
+          };
+          io.to(`${sendUserSocket}`).emit("inform-create-group", dataSent);
+        }
+      }
+    }
+  });
+  socket.on("add-members-group", (data) => {
+    for (var i = 0; i < data.conversation.conversation.members.length; i++) {
+      if (data.conversation.conversation.members[i].userId !== data.myId) {
+        const sendUserSocket = onlineUsers.get(
+          data.conversation.conversation.members[i].userId
+        );
+        if (sendUserSocket) {
+          // console.log(sendUserSocket);
+          const dataSent = {
+            conversation: data.conversation,
+          };
+          io.to(`${sendUserSocket}`).emit("inform-add-members-group", dataSent);
+        }
+      }
+    }
+  });
+
+  socket.on("remove-member-group", (data) => {
+    console.log(data);
+    for (var i = 0; i < data.conversation.conversation.members.length; i++) {
+      if (
+        data.conversation.conversation.members[i].userId !==
+        data.conversation.conversation.leaderId
+      ) {
+        const sendUserSocket = onlineUsers.get(
+          data.conversation.conversation.members[i].userId
+        );
+        if (sendUserSocket) {
+          // console.log(sendUserSocket);
+          const dataSent = {
+            conversation: data.conversation,
+            userRemovedId: data.userRemovedId,
+          };
+          console.log(sendUserSocket);
+          io.to(`${sendUserSocket}`).emit(
+            "inform-remove-member-group",
+            dataSent
+          );
+        }
+      }
+    }
+    const sendUserSocket = onlineUsers.get(data.userRemovedId);
+    if (sendUserSocket) {
+      const dataSent = {
+        conversation: data.conversation,
+        userRemovedId: data.userRemovedId,
+      };
+      io.to(`${sendUserSocket}`).emit("inform-remove-member-group", dataSent);
+    }
+  });
+  socket.on("change-leader", (data) => {
+    for (var i = 0; i < data.conversation.conversation.members.length; i++) {
+      if (data.conversation.conversation.members[i].userId !== data.myId) {
+        const sendUserSocket = onlineUsers.get(
+          data.conversation.conversation.members[i].userId
+        );
+        if (sendUserSocket) {
+          // console.log(sendUserSocket);
+          const dataSent = {
+            conversation: data.conversation,
+          };
+          io.to(`${sendUserSocket}`).emit("inform-change-leader", dataSent);
+        }
+      }
+    }
+  });
+  socket.on("leave-group", (data) => {
+    for (var i = 0; i < data.conversation.conversation.members.length; i++) {
+      if (data.conversation.conversation.members[i].userId !== data.myId) {
+        const sendUserSocket = onlineUsers.get(
+          data.conversation.conversation.members[i].userId
+        );
+        if (sendUserSocket) {
+          // console.log(sendUserSocket);
+          const dataSent = {
+            conversation: data.conversation,
+          };
+          io.to(`${sendUserSocket}`).emit("inform-leave-group", dataSent);
+        }
+      }
+    }
+  });
+  socket.on("remove-group", (data) => {
+    for (var i = 0; i < data.members.length; i++) {
+      if (data.members[i].userId !== data.myId) {
+        const sendUserSocket = onlineUsers.get(data.members[i].userId);
+        if (sendUserSocket) {
+          // console.log(sendUserSocket);
+          io.to(`${sendUserSocket}`).emit("inform-remove-group");
+        }
+      }
     }
   });
 });

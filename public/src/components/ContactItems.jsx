@@ -8,26 +8,49 @@ function ContactItems({conversations, changeCurrentChat, currentSelected}) {
             {
                 (conversations.map((conversation, index) => {
                     return  (
-                        <div 
-                        className={`contact ${conversation.user_info._id === currentSelected ? "selected" : ""}`} 
-                        key={index}
-                        onClick={() => changeCurrentChat(index, conversation.user_info)}
-                                    >
-                            <div className="avatar">
-                                {conversation.user_info && conversation.user_info.avatarImage != "" ? 
-                                    <img src={`data:image/svg+xml;base64,${conversation.user_info.avatarImage}`} alt="avatar"/>
-                                    : <img src={AvatarDefault} alt="avatar"/>
-                                }
-                            </div>
-                            <div className='message'>
-                                <div className="username">
-                                    <h3>{conversation.user_info.username}</h3>
+                        !conversation.conversation.leaderId ? (
+                            <div 
+                            className={`contact ${conversation.conversation._id === currentSelected ? "selected" : ""}`} 
+                            key={index}
+                            onClick={() => changeCurrentChat(index, conversation)}
+                                        >
+                                <div className="avatar">
+                                    {conversation.users_info && conversation.users_info[0].avatarImage != "" ? 
+                                        <img src={conversation.users_info[0].avatarImage} alt="avatar"/>
+                                        : <img src={AvatarDefault} alt="avatar"/>
+                                    }
                                 </div>
-                                <div className="latestMessage">
-                                    <p>{conversation.message.message.text}</p>
+                                <div className='message'>
+                                    <div className="username">
+                                        <h3>{conversation.conversation.members.length > 2 ? conversation.conversation.name : conversation.users_info[0].username}</h3>
+                                    </div>
+                                    <div className="latestMessage">
+                                        <p>{conversation.lastMessage.message.message.files.length > 0 ? 'file' : `${conversation.lastMessage.message.message.text}`}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        ):(
+                            <div 
+                            className={`contact ${conversation.conversation._id === currentSelected ? "selected" : ""}`} 
+                            key={index}
+                            onClick={() => changeCurrentChat(index, conversation)}
+                                        >
+                                <div className="avatar">
+                                    {conversation.user_info && conversation.user_info.avatarImage != "" ? 
+                                        <img src={`data:image/svg+xml;base64,${conversation.user_info[0].avatarImage}`} alt="avatar"/>
+                                        : <img src={AvatarDefault} alt="avatar"/>
+                                    }
+                                </div>
+                                <div className='message'>
+                                    <div className="username">
+                                        <h3>{conversation.conversation.name}</h3>
+                                    </div>
+                                    <div className="latestMessage">
+                                        {conversation.lastMessage.message ? <p>{conversation.lastMessage.message.message.text}</p> : <p>You are added to group</p>}
+                                    </div>
+                                </div>
+                            </div>
+                        )
                     )
                 }))
             }
@@ -40,7 +63,7 @@ const Container = styled.div`
     flex-direction: column;
     align-items: center;
     overflow: auto;
-    gap: 0.8rem;
+    /* gap: 0.8rem; */
     &::-webkit-scrollbar {
         width: 0.2rem;
         &-thumb {
@@ -50,19 +73,24 @@ const Container = styled.div`
         }
     }
     .contact {
-        background-color: #ffffff39;
+        /* background-color: #ffffff39; */
         min-height: 5rem;
-        width: 90%;
+        width: 100%;
         cursor: pointer;
         border-radius: 0.2rem;
-        padding: 0.4rem;
+        padding: 0.4rem 0.5rem;
         gap:1rem;
         align-items: center;
         display: flex;
         transition: 0.5s ease-in-out;
+        &:hover {
+            background-color: #eeeff2;
+        }
         .avatar {
             img {
                 height: 3rem;
+                width: 3rem;
+                border-radius: 50%;
             }   
         }
         .message {
@@ -71,21 +99,21 @@ const Container = styled.div`
             grid-template-rows: 55% 45%;
             .username {
                 h3 {
-                    color: white;
+                    /* color: white; */
                 }
             }
             .latestMessage {
                 width: 100%;
                 overflow: hidden;
                 p {
-                    color: #ccc;
+                    /* color: #ccc; */
                 }
             }
         }
             
     }
     .selected {
-        background-color: #9186f3;
+        background-color: #eeeff2;
     }
 `;
 

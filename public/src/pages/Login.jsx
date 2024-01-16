@@ -67,11 +67,12 @@ function Login() {
             <form onSubmit={(event) => handleSubmit(event)}>
                 <div className="brand">
                     <img src={Logo} alt="Logo" />
-                    <h1>snappy</h1>
+                    <h1>valiu</h1>
                 </div>
                 <input type="text" placeholder="Phone" name="phone" onChange={(e) => handleOnChange(e)}/>
                 <input type="password" placeholder="Password" name="password" onChange={(e) => handleOnChange(e)} />
                 <button type="submit">Login In</button>
+                <span><Link to="/forgotPassword">Forgot password ?</Link></span>
                 <span>Already have an account <Link to="/register">Register</Link></span>
             </form>
         </FormContainer>
@@ -87,7 +88,7 @@ const FormContainer = styled.div`
     justify-content: center;
     align-items: center;
     gap: 1rem;
-    background-color: #131324;
+    background-color: #e8f3ff;
     .brand {
         display: flex;
         align-items: center;
@@ -97,7 +98,7 @@ const FormContainer = styled.div`
             height: 5rem;
         }
         h1 {
-            color: white;
+            /* color: white; */
             text-transform: uppercase
         }
     }
@@ -105,25 +106,26 @@ const FormContainer = styled.div`
         display: flex;
         flex-direction: column;
         gap: 2rem;
-        background-color: #00000076;
+        background-color: #fff;
         border-radius: 2rem;
         padding: 3rem 5rem; 
+        box-shadow: 0 8px 24px rgb(21 48 142 / 14%);
     }
     input {
         background-color: transparent;
         padding: 1rem;
-        border: 0.1rem solid #4e0eff;
+        border: 0.1rem solid #ccc;
         border-radius: 0.4rem;
-        color: white;
+        /* color: white; */
         width: 100%;
         font-size: 1rem;
         &:focus {
-            border: 0.1rem solid #997af0;
+            /* border: 0.1rem solid #ccc; */
             outline: none;
         }
     }
     button {
-        background-color: #997af0;
+        background-color: #0068ff;
         padding: 1rem 2rem;
         color: white;
         cursor: pointer;
@@ -134,16 +136,16 @@ const FormContainer = styled.div`
         text-transform: uppercase;
         transition: 0.5s ease-in-out;
         &:hover {
-            background-color: #4e0eff;
+            background-color: #0184e0;
         }
     }
     span {
-        color: white;
+        /* color: white; */
         text-transform: uppercase;
         a {
             text-decoration: none;
             font-weight: bold;
-            color: #4e0eff;
+            color: #0068ff;
         }
     }
 `;

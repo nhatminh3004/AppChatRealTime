@@ -25,6 +25,18 @@ const userSchema = new mongoose.Schema({
     required: true,
     min: 8,
   },
+  gender: {
+    type: Boolean,
+    default: true,
+  },
+  isActived: {
+    type: Boolean,
+    default: true,
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
   avatarImage: {
     type: String,
     default: "",
